@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <title>Policies - Training Advantage Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-color:#fff; --text-color:#333; --primary:#005f99; --secondary:#008cc9; --light-bg:#f4f7fa; --accent:#ff6600; }
+    html { scroll-behavior: smooth; }
+    [data-theme="dark"] { --bg-color:#121212; --text-color:#e0e0e0; --light-bg:#1e1e1e; --accent:#ff8243; }
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; padding:0; font-family:'Montserrat',sans-serif; background:var(--bg-color); color:var(--text-color); }
+    a { text-decoration:none; color:inherit; }
+    header { background: transparent; border-bottom: none; }
+    .top-bar { display:flex; justify-content:space-between; align-items:center; padding:.5rem 1rem; }
+    .social-icons a { margin-right:.5rem; font-size:.9rem; }
+    .ctas { display:flex; align-items:center; }
+    .ctas button { margin-left:.5rem; padding:.5rem 1rem; border:none; cursor:pointer; border-radius:4px; background:var(--primary); color:#fff; font-weight:600; }
+    .ctas .btn-book { background:var(--secondary); }
+    .toggle-switch { position:relative; display:inline-block; width:50px; height:24px; margin-left:1rem; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:34px; }
+    .slider:before { position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:#fff; transition:.4s; border-radius:50%; }
+    .toggle-switch input:checked + .slider { background:var(--secondary); }
+    .toggle-switch input:checked + .slider:before { transform:translateX(26px); }
+    nav { display:flex; justify-content:space-between; align-items:center; padding:1rem; position:relative; }
+    .logo img { height:50px; }
+    .nav-toggle { display:none; font-size:1.5rem; background:none; border:none; cursor:pointer; }
+    nav ul { display:flex; list-style:none; margin:0; padding:0; }
+    nav ul li { margin-left:1rem; position:relative; }
+    nav ul li a { padding:.5rem; font-weight:600; display:block; }
+    nav ul li a:hover { background: #ccc; color: #000; border-radius:4px; }
+    .dropdown .submenu { display:none; position:absolute; top:100%; left:0; background:var(--light-bg); list-style:none; margin:0; padding:0.5rem 0; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:1000; }
+    .dropdown:hover .submenu { display:block; }
+    .submenu li a { padding:.5rem 1rem; white-space:nowrap; display:block; }
+    .submenu li a:hover { background:#ddd; }
+    .container { max-width:1200px; margin:0 auto; padding:1rem; }
+    @media(max-width:768px) {
+      .nav-toggle { display:block; }
+      nav ul { display:none; flex-direction:column; background:var(--light-bg); width:100%; position:absolute; top:100%; left:0; z-index:1000; }
+      body.nav-open nav ul { display:flex; }
+      .dropdown .submenu { position:static; box-shadow:none; }
+      nav ul li { margin:.5rem 0; text-align:center; }
+      [data-theme="dark"] .nav-toggle { color: #fff; }
+    }
+    .hero-banner { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 4rem 1rem; text-align: center; }
+    .hero-banner h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero-banner p { font-size: 1.2rem; max-width: 800px; margin: 0 auto; }
+    section { padding: 3rem 1rem; }
+    .section-title { color: var(--primary); font-size: 2rem; margin-bottom: 1.5rem; }
+    .policy-section { background: var(--light-bg); padding: 2rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid var(--accent); }
+    .policy-section h3 { color: var(--primary); margin-bottom: 1rem; }
+    .policy-section h4 { color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    .policy-section p { line-height: 1.8; margin-bottom: 1rem; }
+    .policy-section ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    .policy-section li { margin-bottom: 0.5rem; line-height: 1.6; }
+    .highlight-box { background: var(--bg-color); padding: 1.5rem; border-radius: 6px; margin: 1.5rem 0; border: 2px solid var(--accent); }
+    .contact { background: #002147; padding: 3rem 1rem; }
+    .contact h2, .contact p { color: #fff; }
+    .contact .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .contact-form { background: var(--secondary); padding: 1.5rem; border-radius: 8px; }
+    .contact-form label { display: block; margin-top: 1rem; color: #fff; font-weight: 600; }
+    .contact-form input, .contact-form select, .contact-form textarea { width: 100%; padding: .6rem; margin-top: .3rem; border: none; border-radius: 4px; }
+    .contact-form button { margin-top: 1.2rem; background: var(--accent); border: none; padding: .7rem 1rem; color: #fff; font-weight: bold; cursor: pointer; border-radius: 4px; }
+    footer { background: var(--primary); color: #fff; padding: 2rem 1rem; }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    footer h3 { margin-bottom: .8rem; font-size: 1rem; }
+    footer ul { list-style: none; padding: 0; }
+    footer li { margin-bottom: .5rem; font-size: .9rem; }
+    footer a:hover { color: var(--accent); }
+    footer form input { width: 100%; margin-bottom: .5rem; padding: .5rem; border: none; border-radius: 4px; }
+    footer form button { width: 100%; padding: .6rem; border: none; border-radius: 4px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+    @media(max-width:768px) { 
+      .hero-banner h1 { font-size: 2rem; }
+      .contact .grid-2 { grid-template-columns: 1fr; }
+    }
+
+/* === MailerLite footer form – match site styling === */
+
+/* Outer container in footer */
+footer .ml-form-embedContainer {
+  margin-top: .5rem;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+/* Remove MailerLite grey box / borders */
+footer .ml-form-embedContainer .ml-form-embedWrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Remove extra inner padding */
+footer .ml-form-embedContainer .ml-form-embedBody {
+  padding: 0 !important;
+}
+
+/* Hide MailerLite's built-in title/paragraph so only your "Mailing List" heading shows */
+footer .ml-form-embedContainer .ml-form-embedContent {
+  margin: 0 !important;
+}
+footer .ml-form-embedContainer .ml-form-embedContent h4,
+footer .ml-form-embedContainer .ml-form-embedContent p {
+  display: none !important;
+}
+
+/* Stack all fields nicely */
+footer .ml-form-embedContainer .ml-form-formContent {
+  display: flex !important;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+/* Inputs – MailerLite uses .form-control on them */
+footer .ml-form-embedContainer input.form-control {
+  width: 100% !important;
+  padding: .7rem .8rem !important;
+  border-radius: 4px !important;
+  border: none !important;
+  font-size: .9rem !important;
+  background: #ffffff !important;
+  color: #333333 !important;
+  box-sizing: border-box !important;
+}
+
+/* Submit button – match .btn-primary / accent colour */
+footer .ml-form-embedContainer .ml-form-embedSubmit button.primary {
+  width: 100% !important;
+  padding: .7rem 1rem !important;
+  border-radius: 4px !important;
+  border: none !important;
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  font-size: .9rem !important;
+  text-transform: none !important;
+  transition: background .2s ease;
+}
+
+footer .ml-form-embedContainer .ml-form-embedSubmit button.primary:hover {
+  background: #e26b00 !important;
+}
+
+/* Success message text */
+footer .ml-form-embedContainer .ml-form-successBody {
+  padding: 0 !important;
+}
+
+footer .ml-form-embedContainer .ml-form-successContent h4,
+footer .ml-form-embedContainer .ml-form-successContent p {
+  color: #ffffff !important;
+  font-size: .9rem !important;
+}
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top-bar container">
+      <div class="social-icons"><a href="#">Facebook</a><a href="https://www.facebook.com/profile.php?id=100095255725254">LinkedIn</a><a href="#">X</a></div>
+      <div class="ctas"><button class="btn-book">Book a Course</button><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div>
+    </div>
+    <nav class="container">
+      <div class="logo"><img src="images/logo.png" alt="Logo"></div>
+      <button class="nav-toggle" id="navToggle">☰</button>
+      <ul>  
+        <li><a href="/index.html">Home</a></li>
+        <li class="dropdown"><a href="#">About Us</a>
+          <ul class="submenu">
+            <li><a href="about.html">About Training Advantage Group</a></li>
+            <li><a href="fasttrack-training-uk.html">Fasttrack Training UK</a></li>
+            <li><a href="fasttrack-resources.html">Fasttrack Resources</a></li>
+            <li><a href="fasttrack-cleaning-maintenance.html">Fasttrack Cleaning and Maintenance</a></li>
+          </ul>
+        </li>
+        <li class="dropdown"><a href="#">E-learning Suite</a>
+          <ul class="submenu">
+            <li><a href="https://videotilehost.com/trainingadvantagegroup/">Candidate Login</a></li>
+            <li><a href="https://videotilehost.com/trainingadvantagegroup/busLogin.php">Business Login</a></li>
+            <li><a href="https://videotilehost.com/trainingadvantagegroup/freeTrial.php">Free Trial</a></li>
+          </ul>
+        </li>
+        <li><a href="/driver-cpc.html">Driver & TM CPC</a></li>
+        <li><a href="/olat-training.html">OLAT</a></li>
+        <li class="dropdown"><a href="#">Courses</a>
+          <ul class="submenu">
+            <li><a href="forklift-courses.html">Forklift Courses</a></li>
+            <li><a href="hs-courses.html">Health & Safety Courses</a></li>
+          </ul>
+        </li>
+        <li class="dropdown"><a href="#">Training</a>
+          <ul class="submenu">
+            <li><a href="mhe-training.html">MHE, PLANT & NPORS</a></li>
+          </ul>
+        </li>
+        <li class="dropdown"><a href="#">ADR</a>
+          <ul class="submenu">
+            <li><a href="adr-training.html">ADR Awareness Training</a></li>
+            <li><a href="adr-training2.html">ADR Refresher Course</a></li>
+            <li><a href="adr-training3.html">Full ADR Inc Tanks Module</a></li>
+            <li><a href="adr-training4.html">Specialist Categories</a></li>
+          </ul>
+        </li>
+        <li><a href="/learner-info.html">Learner Info</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero-banner">
+    <h1>Our Policies</h1>
+    <p>Training Advantage Group Ltd - Committed to Quality, Compliance and Safety</p>
+  </section>
+
+  <section class="container">
+    <div class="policy-section">
+      <h3>Quality Policy</h3>
+      <p>Training Advantage Group Ltd is committed to providing high-quality training and consultancy services that meet and exceed the expectations of our clients and regulatory requirements.</p>
+      
+      <h4>Our Quality Commitments:</h4>
+      <ul>
+        <li>Delivering training courses that comply with all relevant legislation and industry standards</li>
+        <li>Employing only qualified, experienced, and vetted instructors and assessors</li>
+        <li>Maintaining accreditation with leading industry bodies including NPORS, NLTC, and Ofqual</li>
+        <li>Continuously reviewing and improving our training materials and delivery methods</li>
+        <li>Ensuring all certifications issued are valid, recognized, and compliant with UK law</li>
+        <li>Providing up-to-date equipment and facilities for practical training</li>
+        <li>Conducting regular audits and assessments to maintain service excellence</li>
+        <li>Responding promptly to client feedback and implementing improvements</li>
+      </ul>
+
+      <div class="highlight-box">
+        <p><strong>Quality Assurance:</strong> All our training courses are designed to meet HSE guidelines and industry best practices. We ensure that every candidate receives comprehensive instruction, practical experience, and fair assessment.</p>
+      </div>
+    </div>
+
+    <div class="policy-section">
+      <h3>Health & Safety Policy</h3>
+      <p>The health, safety, and welfare of our employees, candidates, and visitors is our highest priority. Training Advantage Group Ltd is committed to maintaining safe working and training environments.</p>
+      
+      <h4>Health & Safety Commitments:</h4>
+      <ul>
+        <li>Complying with the Health and Safety at Work Act 1974 and all related legislation</li>
+        <li>Conducting comprehensive risk assessments for all training activities</li>
+        <li>Providing appropriate personal protective equipment (PPE) where required</li>
+        <li>Ensuring all training equipment is properly maintained and regularly inspected</li>
+        <li>Maintaining adequate insurance coverage for all operations</li>
+        <li>Training all staff in health and safety procedures relevant to their roles</li>
+        <li>Implementing emergency procedures and ensuring all participants are briefed</li>
+        <li>Investigating and reporting any accidents or near-misses</li>
+        <li>Promoting a culture of safety awareness across all activities</li>
+      </ul>
+
+      <h4>On-Site Training Safety:</h4>
+      <p>When delivering training at client premises, we work collaboratively to ensure:</p>
+      <ul>
+        <li>Understanding of site-specific hazards and safety protocols</li>
+        <li>Adequate space and safe working areas for practical training</li>
+        <li>Access to emergency equipment and first aid facilities</li>
+        <li>Clear communication channels between our instructors and site management</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <h3>Equal Opportunities & Diversity Policy</h3>
+      <p>Training Advantage Group Ltd is an equal opportunities employer and training provider. We are committed to ensuring that all individuals are treated fairly and with respect.</p>
+      
+      <h4>Our Commitments:</h4>
+      <ul>
+        <li>Providing equal access to training opportunities regardless of age, gender, race, religion, disability, sexual orientation, or any other protected characteristic</li>
+        <li>Creating an inclusive learning environment free from discrimination and harassment</li>
+        <li>Making reasonable adjustments to support candidates with disabilities or learning difficulties</li>
+        <li>Ensuring recruitment and employment practices are fair and non-discriminatory</li>
+        <li>Providing training on equality and diversity to all staff members</li>
+        <li>Taking seriously any complaints of discrimination or harassment</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <h3>Data Protection & Privacy Policy</h3>
+      <p>Training Advantage Group Ltd is committed to protecting the privacy and security of personal data in accordance with the General Data Protection Regulation (GDPR) and the Data Protection Act 2018.</p>
+      
+      <h4>How We Use Your Data:</h4>
+      <ul>
+        <li>To process training bookings and manage course attendance</li>
+        <li>To issue certifications and maintain training records</li>
+        <li>To communicate with you about your training and our services</li>
+        <li>To comply with legal and regulatory requirements</li>
+        <li>To improve our services through feedback and analysis</li>
+      </ul>
+
+      <h4>Your Rights:</h4>
+      <ul>
+        <li>Right to access your personal data</li>
+        <li>Right to rectification of inaccurate data</li>
+        <li>Right to erasure in certain circumstances</li>
+        <li>Right to restrict processing</li>
+        <li>Right to data portability</li>
+        <li>Right to object to processing</li>
+      </ul>
+
+      <div class="highlight-box">
+        <p><strong>Data Security:</strong> We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, loss, or disclosure. Data is stored securely and only accessible to authorized personnel.</p>
+      </div>
+
+      <h4>Cookies Policy:</h4>
+      <p>Our website uses cookies to enhance user experience and analyze site usage. By using our website, you consent to our use of cookies in accordance with this policy. You can manage cookie preferences through your browser settings.</p>
+    </div>
+
+    <div class="policy-section">
+      <h3>Complaints Policy</h3>
+      <p>Training Advantage Group Ltd is committed to providing excellent service. However, if you have a concern or complaint, we want to hear from you and resolve it promptly.</p>
+      
+      <h4>How to Make a Complaint:</h4>
+      <ul>
+        <li><strong>Step 1:</strong> Contact us by phone (0141 258 2024), email (office@trainingadvantagegroup.co.uk), or in writing with details of your complaint</li>
+        <li><strong>Step 2:</strong> We will acknowledge your complaint within 3 working days</li>
+        <li><strong>Step 3:</strong> We will investigate thoroughly and provide a full response within 10 working days</li>
+        <li><strong>Step 4:</strong> If you remain dissatisfied, you may request escalation to senior management</li>
+      </ul>
+
+      <h4>What to Include:</h4>
+      <ul>
+        <li>Your name and contact details</li>
+        <li>Details of the course or service involved</li>
+        <li>Date and location of the incident</li>
+        <li>Full description of your complaint</li>
+        <li>Any supporting evidence or documentation</li>
+        <li>What resolution you are seeking</li>
+      </ul>
+
+      <div class="highlight-box">
+        <p><strong>Our Promise:</strong> All complaints will be treated seriously, investigated fairly, and used to improve our services. You will not be disadvantaged for making a complaint.</p>
+      </div>
+    </div>
+
+    <div class="policy-section">
+      <h3>Cancellation & Refund Policy</h3>
+      <p>We understand that circumstances change. This policy outlines our approach to course cancellations and refunds.</p>
+      
+      <h4>Cancellations by Candidates:</h4>
+      <ul>
+        <li><strong>More than 14 days before course:</strong> Full refund or course transfer</li>
+        <li><strong>7-14 days before course:</strong> 50% refund or free course transfer</li>
+        <li><strong>Less than 7 days before course:</strong> No refund, transfer may be available at additional cost</li>
+        <li><strong>Non-attendance:</strong> No refund or transfer</li>
+      </ul>
+
+      <h4>Cancellations by Training Advantage Group:</h4>
+      <p>In the unlikely event we need to cancel or reschedule a course:</p>
+      <ul>
+        <li>We will provide as much notice as possible</li>
+        <li>We will offer alternative dates or a full refund</li>
+        <li>We are not liable for any consequential losses</li>
+      </ul>
+
+      <h4>Assessment Failures:</h4>
+      <p>If a candidate does not successfully complete a course assessment, they may retake the assessment at an additional cost. Refunds are not provided for assessment failures due to candidate performance.</p>
+    </div>
+
+    <div class="policy-section">
+      <h3>Environmental Policy</h3>
+      <p>Training Advantage Group Ltd recognizes our responsibility to minimize our environmental impact and promote sustainability.</p>
+      
+      <h4>Our Environmental Commitments:</h4>
+      <ul>
+        <li>Reducing paper usage through digital documentation and e-learning platforms</li>
+        <li>Encouraging electronic communication and online course materials</li>
+        <li>Minimizing travel impact by offering on-site training at client premises</li>
+        <li>Properly maintaining equipment to ensure efficiency and longevity</li>
+        <li>Recycling and responsible disposal of waste materials</li>
+        <li>Promoting environmental awareness in our health and safety training</li>
+        <li>Working with suppliers who share our environmental values</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <h3>Professional Conduct & Ethics</h3>
+      <p>All employees, instructors, and representatives of Training Advantage Group Ltd are expected to maintain the highest standards of professional conduct.</p>
+      
+      <h4>Code of Conduct:</h4>
+      <ul>
+        <li>Act with integrity and honesty in all dealings</li>
+        <li>Maintain professional boundaries with candidates and clients</li>
+        <li>Respect confidentiality of information</li>
+        <li>Declare any conflicts of interest</li>
+        <li>Provide accurate information about qualifications and courses</li>
+        <li>Treat all individuals with dignity and respect</li>
+        <li>Comply with all relevant legislation and industry standards</li>
+        <li>Report any concerns about safety, conduct, or compliance</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <h3>Safeguarding Policy</h3>
+      <p>Training Advantage Group Ltd is committed to safeguarding the welfare of all candidates, particularly young people and vulnerable adults.</p>
+      
+      <h4>Safeguarding Measures:</h4>
+      <ul>
+        <li>All instructors undergo DBS checks where appropriate</li>
+        <li>Staff are trained to recognize signs of abuse or neglect</li>
+        <li>Clear procedures for reporting safeguarding concerns</li>
+        <li>Designated safeguarding officer available for consultation</li>
+        <li>Partnership with relevant authorities when concerns arise</li>
+        <li>Safe recruitment practices for all staff</li>
+      </ul>
+
+      <div class="highlight-box">
+        <p><strong>Reporting Concerns:</strong> If you have any safeguarding concerns, please contact our safeguarding officer immediately at office@trainingadvantagegroup.co.uk or call 0141 258 2024.</p>
+      </div>
+    </div>
+
+    <div class="policy-section">
+      <h3>Terms & Conditions</h3>
+      
+      <h4>Booking & Payment:</h4>
+      <ul>
+        <li>All bookings must be confirmed in writing or through our booking system</li>
+        <li>Payment terms are typically 30 days from invoice date unless otherwise agreed</li>
+        <li>Full payment must be received before course commencement</li>
+        <li>Interest-free payment plans may be available for certain courses</li>
+      </ul>
+
+      <h4>Course Attendance:</h4>
+      <ul>
+        <li>Candidates must arrive on time and attend the full course duration</li>
+        <li>Appropriate clothing and footwear must be worn for practical training</li>
+        <li>Candidates must follow all safety instructions and site rules</li>
+        <li>Disruptive behavior may result in removal from the course without refund</li>
+      </ul>
+
+      <h4>Certification:</h4>
+      <ul>
+        <li>Certificates are issued only upon successful completion of assessment</li>
+        <li>Certificates remain the property of Training Advantage Group Ltd until full payment is received</li>
+        <li>Duplicate certificates may be issued for a fee</li>
+        <li>Certificate validity periods are determined by relevant regulatory bodies</li>
+      </ul>
+
+      <h4>Liability:</h4>
+      <ul>
+        <li>Training Advantage Group Ltd maintains appropriate insurance coverage</li>
+        <li>We are not liable for personal belongings lost or damaged during training</li>
+        <li>Our liability is limited to the value of the course fee paid</li>
+        <li>We are not liable for consequential losses resulting from course cancellations</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: var(--light-bg); border-radius: 8px;">
+      <h3 style="color: var(--primary); margin-bottom: 1rem;">Questions About Our Policies?</h3>
+      <p>If you have any questions about our policies or require further clarification, please don't hesitate to contact us.</p>
+      <p style="margin-top: 1rem;"><strong>Phone:</strong> 0141 258 2024<br><strong>Email:</strong> office@trainingadvantagegroup.co.uk</p>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">Last Updated: November 2024</p>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="container grid-2">
+      <div>
+        <h2>Contact Us</h2>
+        <p>For enquiries about our policies or any other matter, please get in touch.</p>
+        <p style="margin-top: 2rem;"><strong>Phone:</strong> 0141 258 2024</p>
+        <p><strong>Email:</strong> office@trainingadvantagegroup.co.uk</p>
+        <p style="margin-top: 1rem;">
+          Training Advantage Group Ltd<br>
+          1st Floor Training Suite, APC<br>
+          Unit B, Coalhall Road<br>
+          Fallside Industrial Estate<br>
+          Bothwell, Glasgow<br>
+          G71 8DA
+        </p>
+      </div>
+      <div class="contact-form">
+        <form action="https://formspree.io/f/myzjabzq" method="POST">
+          <label for="name">Name *</label>
+          <input type="text" id="name" name="name" required>
+  
+          <label for="company">Company *</label>
+          <input type="text" id="company" name="company" required>
+  
+          <label for="phone">Phone *</label>
+          <input type="tel" id="phone" name="phone" required>
+  
+          <label for="email">Email *</label>
+          <input type="email" id="email" name="_replyto" required>
+  
+          <label for="source">How did you hear about us?</label>
+          <select id="source" name="source" required>
+            <option>Facebook</option>
+            <option>LinkedIn</option>
+            <option>Instagram</option>
+            <option>Email</option>
+            <option>Referral</option>
+          </select>
+  
+          <label for="message">Message *</label>
+          <textarea id="message" name="message" rows="4" required></textarea>
+  
+          <input type="hidden" name="_subject" value="Policy enquiry from website">
+          <input type="hidden" name="_format" value="plain">
+          <input type="hidden" name="_captcha" value="false">
+  
+          <button type="submit" class="btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-grid container">
+      <div>
+        <h3>Contact</h3>
+        <p>Training Advantage Group Ltd<br>1st Floor Training Suite, APC<br>Unit B, Coalhall Road,<br>Fallside Industrial Estate<br>Bothwell<br>Glasgow<br>G71 8DA<br>0141 258 2024<br>office@trainingadvantagegroup.co.uk</p>
+      </div>
+      <div>
+        <h3>Policies</h3>
+        <ul>
+          <li><a href="/policies.html">Terms & Conditions</a></li>
+          <li><a href="/policies.html#privacy">Privacy & Cookies</a></li>
+          <li><a href="/policies.html#complaints">Complaints Policy</a></li>
+          <li><a href="/policies.html#quality">Quality Policy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>About</h3>
+        <ul>
+          <li><a href="/about.html">About Us</a></li>
+          <li>Meet the Team</li>
+          <li>Blog</li>
+          <li>Testimonials</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Mailing List</h3>
+        <div class="ml-embedded" data-form="T4NMW3"></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('navToggle').addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+    const toggle=document.getElementById('themeToggle');
+    toggle.addEventListener('change',()=>{
+      document.documentElement.setAttribute('data-theme',toggle.checked?'dark':'light');
+      localStorage.setItem('theme',document.documentElement.getAttribute('data-theme'));
+    });
+    const saved=localStorage.getItem('theme')||'light';
+    document.documentElement.setAttribute('data-theme',saved);
+    document.getElementById('themeToggle').checked=saved==='dark';
+  </script>
+
+<!-- MailerLite Universal -->
+<script>
+  (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+  .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+  n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+  (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+  ml('account', '1952581');
+</script>
+<!-- End MailerLite Universal -->
+
+
+</body>
+</html>
