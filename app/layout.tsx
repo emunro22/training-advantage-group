@@ -1,0 +1,51 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Training Advantage Group Ltd | Professional Transport & Industrial Training Scotland",
+    template: "%s | Training Advantage Group Ltd",
+  },
+  description:
+    "Scotland's leading provider of transport, logistics, compliance and industrial training. Driver CPC, Transport Manager CPC, HGV/PCV, ADR, Plant, NPORS & E-Learning. Bothwell, Motherwell & Glasgow.",
+  keywords: [
+    "Driver CPC Scotland",
+    "Transport Manager CPC",
+    "HGV Training Glasgow",
+    "ADR Training Scotland",
+    "Forklift Training",
+    "NPORS Scotland",
+    "Training Advantage Group",
+    "TM CPC Scotland",
+    "Fleet Training",
+  ],
+  openGraph: {
+    siteName: "Training Advantage Group Ltd",
+    locale: "en_GB",
+    type: "website",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en-GB">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="icon" href="/images/logo-mark.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/images/logo-mark.png" />
+      </head>
+      <body className="font-sans antialiased">
+        <Header />
+        <main className="min-h-screen">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
