@@ -82,11 +82,12 @@ export default function Footer() {
             {/* Brand */}
             <div className="lg:col-span-2">
               <Link href="/" className="flex items-center gap-3 mb-5 group">
-                <div className="relative h-12 w-12 flex-shrink-0 bg-white rounded-xl p-1 group-hover:scale-105 transition-transform">
+                <div className="relative h-16 w-16 flex-shrink-0 bg-white rounded-xl p-1.5 group-hover:scale-105 transition-transform">
                   <Image
                     src="/images/logo.png"
                     alt="Training Advantage Group Ltd"
                     fill
+                    sizes="64px"
                     className="object-contain"
                   />
                 </div>

@@ -232,19 +232,20 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-[80px]">
+          <div className="flex items-center justify-between h-[88px]">
             {/* Logo */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link href="/" className="flex-shrink-0 group">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
-                  className="relative h-14 w-14"
+                  className="relative h-16 w-16"
                 >
                   <Image
                     src="/images/logo.png"
                     alt="Training Advantage Group Ltd"
                     fill
+                    sizes="64px"
                     className="object-contain mix-blend-multiply"
                     priority
                   />
@@ -252,19 +253,19 @@ export default function Header() {
               </Link>
               <div className="hidden sm:block">
                 <Link href="/" className="block group">
-                  <div className="font-black text-navy leading-none text-base">
+                  <div className="font-black text-navy leading-none text-lg">
                     TRAINING <span className="text-blue-brand">ADVANTAGE</span>
                   </div>
-                  <div className="font-black text-navy text-base leading-none mt-0.5">GROUP LTD</div>
+                  <div className="font-black text-navy text-lg leading-none mt-0.5">GROUP LTD</div>
                   <div className="text-orange-brand text-[9px] font-bold tracking-[0.18em] mt-1 uppercase">
                     Training for the Future
                   </div>
                 </Link>
                 <a
                   href="tel:01412582024"
-                  className="flex items-center gap-1 text-navy text-xs font-semibold mt-1 hover:text-orange-brand transition-colors"
+                  className="flex items-center gap-1 text-navy text-sm font-semibold mt-1 hover:text-orange-brand transition-colors"
                 >
-                  <Phone size={11} />
+                  <Phone size={13} />
                   0141 258 2024
                 </a>
               </div>
@@ -283,7 +284,7 @@ export default function Header() {
                   >
                     <Link
                       href={item.href}
-                      className={`relative flex items-center gap-0.5 px-2 py-1.5 text-[12px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
+                      className={`relative flex items-center gap-0.5 px-3 py-2 text-[13px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
                         active
                           ? "text-blue-brand bg-blue-50"
                           : activeMenu === item.label
