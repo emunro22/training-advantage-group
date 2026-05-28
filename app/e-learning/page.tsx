@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
-import { Monitor, CheckCircle2, Users2, Award, Clock } from "lucide-react";
+import { Monitor, CheckCircle2, Users2, Award, Clock, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -70,6 +70,25 @@ export default function ELearningPage() {
         cta={{ label: "Browse Courses", href: "#categories" }}
       />
 
+      {/* Platform access banner */}
+      <section className="bg-navy py-6">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="text-white font-bold text-lg">Ready to start learning?</p>
+            <p className="text-blue-light/80 text-sm">Log in or register on the TAG e-learning platform to access your courses.</p>
+          </div>
+          <a
+            href="https://videotilehost.com/trainingadvantagegroup/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-orange-brand hover:bg-orange-dark text-white font-bold px-6 py-3 rounded-lg transition-colors whitespace-nowrap shadow-lg"
+          >
+            Access E-Learning Platform
+            <ExternalLink size={16} />
+          </a>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
@@ -118,9 +137,15 @@ export default function ELearningPage() {
                       </div>
                       <p className="text-sm opacity-80">From {cat.priceFrom} per course</p>
                     </div>
-                    <Link href="/contact" className="btn-navy flex-shrink-0 text-sm">
+                    <a
+                      href="https://videotilehost.com/trainingadvantagegroup/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-navy flex-shrink-0 text-sm flex items-center gap-1.5"
+                    >
                       View Courses
-                    </Link>
+                      <ExternalLink size={13} />
+                    </a>
                   </div>
 
                   <div className="flex flex-wrap gap-2">

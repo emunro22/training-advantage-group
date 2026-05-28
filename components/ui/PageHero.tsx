@@ -26,7 +26,9 @@ export default function PageHero({
   cta,
 }: PageHeroProps) {
   return (
-    <section className="relative bg-gradient-hero overflow-hidden py-20 md:py-28 pattern-bg">
+    <section className="relative bg-gradient-hero overflow-hidden py-20 md:py-28">
+      {/* Dot pattern overlay — separate div so it doesn't override bg-gradient-hero */}
+      <div className="absolute inset-0 pattern-bg pointer-events-none" />
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-brand/20 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />

@@ -1,17 +1,9 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import type { BookingFormData, ContactFormData } from "./types";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = process.env.EMAIL_FROM || "office@trainingadvantagegroup.co.uk";
+const FROM = "Training Advantage Group <office@trainingadvantagegroup.co.uk>";
 const TO = process.env.EMAIL_TO || "office@trainingadvantagegroup.co.uk";
 
 export async function sendBookingConfirmation(data: BookingFormData) {
@@ -71,15 +63,15 @@ export async function sendBookingConfirmation(data: BookingFormData) {
   `;
 
   await Promise.all([
-    transporter.sendMail({
+    resend.emails.send({
       from: FROM,
-      to: data.email,
+      to: [data.email],
       subject: `Booking Request Confirmed – ${data.courseName} | Training Advantage Group`,
       html: customerHtml,
     }),
-    transporter.sendMail({
+    resend.emails.send({
       from: FROM,
-      to: TO,
+      to: [TO],
       subject: `New Booking: ${data.courseName} – ${data.firstName} ${data.lastName}`,
       html: adminHtml,
       replyTo: data.email,
@@ -124,15 +116,15 @@ export async function sendContactEmail(data: ContactFormData) {
   `;
 
   await Promise.all([
-    transporter.sendMail({
+    resend.emails.send({
       from: FROM,
-      to: data.email,
+      to: [data.email],
       subject: "We've received your enquiry | Training Advantage Group",
       html: autoReplyHtml,
     }),
-    transporter.sendMail({
+    resend.emails.send({
       from: FROM,
-      to: TO,
+      to: [TO],
       subject: `Enquiry: ${data.subject} – ${data.firstName} ${data.lastName}`,
       html: adminHtml,
       replyTo: data.email,

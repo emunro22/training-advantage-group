@@ -39,13 +39,15 @@ const FOOTER_LINKS = {
   ],
 };
 
-const ACCREDITATIONS = [
-  { name: "Qualifications Scotland", sub: "Approved Centre", bg: "bg-blue-950", text: "text-blue-200", border: "border-blue-800" },
-  { name: "Driver CPC", sub: "JAUPT Approved", bg: "bg-navy", text: "text-blue-200", border: "border-blue-800" },
-  { name: "DVSA", sub: "ADR Training Body", bg: "bg-yellow-900", text: "text-yellow-200", border: "border-yellow-700" },
-  { name: "NPORS", sub: "Accredited", bg: "bg-orange-900", text: "text-orange-200", border: "border-orange-700" },
-  { name: "NLTC", sub: "Qualifications", bg: "bg-red-900", text: "text-red-200", border: "border-red-800" },
-  { name: "JAUPT", sub: "Approved Training", bg: "bg-green-900", text: "text-green-200", border: "border-green-800" },
+const ACCREDITATION_LOGOS = [
+  { name: "Qualifications Scotland Approved Centre", src: "/images/accreditations/qualifications-scotland.png", width: 140, height: 60 },
+  { name: "NPORS Accredited Training Provider", src: "/images/accreditations/npors-provider.png", width: 80, height: 80 },
+  { name: "NPORS Accredited", src: "/images/accreditations/npors-accredited.png", width: 80, height: 80 },
+  { name: "DVSA Approved ADR Training Body", src: "/images/accreditations/dvsa-adr.png", width: 160, height: 50 },
+  { name: "Driver CPC Approved Consortium Member", src: "/images/accreditations/driver-cpc.png", width: 140, height: 60 },
+  { name: "NLTC Qualifications", src: "/images/accreditations/nltc.png", width: 130, height: 60 },
+  { name: "Ofqual Department for Education", src: "/images/accreditations/ofqual.png", width: 130, height: 60 },
+  { name: "RADAT Register of Approved Driver Assessors & Trainers", src: "/images/accreditations/radat.png", width: 80, height: 80 },
 ];
 
 export default function Footer() {
@@ -57,14 +59,16 @@ export default function Footer() {
           <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-7">
             Approved &amp; Accredited By
           </p>
-          <div className="flex flex-wrap items-stretch justify-center gap-3">
-            {ACCREDITATIONS.map((acc) => (
-              <div
-                key={acc.name}
-                className={`rounded-xl border px-4 py-2.5 text-center min-w-[100px] ${acc.bg} ${acc.border}`}
-              >
-                <div className={`text-xs font-black tracking-wide ${acc.text}`}>{acc.name}</div>
-                <div className="text-[10px] text-white/50 mt-0.5">{acc.sub}</div>
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            {ACCREDITATION_LOGOS.map((logo) => (
+              <div key={logo.name} className="flex items-center justify-center">
+                <Image
+                  src={logo.src}
+                  alt={logo.name}
+                  width={logo.width}
+                  height={logo.height}
+                  className="object-contain"
+                />
               </div>
             ))}
           </div>

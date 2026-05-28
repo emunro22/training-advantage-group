@@ -77,6 +77,7 @@ const NAV = [
     icon: Monitor,
     color: "text-teal-600",
     items: [
+      { label: "Access E-Learning Platform", href: "https://videotilehost.com/trainingadvantagegroup/", desc: "Login or register for courses" },
       { label: "Health & Safety (81)", href: "/e-learning#health-safety", desc: "Online compliance courses" },
       { label: "Business Skills (54)", href: "/e-learning#business", desc: "Leadership & development" },
       { label: "Health & Social Care (40)", href: "/e-learning#social-care", desc: "Care sector training" },
@@ -231,32 +232,43 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-[68px]">
+          <div className="flex items-center justify-between h-[80px]">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400 }}
-                className="relative h-11 w-11 flex-shrink-0"
-              >
-                <Image
-                  src="/images/logo.png"
-                  alt="Training Advantage Group Ltd"
-                  fill
-                  className="object-contain mix-blend-multiply"
-                  priority
-                />
-              </motion.div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <Link href="/" className="flex-shrink-0 group">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                  className="relative h-14 w-14"
+                >
+                  <Image
+                    src="/images/logo.png"
+                    alt="Training Advantage Group Ltd"
+                    fill
+                    className="object-contain mix-blend-multiply"
+                    priority
+                  />
+                </motion.div>
+              </Link>
               <div className="hidden sm:block">
-                <div className="font-black text-navy leading-none text-[14px]">
-                  TRAINING <span className="text-blue-brand">ADVANTAGE</span>
-                </div>
-                <div className="font-black text-navy text-[14px] leading-none mt-0.5">GROUP LTD</div>
-                <div className="text-orange-brand text-[8px] font-bold tracking-[0.18em] mt-0.5 uppercase">
-                  Training for the Future
-                </div>
+                <Link href="/" className="block group">
+                  <div className="font-black text-navy leading-none text-base">
+                    TRAINING <span className="text-blue-brand">ADVANTAGE</span>
+                  </div>
+                  <div className="font-black text-navy text-base leading-none mt-0.5">GROUP LTD</div>
+                  <div className="text-orange-brand text-[9px] font-bold tracking-[0.18em] mt-1 uppercase">
+                    Training for the Future
+                  </div>
+                </Link>
+                <a
+                  href="tel:01412582024"
+                  className="flex items-center gap-1 text-navy text-xs font-semibold mt-1 hover:text-orange-brand transition-colors"
+                >
+                  <Phone size={11} />
+                  0141 258 2024
+                </a>
               </div>
-            </Link>
+            </div>
 
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center gap-px">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
@@ -9,6 +10,17 @@ export const metadata: Metadata = {
   description:
     "Training Advantage Group Ltd is fully accredited by Qualifications Scotland, DVSA, JAUPT, NPORS and NLTC. All qualifications are nationally recognised.",
 };
+
+const LOGO_STRIP = [
+  { name: "Qualifications Scotland", src: "/images/accreditations/qualifications-scotland.png", width: 140, height: 60 },
+  { name: "NPORS Accredited Training Provider", src: "/images/accreditations/npors-provider.png", width: 80, height: 80 },
+  { name: "NPORS Accredited", src: "/images/accreditations/npors-accredited.png", width: 80, height: 80 },
+  { name: "DVSA Approved ADR Training Body", src: "/images/accreditations/dvsa-adr.png", width: 160, height: 50 },
+  { name: "Driver CPC Consortium Member", src: "/images/accreditations/driver-cpc.png", width: 140, height: 60 },
+  { name: "NLTC Qualifications", src: "/images/accreditations/nltc.png", width: 130, height: 60 },
+  { name: "Ofqual Department for Education", src: "/images/accreditations/ofqual.png", width: 130, height: 60 },
+  { name: "RADAT", src: "/images/accreditations/radat.png", width: 80, height: 80 },
+];
 
 const ACCREDITATIONS = [
   {
@@ -71,6 +83,26 @@ const ACCREDITATIONS = [
       "TAG's JAUPT Consortium membership (AC00591) ensures all Driver CPC training meets the national standards for professional driver development as set by the DVSA.",
     what: ["Consortium member AC00591", "Approved module content", "Hours uploaded to DVSA", "Attendance-based assessment"],
   },
+  {
+    name: "RADAT",
+    type: "Register of Approved Driver Assessors & Trainers",
+    emoji: "🚗",
+    color: "bg-blue-50 border-blue-200",
+    textColor: "text-blue-900",
+    description:
+      "TAG instructors are registered with RADAT (Register of Approved Driver Assessors & Trainers), the independent register for professional driver assessors and trainers in the UK.",
+    what: ["Registered driver assessors", "Independent professional register", "Validated training delivery", "Fleet & individual assessments"],
+  },
+  {
+    name: "Ofqual / Department for Education",
+    type: "Regulated Qualification Authority",
+    emoji: "🎓",
+    color: "bg-teal-50 border-teal-200",
+    textColor: "text-teal-900",
+    description:
+      "Ofqual regulates qualifications, examinations and assessments in England. Our qualifications that fall under the Ofqual framework meet the highest standards of regulated education and are recognised by the Department for Education.",
+    what: ["Ofqual regulated qualifications", "Department for Education recognised", "Quality assured assessment", "Nationally accepted standards"],
+  },
 ];
 
 export default function AccreditationsPage() {
@@ -92,6 +124,27 @@ export default function AccreditationsPage() {
             <p className="text-gray-600 leading-relaxed">
               When you train with an accredited provider, you know that your qualifications are genuine, nationally recognised and accepted by employers, regulators and enforcement authorities. TAG&apos;s accreditations are not just logos — they represent real quality assurance and regulatory compliance.
             </p>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Logo strip */}
+      <section className="py-10 bg-gray-light border-b border-gray-mid">
+        <div className="max-w-7xl mx-auto px-4">
+          <AnimatedSection>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              {LOGO_STRIP.map((logo) => (
+                <div key={logo.name} className="flex items-center justify-center bg-white rounded-xl p-3 shadow-sm">
+                  <Image
+                    src={logo.src}
+                    alt={logo.name}
+                    width={logo.width}
+                    height={logo.height}
+                    className="object-contain"
+                  />
+                </div>
+              ))}
+            </div>
           </AnimatedSection>
         </div>
       </section>

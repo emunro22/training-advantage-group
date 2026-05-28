@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
@@ -163,6 +164,20 @@ export default function TrainingCentresPage() {
             <p className="text-xs text-blue-light/60">
               Shuttle operates from 40 minutes before course start until 40 minutes after course end. Please allow extra time and do not park on site during peak periods.
             </p>
+          </AnimatedSection>
+
+          {/* Parking & Shuttle Info Document */}
+          <AnimatedSection className="mt-10">
+            <div className="bg-white/5 rounded-2xl p-4 flex flex-col items-center gap-4">
+              <p className="text-white font-bold text-sm uppercase tracking-wider">Full Parking &amp; Shuttle Guide</p>
+              <Image
+                src="/images/parking-shuttle-info.png"
+                alt="Section 22 – Training Centre Parking & Shuttle Service Information"
+                width={700}
+                height={990}
+                className="rounded-xl w-full max-w-2xl object-contain"
+              />
+            </div>
           </AnimatedSection>
         </div>
       </section>
