@@ -133,8 +133,8 @@ const STATIC_NAV = [
     icon: BookOpen,
     color: "text-teal-600",
     items: [
-      { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },
-      { label: "Downloads & Resources", href: "/learner-hub#downloads", desc: "Forms and documents" },
+      { label: "Upcoming Courses", href: "/upcoming-courses", desc: "Scheduled dates — book now" },
+      { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },      { label: "Downloads & Resources", href: "/learner-hub#downloads", desc: "Forms and documents" },
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
       { label: "Accommodation", href: "/learner-hub#accommodation", desc: "Nearby hotels" },

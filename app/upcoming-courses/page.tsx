@@ -8,7 +8,6 @@ import {
   MapPin,
   Clock,
   Users,
-  Tag,
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
