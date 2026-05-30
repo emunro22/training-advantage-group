@@ -270,6 +270,37 @@ export const PAGE_SCHEMAS: Record<string, PageSchema> = {
     category: "Instructors",
     fields: HERO_FIELDS("Instructor Training", "Become an approved Driver CPC, RADAT or ADR instructor with TAG."),
   },
+
+  "first-aid": {
+    label: "First Aid Training",
+    url: "/first-aid",
+    category: "Health & Safety",
+    fields: [
+      ...HERO_FIELDS("First Aid Training", "Accredited first aid courses — EFAW, FAW & Paediatric. NLTC Level 3 OFQUAL regulated."),
+      { key: "efawPriceLabel", label: "EFAW Price Label", type: "text", defaultValue: "POA", section: "Pricing" },
+      { key: "fawInitialPriceLabel", label: "FAW Initial Price Label", type: "text", defaultValue: "POA", section: "Pricing" },
+      { key: "fawRefresherPriceLabel", label: "FAW Refresher Price Label", type: "text", defaultValue: "POA", section: "Pricing" },
+      { key: "paediatricPriceLabel", label: "Paediatric First Aid Price Label", type: "text", defaultValue: "POA", section: "Pricing" },
+    ],
+  },
+
+  "mental-health-first-aid": {
+    label: "Mental Health First Aid",
+    url: "/mental-health-first-aid",
+    category: "Health & Safety",
+    fields: [
+      ...HERO_FIELDS("Mental Health First Aid Training", "Public Health Scotland accredited manager awareness training and the NLTC Level 3 Mental Health First Aid at Work qualification."),
+      { key: "mhManagersPriceLabel", label: "Mental Health Awareness (Managers) Price Label", type: "text", defaultValue: "POA", section: "Pricing" },
+      { key: "mhfaNltcPriceLabel", label: "NLTC Level 3 MHFA Price Label", type: "text", defaultValue: "POA", section: "Pricing" },
+    ],
+  },
+
+  "verify-certificate": {
+    label: "Verify Certificate",
+    url: "/verify-certificate",
+    category: "Company",
+    fields: HERO_FIELDS("Verify a Certificate", "Instantly check the authenticity of any certificate issued by Training Advantage Group Ltd."),
+  },
 };
 
 export function getPageSchema(slug: string): PageSchema | null {

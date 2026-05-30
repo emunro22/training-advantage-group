@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   BookOpen,
   ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 
 const STATIC_NAV = [
@@ -122,8 +123,16 @@ const STATIC_NAV = [
     color: "text-green-600",
     items: [
       { label: "IOSH Managing Safely®", href: "/iosh-managing-safely", desc: "IOSH Approved — rated Outstanding" },
-      { label: "Verify a Certificate", href: "/verify-certificate", desc: "Check any TAG certificate" },
+      { label: "First Aid Training", href: "/first-aid", desc: "EFAW, FAW & Paediatric — NLTC OFQUAL qualified" },
+      { label: "Mental Health First Aid", href: "/mental-health-first-aid", desc: "Public Health Scotland & NLTC Level 3" },
     ],
+  },
+  {
+    label: "Verify Certificate",
+    href: "/verify-certificate",
+    icon: BadgeCheck,
+    color: "text-blue-brand",
+    items: [],
   },
   {
     label: "Learner Hub",
@@ -136,7 +145,6 @@ const STATIC_NAV = [
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
       { label: "Accommodation", href: "/learner-hub#accommodation", desc: "Nearby hotels" },
-      { label: "Verify Certificate", href: "/verify-certificate", desc: "Check a certificate is genuine" },
     ],
   },
   {
@@ -346,7 +354,7 @@ export default function Header() {
                       }`}
                     >
                       {item.label}
-                      {item.items && (
+                      {item.items && item.items.length > 0 && (
                         <ChevronDown
                           size={13}
                           className={`transition-transform duration-200 ${activeMenu === item.label ? "rotate-180 text-orange-brand" : ""}`}
@@ -361,13 +369,13 @@ export default function Header() {
                     </Link>
 
                     <AnimatePresence>
-                      {activeMenu === item.label && item.items && (
+                      {activeMenu === item.label && item.items && item.items.length > 0 && (
                         <motion.div
                           initial={{ opacity: 0, y: 8, scale: 0.97 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.97 }}
                           transition={{ duration: 0.18, ease: "easeOut" }}
-                          className={`absolute top-full left-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50 mt-1 ${item.items && item.items.length > 7 ? "w-80" : "w-72"}`}
+                          className={`absolute top-full left-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50 mt-1 ${item.items.length > 7 ? "w-80" : "w-72"}`}
                           onMouseEnter={() => handleMouseEnter(item.label)}
                           onMouseLeave={handleMouseLeave}
                         >
@@ -510,6 +518,22 @@ function MobileNavItem({
 }) {
   const [open, setOpen] = useState(false);
 
+  // If no sub-items, render as a plain Link instead of an accordion button
+  if (!item.items || item.items.length === 0) {
+    return (
+      <Link
+        href={item.href}
+        className={`flex items-center gap-2 w-full px-3 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
+          isActive ? "bg-blue-50 text-blue-brand" : "text-navy hover:bg-gray-light"
+        }`}
+        onClick={onClose}
+      >
+        <item.icon size={15} className={item.color} />
+        {item.label}
+      </Link>
+    );
+  }
+
   return (
     <div>
       <button
@@ -522,14 +546,14 @@ function MobileNavItem({
           <item.icon size={15} className={item.color} />
           {item.label}
         </span>
-        {item.items && (
+        {item.items && item.items.length > 0 && (
           <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown size={15} />
           </motion.span>
         )}
       </button>
       <AnimatePresence>
-        {open && item.items && (
+        {open && item.items && item.items.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}

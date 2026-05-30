@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import {
   getUpcomingCourses,
@@ -35,6 +36,8 @@ export async function POST(request: Request) {
       courseName: body.courseName ?? "",
       date: body.date ?? "",
       endDate: body.endDate,
+      startTime: body.startTime,
+      endTime: body.endTime,
       location: body.location ?? "",
       spotsAvailable: body.spotsAvailable ?? 0,
       totalSpots: body.totalSpots ?? 0,

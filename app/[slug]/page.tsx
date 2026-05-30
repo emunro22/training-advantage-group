@@ -9,8 +9,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const pages = await getCustomPages(true);
-  return pages.map((p) => ({ slug: p.slug }));
+  try {
+    const pages = await getCustomPages(true);
+    return pages.map((p) => ({ slug: p.slug }));
+  } catch {
+    // Neon tables may not exist yet on first deploy — return empty and render dynamically
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

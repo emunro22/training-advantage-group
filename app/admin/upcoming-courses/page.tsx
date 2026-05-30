@@ -11,6 +11,8 @@ const EMPTY_FORM = {
   courseId: "",
   date: "",
   endDate: "",
+  startTime: "",
+  endTime: "",
   location: "Bothwell",
   spotsAvailable: 10,
   totalSpots: 10,
@@ -51,6 +53,8 @@ export default function UpcomingCoursesAdmin() {
       courseId: c.courseId,
       date: c.date,
       endDate: c.endDate ?? "",
+      startTime: c.startTime ?? "",
+      endTime: c.endTime ?? "",
       location: c.location,
       spotsAvailable: c.spotsAvailable,
       totalSpots: c.totalSpots,
@@ -158,6 +162,13 @@ export default function UpcomingCoursesAdmin() {
                   </div>
                   <div className="flex gap-3 text-xs text-gray-400 flex-wrap">
                     <span>{fmtDate(c.date)}{c.endDate ? ` – ${fmtDate(c.endDate)}` : ""}</span>
+                    {(c.startTime || c.endTime) && (
+                      <span className="font-semibold text-gray-500">
+                        {c.startTime || ""}
+                        {c.startTime && c.endTime ? " – " : ""}
+                        {c.endTime || ""}
+                      </span>
+                    )}
                     <span>{c.location}</span>
                     {c.price && <span className="font-semibold text-blue-brand">{c.price}</span>}
                   </div>
@@ -200,6 +211,14 @@ export default function UpcomingCoursesAdmin() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">End Date</label>
                   <input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Start Time</label>
+                  <input type="time" value={form.startTime} onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="09:00" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Finish Time</label>
+                  <input type="time" value={form.endTime} onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="17:00" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">

@@ -83,6 +83,8 @@ export interface UpcomingCourse {
   courseName: string;
   date: string;
   endDate?: string;
+  startTime?: string;
+  endTime?: string;
   location: string;
   spotsAvailable: number;
   totalSpots: number;
@@ -201,6 +203,8 @@ function rowToCourse(r: any): UpcomingCourse {
     courseName: r.course_name,
     date: r.date,
     endDate: r.end_date ?? undefined,
+    startTime: r.start_time ?? undefined,
+    endTime: r.end_time ?? undefined,
     location: r.location,
     spotsAvailable: r.spots_available,
     totalSpots: r.total_spots,
@@ -218,6 +222,7 @@ function rowToCourse(r: any): UpcomingCourse {
 
 export async function getCertificates(): Promise<Certificate[]> {
   if (USE_NEON) {
+    await ensureSchema();
     const sql = getDb();
     const rows = await sql`SELECT * FROM certificates ORDER BY created_at DESC`;
     return rows.map(rowToCert);
@@ -231,6 +236,7 @@ export async function verifyCertificate(
   lastName?: string
 ): Promise<Certificate | null> {
   if (USE_NEON) {
+    await ensureSchema();
     const sql = getDb();
     const rows = await sql`
       SELECT * FROM certificates
@@ -321,6 +327,7 @@ export async function deleteCertificate(id: string): Promise<boolean> {
 
 export async function getCustomPages(publishedOnly = false): Promise<CustomPage[]> {
   if (USE_NEON) {
+    await ensureSchema();
     const sql = getDb();
     const rows = publishedOnly
       ? await sql`SELECT * FROM custom_pages WHERE published = TRUE ORDER BY created_at DESC`
@@ -333,6 +340,7 @@ export async function getCustomPages(publishedOnly = false): Promise<CustomPage[
 
 export async function getCustomPageBySlug(slug: string): Promise<CustomPage | null> {
   if (USE_NEON) {
+    await ensureSchema();
     const sql = getDb();
     const rows = await sql`SELECT * FROM custom_pages WHERE slug = ${slug} LIMIT 1`;
     return rows.length > 0 ? rowToPage(rows[0]) : null;
@@ -411,6 +419,7 @@ export async function deleteCustomPage(id: string): Promise<boolean> {
 
 export async function getPricingData(): Promise<PricingStore> {
   if (USE_NEON) {
+    await ensureSchema();
     const sql = getDb();
     const [offerRows, overrideRows] = await Promise.all([
       sql`SELECT * FROM special_offers ORDER BY created_at DESC`,
@@ -560,6 +569,7 @@ export async function savePricingData(data: PricingStore): Promise<void> {
 export async function getPageContent(slug: string): Promise<Record<string, string>> {
   if (USE_NEON) {
     try {
+      await ensureSchema();
       const sql = getDb();
       const rows = await sql`SELECT content FROM page_overrides WHERE slug = ${slug}`;
       return rows.length > 0 ? (rows[0].content as Record<string, string>) : {};
@@ -605,6 +615,7 @@ export async function savePageContent(
 
 export async function getUpcomingCourses(activeOnly = false): Promise<UpcomingCourse[]> {
   if (USE_NEON) {
+    await ensureSchema();
     const sql = getDb();
     const rows = activeOnly
       ? await sql`SELECT * FROM upcoming_courses WHERE active = TRUE ORDER BY date ASC`
@@ -621,10 +632,11 @@ export async function addUpcomingCourse(c: UpcomingCourse): Promise<void> {
     const sql = getDb();
     await sql`
       INSERT INTO upcoming_courses
-        (id, course_id, course_name, date, end_date, location, spots_available, total_spots,
-         price, booking_url, notes, active)
+        (id, course_id, course_name, date, end_date, start_time, end_time,
+         location, spots_available, total_spots, price, booking_url, notes, active)
       VALUES
         (${c.id}, ${c.courseId}, ${c.courseName}, ${c.date}, ${c.endDate ?? null},
+         ${c.startTime ?? null}, ${c.endTime ?? null},
          ${c.location}, ${c.spotsAvailable}, ${c.totalSpots}, ${c.price},
          ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active})
     `;
@@ -647,6 +659,8 @@ export async function updateUpcomingCourse(
         course_name      = COALESCE(${u.courseName ?? null}, course_name),
         date             = COALESCE(${u.date ?? null}, date),
         end_date         = COALESCE(${u.endDate ?? null}, end_date),
+        start_time       = COALESCE(${u.startTime ?? null}, start_time),
+        end_time         = COALESCE(${u.endTime ?? null}, end_time),
         location         = COALESCE(${u.location ?? null}, location),
         spots_available  = COALESCE(${u.spotsAvailable ?? null}, spots_available),
         total_spots      = COALESCE(${u.totalSpots ?? null}, total_spots),

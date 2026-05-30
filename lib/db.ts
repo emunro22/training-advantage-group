@@ -1,7 +1,5 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 
-// Returns a tagged-template SQL client connected to Neon.
-// Each call is lightweight (HTTP, no persistent connection) — safe in serverless.
 export function getDb(): NeonQueryFunction<false, false> {
   const url = process.env.DATABASE_URL;
   if (!url) {
@@ -12,8 +10,9 @@ export function getDb(): NeonQueryFunction<false, false> {
   return neon(url);
 }
 
-// Creates all tables if they do not already exist.
-// Called lazily on first write operation so the app boots without a DB in local dev.
+// Tracks whether schema creation has run in this serverless instance lifecycle.
+// Every new instance starts with migrated = false and re-runs ensureSchema(),
+// which uses CREATE TABLE IF NOT EXISTS / ALTER TABLE IF NOT EXISTS — all idempotent.
 let migrated = false;
 
 export async function ensureSchema() {
@@ -89,6 +88,8 @@ export async function ensureSchema() {
       course_name TEXT NOT NULL,
       date TEXT NOT NULL,
       end_date TEXT,
+      start_time TEXT,
+      end_time TEXT,
       location TEXT NOT NULL DEFAULT '',
       spots_available INTEGER NOT NULL DEFAULT 0,
       total_spots INTEGER NOT NULL DEFAULT 0,
@@ -99,6 +100,11 @@ export async function ensureSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+
+  // Add time columns to upcoming_courses for existing deployments where the
+  // table was already created without them.
+  await sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`;
+  await sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS page_overrides (

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { FileText, Award, Tag, CalendarDays, ArrowRight, Globe, PlusCircle } from "lucide-react";
+import { FileText, Award, Tag, CalendarDays, ArrowRight, Globe, PlusCircle, RefreshCw } from "lucide-react";
 
 interface DashboardStats {
   certificates: number;
@@ -12,16 +12,24 @@ interface DashboardStats {
   upcomingCourses: number;
 }
 
+// Bust browser cache by appending a timestamp so re-visiting the dashboard
+// always gets fresh counts from Neon rather than a stale cached response.
+function noCache(url: string) {
+  return `${url}?_=${Date.now()}`;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function loadStats() {
+  const loadStats = useCallback(async () => {
+    setRefreshing(true);
+    try {
       const [certsRes, pagesRes, pricingRes, coursesRes] = await Promise.all([
-        fetch("/api/admin/certificates"),
-        fetch("/api/admin/pages"),
-        fetch("/api/admin/pricing"),
-        fetch("/api/admin/upcoming-courses"),
+        fetch(noCache("/api/admin/certificates"), { cache: "no-store" }),
+        fetch(noCache("/api/admin/pages"), { cache: "no-store" }),
+        fetch(noCache("/api/admin/pricing"), { cache: "no-store" }),
+        fetch(noCache("/api/admin/upcoming-courses"), { cache: "no-store" }),
       ]);
 
       const [certs, pages, pricing, courses] = await Promise.all([
@@ -38,9 +46,12 @@ export default function AdminDashboard() {
         specialOffers: pricing.specialOffers?.filter((o: { active: boolean }) => o.active).length ?? 0,
         upcomingCourses: courses.courses?.filter((c: { active: boolean }) => c.active).length ?? 0,
       });
+    } finally {
+      setRefreshing(false);
     }
-    loadStats();
   }, []);
+
+  useEffect(() => { loadStats(); }, [loadStats]);
 
   const STAT_CARDS = [
     {
@@ -88,9 +99,20 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Welcome to the TAG Admin Portal. Manage your content from here.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1">Welcome to the TAG Admin Portal. Manage your content from here.</p>
+        </div>
+        <button
+          onClick={loadStats}
+          disabled={refreshing}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-navy border border-gray-200 hover:border-gray-300 px-3 py-2 rounded-xl transition-all"
+          title="Refresh stats"
+        >
+          <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+          {refreshing ? "Refreshing…" : "Refresh"}
+        </button>
       </div>
 
       {/* Stats grid */}

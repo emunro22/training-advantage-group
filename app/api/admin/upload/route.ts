@@ -68,9 +68,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Increase body size limit for this route to 6MB
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// App Router uses the native Request body — no bodyParser config needed.
+// Set to force-dynamic so Vercel never caches this endpoint.
+export const dynamic = "force-dynamic";
