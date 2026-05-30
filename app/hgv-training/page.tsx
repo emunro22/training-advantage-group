@@ -4,19 +4,23 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { getPageContent } from "@/lib/storage";
 
-export const metadata: Metadata = {
-  title: "HGV & PCV Driver Training Scotland | Class 1, 2 & Bus Licence",
-  description:
-    "Complete HGV and PCV driver training packages in Scotland. Cat C, Cat C+E and Category D. Includes medicals, theory, practical training and Module 4 CPC.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getPageContent("hgv-training");
+  return {
+    title: c.metaTitle || "HGV & PCV Driver Training Scotland | Class 1, 2 & Bus Licence",
+    description: c.metaDescription || "Complete HGV and PCV driver training packages in Scotland. Cat C, Cat C+E and Category D. Includes medicals, theory, practical training and Module 4 CPC.",
+  };
+}
 
-export default function HGVTrainingPage() {
+export default async function HGVTrainingPage() {
+  const c = await getPageContent("hgv-training");
   return (
     <>
       <PageHero
-        title="HGV & PCV Driver Training"
-        subtitle="Complete LGV and PCV training packages including DVLA medicals, theory tests, practical training, Module 4 CPC and fleet assessments."
+        title={c.heroTitle || "HGV & PCV Driver Training"}
+        subtitle={c.heroSubtitle || "Complete LGV and PCV training packages including DVLA medicals, theory tests, practical training, Module 4 CPC and fleet assessments."}
         tag="HGV & PCV Training"
         breadcrumbs={[{ label: "HGV & PCV Training" }]}
         cta={{ label: "Book Your Training", href: "/booking?course=hgv-class2" }}
@@ -39,7 +43,7 @@ export default function HGVTrainingPage() {
                 icon: "🚛",
                 desc: "Rigid vehicle licence up to 32 tonnes. Perfect for local delivery and fleet operations.",
                 includes: ["DVLA Group 2 Medical", "Theory & Hazard Perception", "Practical Training", "Driving Test", "Module 4 CPC"],
-                price: "From £1,495",
+                price: c.catCPriceLabel || "From £1,495",
                 courseId: "hgv-class2",
               },
               {
@@ -47,7 +51,7 @@ export default function HGVTrainingPage() {
                 icon: "🚚",
                 desc: "Articulated vehicle licence. The most in-demand heavy goods vehicle qualification.",
                 includes: ["Medical (if required)", "Theory Support", "Practical Training", "Driving Test", "Module 4 CPC"],
-                price: "From £2,695",
+                price: c.catCEPriceLabel || "From £2,695",
                 courseId: "hgv-class1",
                 highlighted: true,
               },
@@ -56,7 +60,7 @@ export default function HGVTrainingPage() {
                 icon: "🚌",
                 desc: "Professional passenger-carrying vehicle licence for bus and coach operators.",
                 includes: ["DVLA Group 2 Medical", "Theory & Hazard Perception", "Practical Training", "Driving Test", "Module 4 CPC"],
-                price: "From £1,795",
+                price: c.pcvPriceLabel || "From £1,795",
                 courseId: "pcv-catd",
               },
             ].map(({ category, icon, desc, includes, price, courseId, highlighted }) => (
@@ -101,12 +105,12 @@ export default function HGVTrainingPage() {
           </AnimatedSection>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "Medical Assessment", price: "£65", desc: "DVLA Group 2 medical conducted by approved practitioners.", id: "medical" },
-              { title: "Module 4 CPC Practical", price: "£295", desc: "Practical CPC test — demonstration of professional competence.", id: "module4" },
-              { title: "3A Off-Road Manoeuvres", price: "£250", desc: "Off-road manoeuvrability test at our dedicated test area.", id: "manoeuvres-3a" },
-              { title: "3B Practical Driving Test", price: "£450", desc: "On-road practical test with experienced driving examiner.", id: "test-3b" },
-              { title: "Fleet Driver Assessment", priceLabel: "From £95", desc: "Professional assessment of your drivers' on-road skills and compliance.", id: "fleet-assessment" },
-              { title: "Additional Training Day", price: "£350", desc: "Extra training sessions if more practice is required before test.", id: "extra-day" },
+              { title: "Medical Assessment", price: `£${c.medicalPrice ?? "65"}`, desc: "DVLA Group 2 medical conducted by approved practitioners.", id: "medical" },
+              { title: "Module 4 CPC Practical", price: `£${c.module4Price ?? "295"}`, desc: "Practical CPC test — demonstration of professional competence.", id: "module4" },
+              { title: "3A Off-Road Manoeuvres", price: `£${c.manoeuvres3aPrice ?? "250"}`, desc: "Off-road manoeuvrability test at our dedicated test area.", id: "manoeuvres-3a" },
+              { title: "3B Practical Driving Test", price: `£${c.practicalTestPrice ?? "450"}`, desc: "On-road practical test with experienced driving examiner.", id: "test-3b" },
+              { title: "Fleet Driver Assessment", priceLabel: c.fleetAssessmentLabel || "From £95", desc: "Professional assessment of your drivers' on-road skills and compliance.", id: "fleet-assessment" },
+              { title: "Additional Training Day", price: `£${c.additionalDayPrice ?? "350"}`, desc: "Extra training sessions if more practice is required before test.", id: "extra-day" },
             ].map(({ title, price, priceLabel, desc, id }) => (
               <AnimatedSection key={id}>
                 <div className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
@@ -137,7 +141,7 @@ export default function HGVTrainingPage() {
             <p className="text-gray-600 leading-relaxed mb-6">
               We can arrange your medical as part of your training package or as a standalone appointment. Results are typically provided on the same day.
             </p>
-            <Link href="/booking?course=medical" className="btn-navy">Book a Medical – £65</Link>
+            <Link href="/booking?course=medical" className="btn-navy">Book a Medical – £{c.medicalPrice ?? "65"}</Link>
           </AnimatedSection>
           <AnimatedSection direction="right">
             <div className="bg-gray-light rounded-2xl p-6">

@@ -5,12 +5,15 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, BookOpen, Award, Calendar } from "lucide-react";
 import Link from "next/link";
+import { getPageContent } from "@/lib/storage";
 
-export const metadata: Metadata = {
-  title: "Transport Manager CPC Training Scotland | Road Haulage & PSV",
-  description:
-    "Full Transport Manager CPC classroom training for Road Haulage and PSV. NLTC exam fees included. From £1,195 excl. VAT. Scotland's leading TM CPC provider.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getPageContent("tm-cpc");
+  return {
+    title: c.metaTitle || "Transport Manager CPC Training Scotland | Road Haulage & PSV",
+    description: c.metaDescription || "Full Transport Manager CPC classroom training for Road Haulage and PSV. NLTC exam fees included. From £1,195 excl. VAT. Scotland's leading TM CPC provider.",
+  };
+}
 
 const TM_TOPICS = [
   "Operator Licensing",
@@ -25,12 +28,13 @@ const TM_TOPICS = [
   "International Transport Operations",
 ];
 
-export default function TMCPCPage() {
+export default async function TMCPCPage() {
+  const c = await getPageContent("tm-cpc");
   return (
     <>
       <PageHero
-        title="Transport Manager CPC Training"
-        subtitle="Full Road Haulage and PSV TM CPC classroom intensive training. NLTC exam fees included. Delivered by experienced transport professionals."
+        title={c.heroTitle || "Transport Manager CPC Training"}
+        subtitle={c.heroSubtitle || "Full Road Haulage and PSV TM CPC classroom intensive training. NLTC exam fees included. Delivered by experienced transport professionals."}
         tag="Transport Manager CPC"
         breadcrumbs={[{ label: "TM CPC" }]}
         cta={{ label: "Book TM CPC Course", href: "/booking?course=tm-road-haulage" }}
@@ -140,7 +144,7 @@ export default function TMCPCPage() {
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <PriceCard
               title="Road Haulage Transport Manager CPC"
-              price={1195}
+              price={Number(c.roadHaulagePrice ?? "1195")}
               priceNote="NLTC exam fees included, excl. VAT"
               features={[
                 "Full TM CPC qualification",
@@ -157,7 +161,7 @@ export default function TMCPCPage() {
             />
             <PriceCard
               title="PSV / Bus Transport Manager CPC"
-              price={1195}
+              price={Number(c.psvPrice ?? "1195")}
               priceNote="NLTC exam fees included, excl. VAT"
               features={[
                 "Full PSV TM CPC qualification",
@@ -175,7 +179,7 @@ export default function TMCPCPage() {
 
           <AnimatedSection className="mt-8 text-center">
             <p className="text-sm text-gray-500">
-              Optional: TM App e-learning add-on available at £129.
+              Optional: TM App e-learning add-on available at £{c.elearningAddOnPrice ?? "129"}.
               Remote e-learning tests can be arranged nationwide.
             </p>
           </AnimatedSection>

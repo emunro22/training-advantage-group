@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, CheckCircle2, XCircle, AlertCircle, Award, Calendar, MapPin, BookOpen, Shield } from "lucide-react";
 import Link from "next/link";
+import { CERT_TYPES, guessCertType } from "@/lib/cert-types";
 
 interface CertResult {
   found: boolean;
@@ -219,6 +220,7 @@ export default function VerifyCertificatePage() {
             const cert = result.certificate;
             const cfg = statusConfig[cert.status];
             const Icon = cfg.icon;
+            const certType = guessCertType(cert.certificateNumber);
 
             return (
               <div className={`bg-white rounded-2xl shadow-card overflow-hidden border-2 ${cfg.border}`}>
@@ -242,11 +244,22 @@ export default function VerifyCertificatePage() {
                     <div className="w-10 h-10 bg-navy rounded-xl flex items-center justify-center flex-shrink-0">
                       <Award size={18} className="text-orange-brand" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-0.5">Certificate Number</div>
                       <div className="font-mono font-bold text-navy text-lg">{cert.certificateNumber}</div>
+                      {certType && (
+                        <span className={`inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full font-semibold ${certType.color}`}>
+                          {certType.label}
+                        </span>
+                      )}
                     </div>
                   </div>
+                  {certType && (
+                    <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 flex items-start gap-2">
+                      <Shield size={13} className="text-blue-brand flex-shrink-0 mt-0.5" />
+                      <span>{certType.description} · Validity: <strong>{certType.validity}</strong></span>
+                    </div>
+                  )}
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="bg-gray-50 rounded-xl p-4">
@@ -314,26 +327,49 @@ export default function VerifyCertificatePage() {
 
           {/* Info box */}
           {!result && (
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h3 className="font-bold text-sm text-gray-700 mb-2">How it works</h3>
-              <ul className="space-y-1.5">
-                {[
-                  "Enter the certificate number exactly as it appears on the certificate",
-                  "Optionally add the holder's last name for extra verification",
-                  "Results are instant — the system checks our certificate registry",
-                  "Valid, expired and revoked status is displayed clearly",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-gray-500">
-                    <CheckCircle2 size={14} className="text-blue-brand flex-shrink-0 mt-0.5" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">
-                Employers, customers and third parties can use this tool to verify the authenticity of any certificate issued by TAG.
-                If you need to report a fraudulent certificate, please{" "}
-                <Link href="/contact" className="text-blue-brand hover:underline">contact us</Link>.
-              </p>
+            <div className="space-y-4">
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-bold text-sm text-gray-700 mb-2">How it works</h3>
+                <ul className="space-y-1.5">
+                  {[
+                    "Enter the certificate number exactly as it appears on the certificate",
+                    "Optionally add the holder's last name for extra verification",
+                    "Results are instant — the system checks our certificate registry",
+                    "Valid, expired and revoked status is displayed clearly",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-gray-500">
+                      <CheckCircle2 size={14} className="text-blue-brand flex-shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">
+                  Employers, customers and third parties can use this tool to verify the authenticity of any certificate issued by TAG.
+                  If you need to report a fraudulent certificate, please{" "}
+                  <Link href="/contact" className="text-blue-brand hover:underline">contact us</Link>.
+                </p>
+              </div>
+
+              {/* Cert types we issue */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="font-bold text-sm text-gray-700 mb-3">Certificates you can check here</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {CERT_TYPES.filter(t => t.id !== "other").map((t) => (
+                    <div key={t.id} className="flex items-start gap-2 p-2.5 rounded-lg bg-gray-50">
+                      <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap ${t.color}`}>
+                        {t.prefix.replace("TAG-", "").replace("-", "")}
+                      </span>
+                      <div>
+                        <div className="text-xs font-semibold text-gray-700 leading-tight">{t.shortLabel}</div>
+                        <div className="text-[10px] text-gray-400">{t.validity}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-3">
+                  Certificate numbers follow the format shown — e.g. <code className="font-mono bg-gray-100 px-1 rounded">TAG-ADR-2024-001</code>
+                </p>
+              </div>
             </div>
           )}
         </div>

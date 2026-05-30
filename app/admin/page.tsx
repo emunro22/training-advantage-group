@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Award, Tag, CalendarDays, ArrowRight, CheckCircle2, Globe, PlusCircle } from "lucide-react";
+import { FileText, Award, Tag, CalendarDays, ArrowRight, Globe, PlusCircle } from "lucide-react";
 
 interface DashboardStats {
   certificates: number;
@@ -137,24 +137,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Info panel */}
-      <div className="bg-blue-50 border border-blue-200/60 rounded-2xl p-5">
-        <div className="flex items-start gap-3">
-          <CheckCircle2 size={20} className="text-blue-brand flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-bold text-navy text-sm mb-1">Production storage note</p>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Data is stored in JSON files locally. For production Vercel deployment, add{" "}
-              <strong>Vercel KV</strong> (Redis) from your Vercel project dashboard and set{" "}
-              <code className="bg-white border border-blue-100 px-1.5 py-0.5 rounded text-xs">KV_REST_API_URL</code> and{" "}
-              <code className="bg-white border border-blue-100 px-1.5 py-0.5 rounded text-xs">KV_REST_API_TOKEN</code> as
-              environment variables. The system will automatically switch backends.
-              Also set <code className="bg-white border border-blue-100 px-1.5 py-0.5 rounded text-xs">ADMIN_PASSWORD</code> and{" "}
-              <code className="bg-white border border-blue-100 px-1.5 py-0.5 rounded text-xs">ADMIN_SECRET</code> in your Vercel env vars.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

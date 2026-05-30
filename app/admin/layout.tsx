@@ -13,11 +13,13 @@ import {
   Menu,
   Shield,
   ChevronRight,
+  PenLine,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/pages", label: "Pages & Navigation", icon: FileText },
+  { href: "/admin/content", label: "Edit Page Content", icon: PenLine },
+  { href: "/admin/pages", label: "Custom Pages & Nav", icon: FileText },
   { href: "/admin/certificates", label: "Certificates", icon: Award },
   { href: "/admin/pricing", label: "Pricing & Offers", icon: Tag },
   { href: "/admin/upcoming-courses", label: "Upcoming Courses", icon: CalendarDays },

@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Plus, Trash2, Edit2, CheckCircle2, AlertCircle, XCircle, X, Search } from "lucide-react";
+import { Award, Plus, Trash2, Edit2, CheckCircle2, AlertCircle, XCircle, X, Search, Info } from "lucide-react";
 import type { Certificate } from "@/lib/storage";
+import { CERT_TYPES } from "@/lib/cert-types";
 
 const EMPTY_FORM = {
   certificateNumber: "",
   holderFirstName: "",
   holderLastName: "",
+  certTypeId: "other",
   course: "",
   courseType: "",
   issueDate: "",
@@ -49,6 +51,7 @@ export default function CertificatesAdmin() {
       certificateNumber: cert.certificateNumber,
       holderFirstName: cert.holderFirstName,
       holderLastName: cert.holderLastName,
+      certTypeId: cert.courseType || "other",
       course: cert.course,
       courseType: cert.courseType,
       issueDate: cert.issueDate,
@@ -229,6 +232,40 @@ export default function CertificatesAdmin() {
               )}
 
               <div className="grid grid-cols-2 gap-3">
+                {/* Cert type selector */}
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Certificate Type *</label>
+                  <select
+                    value={form.certTypeId}
+                    onChange={(e) => {
+                      const t = CERT_TYPES.find((ct) => ct.id === e.target.value);
+                      setForm((f) => ({
+                        ...f,
+                        certTypeId: e.target.value,
+                        course: t ? t.label : f.course,
+                        courseType: e.target.value,
+                        certificateNumber: t ? (f.certificateNumber.startsWith("TAG-") ? t.prefix + f.certificateNumber.split("-").slice(-2).join("-") : t.prefix) : f.certificateNumber,
+                        expiryDate: f.expiryDate,
+                      }));
+                    }}
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand bg-white"
+                  >
+                    {CERT_TYPES.map((t) => (
+                      <option key={t.id} value={t.id}>{t.label}</option>
+                    ))}
+                  </select>
+                  {form.certTypeId && (() => {
+                    const t = CERT_TYPES.find((ct) => ct.id === form.certTypeId);
+                    if (!t) return null;
+                    return (
+                      <div className="mt-1.5 flex items-start gap-1.5 text-xs text-gray-400">
+                        <Info size={11} className="mt-0.5 flex-shrink-0" />
+                        <span>Validity: <strong>{t.validity}</strong> · Format: <code className="font-mono">{t.exampleNumber}</code></span>
+                      </div>
+                    );
+                  })()}
+                </div>
+
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Certificate Number *</label>
                   <input
@@ -236,7 +273,7 @@ export default function CertificatesAdmin() {
                     value={form.certificateNumber}
                     onChange={(e) => setForm((f) => ({ ...f, certificateNumber: e.target.value }))}
                     className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand font-mono"
-                    placeholder="e.g. TAG-IOSH-2024-001"
+                    placeholder={CERT_TYPES.find(t => t.id === form.certTypeId)?.exampleNumber ?? "TAG-XXXX-2024-001"}
                   />
                 </div>
                 <div>

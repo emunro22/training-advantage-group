@@ -5,12 +5,15 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, MapPin, Users, Upload, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { getPageContent } from "@/lib/storage";
 
-export const metadata: Metadata = {
-  title: "Driver CPC Training Scotland – Periodic & Initial CPC Courses",
-  description:
-    "DVSA & JAUPT approved Driver CPC periodic training across Scotland. Classroom sessions in Bothwell, Motherwell, Glasgow, or online remote delivery. From £50.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getPageContent("driver-cpc");
+  return {
+    title: c.metaTitle || "Driver CPC Training Scotland – Periodic & Initial CPC Courses",
+    description: c.metaDescription || "DVSA & JAUPT approved Driver CPC periodic training across Scotland. Classroom sessions in Bothwell, Motherwell, Glasgow, or online remote delivery. From £50.",
+  };
+}
 
 const MODULES = [
   "Drivers' Hours & Working Time",
@@ -48,12 +51,13 @@ const FAQS = [
   },
 ];
 
-export default function DriverCPCPage() {
+export default async function DriverCPCPage() {
+  const c = await getPageContent("driver-cpc");
   return (
     <>
       <PageHero
-        title="Driver CPC Training"
-        subtitle="DVSA & JAUPT approved periodic and initial Driver CPC training delivered in classroom or online across Scotland."
+        title={c.heroTitle || "Driver CPC Training"}
+        subtitle={c.heroSubtitle || "DVSA & JAUPT approved periodic and initial Driver CPC training delivered in classroom or online across Scotland."}
         tag="Driver CPC"
         breadcrumbs={[{ label: "Driver CPC" }]}
         cta={{ label: "Book CPC Training", href: "/booking?course=dcpc-classroom" }}
@@ -114,7 +118,7 @@ export default function DriverCPCPage() {
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <PriceCard
               title="3.5-Hour CPC Session"
-              price={35}
+              price={Number(c.cpc35hrPrice ?? "35")}
               priceNote="per delegate, excl. VAT"
               features={[
                 "3.5 hours JAUPT approved",
@@ -127,7 +131,7 @@ export default function DriverCPCPage() {
             />
             <PriceCard
               title="Full 7-Hour CPC Session"
-              price={59}
+              price={Number(c.cpc7hrPrice ?? "59")}
               priceNote="per delegate, excl. VAT"
               highlighted
               features={[
@@ -142,7 +146,7 @@ export default function DriverCPCPage() {
             />
             <PriceCard
               title="Remote Online CPC"
-              price={50}
+              price={Number(c.cpcRemotePrice ?? "50")}
               priceNote="per delegate, excl. VAT"
               features={[
                 "7 hours JAUPT approved",
@@ -159,7 +163,7 @@ export default function DriverCPCPage() {
           <AnimatedSection className="mt-8 text-center">
             <div className="inline-flex items-center gap-2 text-sm text-gray-600 bg-white rounded-lg px-4 py-2 shadow-sm">
               <Upload size={14} className="text-blue-brand" />
-              JAUPT upload fee: £8.75 per candidate
+              JAUPT upload fee: £{c.jauptFee ?? "8.75"} per candidate
             </div>
           </AnimatedSection>
         </div>

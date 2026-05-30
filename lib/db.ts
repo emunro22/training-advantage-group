@@ -100,5 +100,13 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS page_overrides (
+      slug TEXT PRIMARY KEY,
+      content JSONB NOT NULL DEFAULT '{}',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   migrated = true;
 }

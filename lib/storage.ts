@@ -554,6 +554,52 @@ export async function savePricingData(data: PricingStore): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Page Content Overrides
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function getPageContent(slug: string): Promise<Record<string, string>> {
+  if (USE_NEON) {
+    try {
+      const sql = getDb();
+      const rows = await sql`SELECT content FROM page_overrides WHERE slug = ${slug}`;
+      return rows.length > 0 ? (rows[0].content as Record<string, string>) : {};
+    } catch {
+      return {};
+    }
+  }
+  // Filesystem fallback: data/page-overrides/{slug}.json
+  const dir = path.join(DATA_DIR, "page-overrides");
+  const filePath = path.join(dir, `${slug}.json`);
+  try {
+    if (!fs.existsSync(filePath)) return {};
+    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+export async function savePageContent(
+  slug: string,
+  content: Record<string, string>
+): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO page_overrides (slug, content, updated_at)
+      VALUES (${slug}, ${JSON.stringify(content)}, NOW())
+      ON CONFLICT (slug) DO UPDATE SET
+        content    = EXCLUDED.content,
+        updated_at = NOW()
+    `;
+    return;
+  }
+  const dir = path.join(DATA_DIR, "page-overrides");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, `${slug}.json`), JSON.stringify(content, null, 2), "utf-8");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Upcoming Courses
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -4,19 +4,23 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { getPageContent } from "@/lib/storage";
 
-export const metadata: Metadata = {
-  title: "ADR Dangerous Goods Training Scotland | Initial & Requalification",
-  description:
-    "DVSA approved ADR training for the carriage of dangerous goods by road. Initial packages, requalification, tanks and specialist classes. Scotland.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getPageContent("adr-training");
+  return {
+    title: c.metaTitle || "ADR Dangerous Goods Training Scotland | Initial & Requalification",
+    description: c.metaDescription || "DVSA approved ADR training for the carriage of dangerous goods by road. Initial packages, requalification, tanks and specialist classes. Scotland.",
+  };
+}
 
-export default function ADRTrainingPage() {
+export default async function ADRTrainingPage() {
+  const c = await getPageContent("adr-training");
   return (
     <>
       <PageHero
-        title="ADR Dangerous Goods Training"
-        subtitle="DVSA approved training for the carriage of dangerous goods by road. Initial courses, requalification and specialist class upgrades."
+        title={c.heroTitle || "ADR Dangerous Goods Training"}
+        subtitle={c.heroSubtitle || "DVSA approved training for the carriage of dangerous goods by road. Initial courses, requalification and specialist class upgrades."}
         tag="ADR Training"
         breadcrumbs={[{ label: "ADR Training" }]}
         cta={{ label: "Book ADR Training", href: "/booking?course=adr-initial" }}
@@ -85,26 +89,26 @@ export default function ADRTrainingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
             <PriceCard
               title="ADR Initial Packages"
-              price={395}
+              price={Number(c.adrInitialPrice ?? "395")}
               features={["Core training included", "All standard classes", "Written examination", "Certificate on pass", "5-year validity"]}
               cta={{ label: "Book Initial", href: "/booking?course=adr-initial" }}
             />
             <PriceCard
               title="ADR Tanks & Packages"
-              price={495}
+              price={Number(c.adrTanksPrice ?? "495")}
               highlighted
               features={["Core training + tanks module", "Bulk transport focus", "Written examination", "Certificate on pass", "5-year validity"]}
               cta={{ label: "Book Tanks", href: "/booking?course=adr-tanks" }}
             />
             <PriceCard
               title="ADR Requalification"
-              price={325}
+              price={Number(c.adrRequalPrice ?? "325")}
               features={["Renewal before expiry", "Updated knowledge", "Written examination", "Certificate on pass", "5-year extension"]}
               cta={{ label: "Book Requalification", href: "/booking?course=adr-requalification" }}
             />
             <PriceCard
               title="Class 1 or 7 Upgrade"
-              price={95}
+              price={Number(c.adrUpgradePrice ?? "95")}
               features={["Specialist class add-on", "Explosives or Radioactive", "Written examination", "Certificate on pass", "Added to existing ADR"]}
               cta={{ label: "Book Upgrade", href: "/booking?course=adr-class1-7" }}
             />
@@ -112,8 +116,8 @@ export default function ADRTrainingPage() {
 
           <AnimatedSection className="mt-8 text-center">
             <div className="inline-flex flex-wrap justify-center gap-4 text-sm text-gray-600">
-              <span className="bg-white rounded-lg px-4 py-2 shadow-sm">ADR Retest: £25 per paper</span>
-              <span className="bg-white rounded-lg px-4 py-2 shadow-sm">Duplicate Certificate: £25</span>
+              <span className="bg-white rounded-lg px-4 py-2 shadow-sm">ADR Retest: £{c.adrRetestPrice ?? "25"} per paper</span>
+              <span className="bg-white rounded-lg px-4 py-2 shadow-sm">Duplicate Certificate: £{c.adrDuplicateCertPrice ?? "25"}</span>
               <span className="bg-white rounded-lg px-4 py-2 shadow-sm">DCPC Upload: £8.75</span>
             </div>
           </AnimatedSection>

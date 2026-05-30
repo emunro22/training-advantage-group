@@ -3,21 +3,15 @@ import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2 } from "lucide-react";
+import { getPageContent } from "@/lib/storage";
 
-export const metadata: Metadata = {
-  title: "Plant & MHE Training Scotland | Forklift, NPORS, Telehandler",
-  description:
-    "NPORS accredited forklift, telehandler, reach truck and MEWP training. On-site or at our centres. From £295. Glasgow, Motherwell & Bothwell.",
-};
-
-const COURSES = [
-  { name: "Counterbalance Forklift – Refresher", price: "From £295", desc: "For operators with prior experience requiring renewal.", id: "counterbalance-refresher" },
-  { name: "Counterbalance Forklift – Novice", price: "From £595", desc: "Full novice course for new operators.", id: "counterbalance-novice" },
-  { name: "Reach Truck Training", price: "From £595", desc: "Narrow aisle reach truck operation and safety.", id: "reach-truck" },
-  { name: "Telehandler Training", price: "From £695", desc: "All-terrain telescopic handler operation.", id: "telehandler" },
-  { name: "MEWP Training", price: "From £495", desc: "Mobile elevated work platforms — all categories.", id: "mewp" },
-  { name: "Excavator / Dumper", price: "From £695", desc: "Plant machinery including 360 excavator and dumper.", id: "excavator" },
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getPageContent("plant-training");
+  return {
+    title: c.metaTitle || "Plant & MHE Training Scotland | Forklift, NPORS, Telehandler",
+    description: c.metaDescription || "NPORS accredited forklift, telehandler, reach truck and MEWP training. On-site or at our centres. From £295. Glasgow, Motherwell & Bothwell.",
+  };
+}
 
 const SAFETY_COURSES = [
   { name: "Emergency First Aid at Work", price: "POA", desc: "1-day HSE approved first aid course." },
@@ -26,12 +20,21 @@ const SAFETY_COURSES = [
   { name: "Health & Safety Awareness", price: "POA", desc: "Workplace health & safety fundamentals." },
 ];
 
-export default function PlantTrainingPage() {
+export default async function PlantTrainingPage() {
+  const c = await getPageContent("plant-training");
+  const COURSES = [
+    { name: "Counterbalance Forklift – Refresher", price: c.counterbalanceRefresherPrice || "From £295", desc: "For operators with prior experience requiring renewal.", id: "counterbalance-refresher" },
+    { name: "Counterbalance Forklift – Novice", price: c.counterbalanceNovicePrice || "From £595", desc: "Full novice course for new operators.", id: "counterbalance-novice" },
+    { name: "Reach Truck Training", price: c.reachTruckPrice || "From £595", desc: "Narrow aisle reach truck operation and safety.", id: "reach-truck" },
+    { name: "Telehandler Training", price: c.telehandlerPrice || "From £695", desc: "All-terrain telescopic handler operation.", id: "telehandler" },
+    { name: "MEWP Training", price: c.mewpPrice || "From £495", desc: "Mobile elevated work platforms — all categories.", id: "mewp" },
+    { name: "Excavator / Dumper", price: c.excavatorPrice || "From £695", desc: "Plant machinery including 360 excavator and dumper.", id: "excavator" },
+  ];
   return (
     <>
       <PageHero
-        title="Plant & Industrial Training"
-        subtitle="NPORS accredited forklift, plant machinery and workplace safety training delivered on-site or at our professional training centres."
+        title={c.heroTitle || "Plant & Industrial Training"}
+        subtitle={c.heroSubtitle || "NPORS accredited forklift, plant machinery and workplace safety training delivered on-site or at our professional training centres."}
         tag="Plant & MHE Training"
         breadcrumbs={[{ label: "Plant & Industrial Training" }]}
         cta={{ label: "Book Plant Training", href: "/booking?course=counterbalance-novice" }}
@@ -67,10 +70,10 @@ export default function PlantTrainingPage() {
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Registration Fee", value: "£50" },
-                  { label: "Duplicate Card", value: "£30" },
-                  { label: "Additional Candidate", value: "From £65" },
-                  { label: "Retest/Reassessment", value: "From £85" },
+                  { label: "Registration Fee", value: `£${c.nporsRegFee ?? "50"}` },
+                  { label: "Duplicate Card", value: `£${c.nporsDuplicateCard ?? "30"}` },
+                  { label: "Additional Candidate", value: c.nporsAdditionalCandidate || "From £65" },
+                  { label: "Retest/Reassessment", value: c.nporsRetestLabel || "From £85" },
                 ].map(({ label, value }) => (
                   <div key={label} className="bg-white rounded-lg p-3 text-center">
                     <div className="text-lg font-black text-orange-brand">{value}</div>
