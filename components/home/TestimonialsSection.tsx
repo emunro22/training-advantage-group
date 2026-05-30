@@ -44,7 +44,7 @@ const COLORS = ["bg-blue-600", "bg-orange-500", "bg-purple-600", "bg-green-600"]
 export default function TestimonialsSection() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const x = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  useTransform(scrollYProgress, [0, 1], [0, -40]);
 
   return (
     <section ref={ref} className="py-20 bg-navy relative overflow-hidden">

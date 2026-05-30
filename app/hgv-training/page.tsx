@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
-import { CheckCircle2, Truck } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "HGV & PCV Driver Training Scotland | Class 1, 2 & Bus Licence",
@@ -137,7 +137,7 @@ export default function HGVTrainingPage() {
             <p className="text-gray-600 leading-relaxed mb-6">
               We can arrange your medical as part of your training package or as a standalone appointment. Results are typically provided on the same day.
             </p>
-            <a href="/booking?course=medical" className="btn-navy">Book a Medical – £65</a>
+            <Link href="/booking?course=medical" className="btn-navy">Book a Medical – £65</Link>
           </AnimatedSection>
           <AnimatedSection direction="right">
             <div className="bg-gray-light rounded-2xl p-6">

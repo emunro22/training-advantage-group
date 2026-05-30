@@ -21,9 +21,10 @@ import {
   Users2,
   AlertTriangle,
   BookOpen,
+  ShieldCheck,
 } from "lucide-react";
 
-const NAV = [
+const STATIC_NAV = [
   {
     label: "Transport",
     href: "/driver-cpc",
@@ -115,6 +116,16 @@ const NAV = [
     ],
   },
   {
+    label: "Health & Safety",
+    href: "/iosh-managing-safely",
+    icon: ShieldCheck,
+    color: "text-green-600",
+    items: [
+      { label: "IOSH Managing Safely®", href: "/iosh-managing-safely", desc: "IOSH Approved — rated Outstanding" },
+      { label: "Verify a Certificate", href: "/verify-certificate", desc: "Check any TAG certificate" },
+    ],
+  },
+  {
     label: "Learner Hub",
     href: "/learner-hub",
     icon: BookOpen,
@@ -125,7 +136,7 @@ const NAV = [
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
       { label: "Accommodation", href: "/learner-hub#accommodation", desc: "Nearby hotels" },
-      { label: "Certificate Checker", href: "/learner-hub#certificates", desc: "Verify your certificate" },
+      { label: "Verify Certificate", href: "/verify-certificate", desc: "Check a certificate is genuine" },
     ],
   },
   {
@@ -145,13 +156,55 @@ const NAV = [
   },
 ];
 
+interface CustomNavPage {
+  slug: string;
+  navLabel: string;
+  navCategory: string;
+}
+
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [customPages, setCustomPages] = useState<CustomNavPage[]>([]);
   const pathname = usePathname();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load custom pages for nav (published only, no auth needed)
+  useEffect(() => {
+    fetch("/api/nav")
+      .then((r) => r.json())
+      .then((d) => setCustomPages(d.pages ?? []))
+      .catch(() => {});
+  }, []);
+
+  // Build the final nav: inject custom pages into their categories or as standalone items
+  const NAV = (() => {
+    const base = STATIC_NAV.map((section) => {
+      const injected = customPages.filter((p) => p.navCategory === section.label.toLowerCase().replace(/[^a-z]/g, "-") || p.navCategory === section.label.toLowerCase());
+      if (injected.length === 0) return section;
+      return {
+        ...section,
+        items: [
+          ...section.items,
+          ...injected.map((p) => ({ label: p.navLabel, href: `/${p.slug}`, desc: "Custom page" })),
+        ],
+      };
+    });
+
+    // Add standalone custom pages as top-level nav items
+    const standalones = customPages.filter((p) => p.navCategory === "standalone");
+    const standaloneItems = standalones.map((p) => ({
+      label: p.navLabel,
+      href: `/${p.slug}`,
+      icon: BookOpen,
+      color: "text-gray-600",
+      items: [] as { label: string; href: string; desc: string }[],
+    }));
+
+    return [...base, ...standaloneItems];
+  })();
 
   useEffect(() => {
     const onScroll = () => {
@@ -451,7 +504,7 @@ function MobileNavItem({
   onClose,
   isActive,
 }: {
-  item: (typeof NAV)[0];
+  item: (typeof STATIC_NAV)[0];
   onClose: () => void;
   isActive: boolean;
 }) {

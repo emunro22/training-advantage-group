@@ -69,7 +69,7 @@ export default function LearnerHubPage() {
               { step: "03", icon: Award, title: "Attend Induction", desc: "Learn about TAG, our policies, safety rules, values and your training plan." },
               { step: "04", icon: CheckCircle2, title: "Meet Your Team", desc: "You'll be introduced to your Trainer, Instructors and the wider team." },
               { step: "05", icon: Download, title: "Receive Your Equipment", desc: "ID card, uniform (if applicable), PPE and any required training materials." },
-            ].map(({ step, icon: Icon, title, desc }) => (
+            ].map(({ step, title, desc }) => (
               <AnimatedSection key={step}>
                 <div className="bg-white rounded-xl p-5 shadow-sm flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white text-sm font-bold flex-shrink-0">

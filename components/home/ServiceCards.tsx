@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Truck, GraduationCap, HardHat, Monitor, FileCheck, Users2, AlertTriangle, BookOpen } from "lucide-react";
+import { ArrowRight, Truck, GraduationCap, HardHat, Monitor, FileCheck, Users2, AlertTriangle } from "lucide-react";
 
 const SERVICES = [
   { id: "driver-cpc",    icon: Truck,        title: "Driver CPC",              desc: "DVSA & JAUPT approved periodic and initial Driver CPC — classroom or online.",   href: "/driver-cpc",         price: "From £50",    accent: "#0066cc", tags: ["Classroom", "Online", "JAUPT"] },

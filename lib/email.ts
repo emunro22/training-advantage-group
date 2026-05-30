@@ -1,7 +1,13 @@
 import { Resend } from "resend";
 import type { BookingFormData, ContactFormData } from "./types";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialisation so missing API key only fails at send time, not at build
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY ?? "placeholder");
+  return _resend;
+}
+const resend = { emails: { send: (...args: Parameters<Resend["emails"]["send"]>) => getResend().emails.send(...args) } };
 
 const FROM = "Training Advantage Group <office@trainingadvantagegroup.co.uk>";
 const TO = process.env.EMAIL_TO || "office@trainingadvantagegroup.co.uk";

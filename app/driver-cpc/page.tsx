@@ -3,7 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
-import { CheckCircle2, Clock, MapPin, Users, Upload, BookOpen } from "lucide-react";
+import { CheckCircle2, MapPin, Users, Upload, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {

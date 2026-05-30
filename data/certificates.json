@@ -1,0 +1,18 @@
+{
+  "certificates": [
+    {
+      "id": "demo-001",
+      "certificateNumber": "TAG-IOSH-2024-001",
+      "holderFirstName": "John",
+      "holderLastName": "Smith",
+      "course": "IOSH Managing Safely",
+      "courseType": "Health & Safety",
+      "issueDate": "2024-03-15",
+      "expiryDate": "2027-03-15",
+      "status": "valid",
+      "trainingCentre": "Bothwell",
+      "notes": "Demo certificate — replace with real data",
+      "createdAt": "2024-03-15T09:00:00.000Z"
+    }
+  ]
+}

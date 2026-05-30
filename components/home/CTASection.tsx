@@ -42,8 +42,8 @@ export default function CTASection() {
             width: orb.size,
             height: orb.size,
             top: orb.top,
-            left: (orb as any).left,
-            right: (orb as any).right,
+            left: (orb as { left?: string }).left,
+            right: (orb as { right?: string }).right,
             background: "radial-gradient(circle, rgba(255,102,0,0.12) 0%, transparent 70%)",
           }}
           animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}

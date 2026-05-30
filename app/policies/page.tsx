@@ -38,10 +38,10 @@ export default function PoliciesPage() {
               <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-3 text-gray-700">
                 <p><strong>Bookings:</strong> All bookings are subject to availability and confirmation by TAG. A booking is only confirmed upon receipt of a written confirmation from us.</p>
                 <p><strong>Payment:</strong> Payment terms are stated on your invoice. Corporate accounts may be subject to credit terms as agreed.</p>
-                <p><strong>Cancellation:</strong> Cancellations must be made in writing. Cancellations with less than 5 working days' notice may be subject to a cancellation charge of up to 50% of the course fee. No-shows are charged at 100%.</p>
+                <p><strong>Cancellation:</strong> Cancellations must be made in writing. Cancellations with less than 5 working days&apos; notice may be subject to a cancellation charge of up to 50% of the course fee. No-shows are charged at 100%.</p>
                 <p><strong>Attendance:</strong> Candidates must attend for the full duration of their course to receive a certificate. Late arrival may result in inability to sit the course.</p>
                 <p><strong>Conduct:</strong> TAG reserves the right to exclude any candidate who behaves inappropriately or unsafely, without refund.</p>
-                <p><strong>Liability:</strong> TAG's liability is limited to the cost of the training provided. We are not responsible for consequential losses arising from training outcomes.</p>
+                <p><strong>Liability:</strong> TAG&apos;s liability is limited to the cost of the training provided. We are not responsible for consequential losses arising from training outcomes.</p>
               </div>
             </section>
           </AnimatedSection>

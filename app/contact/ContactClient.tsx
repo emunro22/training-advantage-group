@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { CheckCircle2, Loader2, Phone, Mail, MapPin, Clock, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 const schema = z.object({
@@ -225,7 +226,7 @@ export default function ContactClient() {
             <div className="bg-navy rounded-xl p-5 text-white">
               <h3 className="font-bold mb-2">Prefer to Book Directly?</h3>
               <p className="text-sm text-white/80 mb-4">Use our online booking system to request a training place in minutes.</p>
-              <a href="/booking" className="btn-primary w-full justify-center text-sm">Book Training Now</a>
+              <Link href="/booking" className="btn-primary w-full justify-center text-sm">Book Training Now</Link>
             </div>
           </AnimatedSection>
         </div>
