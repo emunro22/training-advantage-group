@@ -101,14 +101,7 @@ const STATIC_NAV = [
       { label: "Tachograph Analysis", href: "/consultancy#tacho", desc: "Driver hours analysis" },
       { label: "FORS Support", href: "/consultancy#fors", desc: "Fleet operator recognition" },
       { label: "Earned Recognition", href: "/consultancy#earned-recognition", desc: "DVSA scheme support" },
-    ],
-  },
-  {
-    label: "Instructors",
-    href: "/instructor-training",
-    icon: Users2,
-    color: "text-red-brand",
-    items: [
+      { label: "Instructor Training", href: "/instructor-training", desc: "section-header" },
       { label: "Driver CPC Instructor", href: "/instructor-training", desc: "Deliver CPC training" },
       { label: "RADAT Development", href: "/instructor-training#radat", desc: "Registered assessor training" },
       { label: "ADR Instructor Mentoring", href: "/instructor-training#adr", desc: "Dangerous goods instructors" },
@@ -128,7 +121,7 @@ const STATIC_NAV = [
     ],
   },
   {
-    label: "Verify Certificate",
+    label: "Verify",
     href: "/verify-certificate",
     icon: BadgeCheck,
     color: "text-blue-brand",
@@ -158,6 +151,7 @@ const STATIC_NAV = [
       { label: "Training Centres", href: "/training-centres", desc: "Bothwell, Motherwell, Glasgow" },
       { label: "Testimonials", href: "/testimonials", desc: "What learners say" },
       { label: "News & Updates", href: "/news", desc: "Latest from TAG" },
+      { label: "Instructor Training", href: "/instructor-training", desc: "Become a TAG approved instructor" },
       { label: "Careers", href: "/careers", desc: "Join our team" },
       { label: "Contact Us", href: "/contact", desc: "Get in touch" },
     ],
@@ -332,8 +326,8 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-px">
+            {/* Desktop nav — only shown at xl (1280px+) to prevent overflow */}
+            <nav className="hidden xl:flex items-center gap-px">
               {NAV.map((item) => {
                 const active = isActive(item.href);
                 return (
@@ -345,7 +339,7 @@ export default function Header() {
                   >
                     <Link
                       href={item.href}
-                      className={`relative flex items-center gap-0.5 px-3 py-2 text-[13px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
+                      className={`relative flex items-center gap-0.5 px-2 py-2 text-[12px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
                         active
                           ? "text-blue-brand bg-blue-50"
                           : activeMenu === item.label
@@ -363,7 +357,7 @@ export default function Header() {
                       {active && (
                         <motion.div
                           layoutId="activeNav"
-                          className="absolute bottom-0 left-3 right-3 h-0.5 bg-orange-brand rounded-full"
+                          className="absolute bottom-0 left-2 right-2 h-0.5 bg-orange-brand rounded-full"
                         />
                       )}
                     </Link>
@@ -386,28 +380,37 @@ export default function Header() {
                               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{item.label}</span>
                             </div>
                           </div>
-                          {item.items.map((sub, i) => (
-                            <motion.div
-                              key={sub.href + sub.label}
-                              initial={{ opacity: 0, x: -8 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: i * 0.04 }}
-                            >
-                              <Link
-                                href={sub.href}
-                                className="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-light transition-colors group"
-                                onClick={() => setActiveMenu(null)}
+                          {item.items.map((sub, i) =>
+                            sub.desc === "section-header" ? (
+                              <div key={sub.label + i} className="px-3 pt-3 pb-1 mt-1 border-t border-gray-100">
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                                  <item.icon size={10} className="text-red-brand" />
+                                  {sub.label}
+                                </span>
+                              </div>
+                            ) : (
+                              <motion.div
+                                key={sub.href + sub.label}
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.03 }}
                               >
-                                <div className="w-1.5 h-1.5 rounded-full bg-orange-brand/50 flex-shrink-0 mt-1.5 group-hover:bg-orange-brand transition-colors" />
-                                <div>
-                                  <span className="text-sm font-semibold text-navy group-hover:text-blue-brand transition-colors block leading-tight">
-                                    {sub.label}
-                                  </span>
-                                  <span className="text-xs text-gray-400 mt-0.5 block">{sub.desc}</span>
-                                </div>
-                              </Link>
-                            </motion.div>
-                          ))}
+                                <Link
+                                  href={sub.href}
+                                  className="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-light transition-colors group"
+                                  onClick={() => setActiveMenu(null)}
+                                >
+                                  <div className="w-1.5 h-1.5 rounded-full bg-orange-brand/50 flex-shrink-0 mt-1.5 group-hover:bg-orange-brand transition-colors" />
+                                  <div>
+                                    <span className="text-sm font-semibold text-navy group-hover:text-blue-brand transition-colors block leading-tight">
+                                      {sub.label}
+                                    </span>
+                                    <span className="text-xs text-gray-400 mt-0.5 block">{sub.desc}</span>
+                                  </div>
+                                </Link>
+                              </motion.div>
+                            )
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -417,10 +420,7 @@ export default function Header() {
             </nav>
 
             {/* CTA buttons */}
-            <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-              <Link href="/contact" className="text-[12px] font-semibold text-gray-500 hover:text-navy transition-colors px-2.5 py-1.5 whitespace-nowrap">
-                Contact
-              </Link>
+            <div className="hidden xl:flex items-center gap-2 flex-shrink-0">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link href="/booking" className="btn-primary text-[12px] px-4 py-2 whitespace-nowrap">
                   Book Training
@@ -428,9 +428,9 @@ export default function Header() {
               </motion.div>
             </div>
 
-            {/* Mobile toggle */}
+            {/* Mobile toggle — shown below xl (1280px) */}
             <motion.button
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-light transition-colors"
+              className="xl:hidden p-2 rounded-xl hover:bg-gray-light transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
               whileTap={{ scale: 0.92 }}
@@ -458,7 +458,7 @@ export default function Header() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="lg:hidden border-t border-gray-100 bg-white overflow-hidden"
+              className="xl:hidden border-t border-gray-100 bg-white overflow-hidden"
             >
               <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
                 {/* Contact info */}
@@ -561,16 +561,22 @@ function MobileNavItem({
             transition={{ duration: 0.2 }}
             className="ml-4 border-l-2 border-orange-brand/30 pl-3 overflow-hidden"
           >
-            {item.items.map((sub) => (
-              <Link
-                key={sub.href + sub.label}
-                href={sub.href}
-                className="block py-2 text-sm text-gray-600 hover:text-navy transition-colors"
-                onClick={onClose}
-              >
-                {sub.label}
-              </Link>
-            ))}
+            {item.items.map((sub) =>
+              sub.desc === "section-header" ? (
+                <div key={sub.label} className="pt-2 pb-0.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  {sub.label}
+                </div>
+              ) : (
+                <Link
+                  key={sub.href + sub.label}
+                  href={sub.href}
+                  className="block py-1.5 text-sm text-gray-600 hover:text-navy transition-colors"
+                  onClick={onClose}
+                >
+                  {sub.label}
+                </Link>
+              )
+            )}
           </motion.div>
         )}
       </AnimatePresence>
