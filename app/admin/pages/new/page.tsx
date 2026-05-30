@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Eye, Save } from "lucide-react";
+import { ArrowLeft, Eye, Save, ImagePlus, Loader2 } from "lucide-react";
 
 const NAV_CATEGORIES = [
   { value: "standalone", label: "Standalone top-level nav item" },
@@ -22,6 +22,9 @@ export default function NewPageAdmin() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -34,6 +37,37 @@ export default function NewPageAdmin() {
     content: "",
     published: false,
   });
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        // Insert img tag at cursor position in the content textarea
+        const ta = contentRef.current;
+        const imgTag = `<img src="${data.url}" alt="${file.name}" style="max-width:100%;height:auto;" />`;
+        if (ta) {
+          const start = ta.selectionStart ?? form.content.length;
+          const updated = form.content.slice(0, start) + "\n" + imgTag + "\n" + form.content.slice(start);
+          setForm((f) => ({ ...f, content: updated }));
+        } else {
+          setForm((f) => ({ ...f, content: f.content + "\n" + imgTag + "\n" }));
+        }
+      } else {
+        setError(data.error ?? "Upload failed");
+      }
+    } catch {
+      setError("Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   function handleTitleChange(title: string) {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -207,18 +241,37 @@ export default function NewPageAdmin() {
 
             {/* Content */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Page Content
-                <span className="ml-1 text-gray-400 font-normal text-xs">(HTML supported)</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Page Content
+                  <span className="ml-1 text-gray-400 font-normal text-xs">(HTML supported)</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-blue-brand border border-blue-200 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+                  {uploading ? "Uploading…" : "Insert Image"}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </div>
               <textarea
+                ref={contentRef}
                 value={form.content}
                 onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
                 rows={14}
                 className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand transition-colors resize-y font-mono"
                 placeholder={`<h2>Section Title</h2>\n<p>Your content here...</p>\n\n<ul>\n  <li>Bullet point one</li>\n  <li>Bullet point two</li>\n</ul>`}
               />
-              <p className="text-xs text-gray-400 mt-1">You can use HTML tags: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;/&lt;li&gt;, &lt;strong&gt;, &lt;a href=&quot;...&quot;&gt;</p>
+              <p className="text-xs text-gray-400 mt-1">HTML tags: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;/&lt;li&gt;, &lt;strong&gt;, &lt;a href=&quot;...&quot;&gt; · Click &ldquo;Insert Image&rdquo; to upload from Vercel Blob</p>
             </div>
           </div>
         ) : (

@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
-import { getPricingData, savePricingData, type PricingStore, type SpecialOffer, type PriceOverride } from "@/lib/storage";
+import {
+  getPricingData,
+  addSpecialOffer,
+  updateSpecialOffer,
+  deleteSpecialOffer,
+  addPriceOverride,
+  updatePriceOverride,
+  deletePriceOverride,
+  type SpecialOffer,
+  type PriceOverride,
+} from "@/lib/storage";
 import { cookies } from "next/headers";
 import { validateSessionToken, ADMIN_COOKIE } from "@/lib/admin-auth";
 
@@ -23,7 +33,6 @@ export async function POST(request: Request) {
   }
   try {
     const body = (await request.json()) as { type: "offer" | "override" } & Record<string, unknown>;
-    const data = await getPricingData();
 
     if (body.type === "offer") {
       const offer: SpecialOffer = {
@@ -39,8 +48,7 @@ export async function POST(request: Request) {
         promoCode: body.promoCode as string | undefined,
         createdAt: new Date().toISOString(),
       };
-      data.specialOffers.push(offer);
-      await savePricingData(data);
+      await addSpecialOffer(offer);
       return NextResponse.json({ offer }, { status: 201 });
     }
 
@@ -54,8 +62,7 @@ export async function POST(request: Request) {
         label: body.label as string | undefined,
         active: (body.active as boolean) ?? true,
       };
-      data.priceOverrides.push(override);
-      await savePricingData(data);
+      await addPriceOverride(override);
       return NextResponse.json({ override }, { status: 201 });
     }
 
@@ -70,22 +77,17 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const body = (await request.json()) as { type: "offer" | "override"; id: string } & Partial<PricingStore>;
-    const data = await getPricingData();
+    const body = (await request.json()) as { type: "offer" | "override"; id: string } & Record<string, unknown>;
 
     if (body.type === "offer") {
-      const idx = data.specialOffers.findIndex((o) => o.id === body.id);
-      if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
-      data.specialOffers[idx] = { ...data.specialOffers[idx], ...(body as Partial<SpecialOffer>) };
-      await savePricingData(data);
+      const ok = await updateSpecialOffer(body.id, body as Partial<SpecialOffer>);
+      if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
       return NextResponse.json({ ok: true });
     }
 
     if (body.type === "override") {
-      const idx = data.priceOverrides.findIndex((o) => o.id === body.id);
-      if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
-      data.priceOverrides[idx] = { ...data.priceOverrides[idx], ...(body as Partial<PriceOverride>) };
-      await savePricingData(data);
+      const ok = await updatePriceOverride(body.id, body as Partial<PriceOverride>);
+      if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
       return NextResponse.json({ ok: true });
     }
 
@@ -101,15 +103,13 @@ export async function DELETE(request: Request) {
   }
   try {
     const { type, id } = (await request.json()) as { type: "offer" | "override"; id: string };
-    const data = await getPricingData();
 
     if (type === "offer") {
-      data.specialOffers = data.specialOffers.filter((o) => o.id !== id);
+      await deleteSpecialOffer(id);
     } else if (type === "override") {
-      data.priceOverrides = data.priceOverrides.filter((o) => o.id !== id);
+      await deletePriceOverride(id);
     }
 
-    await savePricingData(data);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -1,5 +1,9 @@
+// Storage layer: Neon PostgreSQL in production, JSON filesystem fallback in local dev.
+// Neon is used when DATABASE_URL is set. Otherwise reads/writes data/*.json files.
+
 import fs from "fs";
 import path from "path";
+import { getDb, ensureSchema } from "./db";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -25,8 +29,16 @@ export interface CustomPage {
   slug: string;
   title: string;
   navLabel: string;
-  // 'standalone' = top-level nav item; any other value = added to that category dropdown
-  navCategory: "standalone" | "transport" | "health-safety" | "plant" | "e-learning" | "consultancy" | "instructors" | "about" | "none";
+  navCategory:
+    | "standalone"
+    | "transport"
+    | "health-safety"
+    | "plant"
+    | "e-learning"
+    | "consultancy"
+    | "instructors"
+    | "about"
+    | "none";
   content: string;
   heroTitle?: string;
   heroSubtitle?: string;
@@ -60,6 +72,11 @@ export interface PriceOverride {
   active: boolean;
 }
 
+export interface PricingStore {
+  specialOffers: SpecialOffer[];
+  priceOverrides: PriceOverride[];
+}
+
 export interface UpcomingCourse {
   id: string;
   courseId: string;
@@ -78,50 +95,20 @@ export interface UpcomingCourse {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Backend detection
-// Vercel KV: set KV_REST_API_URL + KV_REST_API_TOKEN in your Vercel dashboard.
-// Otherwise defaults to filesystem (perfect for local dev / self-hosted).
 // ─────────────────────────────────────────────────────────────────────────────
 
-const KV_URL = process.env.KV_REST_API_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN;
-const USE_KV = !!(KV_URL && KV_TOKEN);
-
+const USE_NEON = !!process.env.DATABASE_URL;
 const DATA_DIR = path.join(process.cwd(), "data");
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Low-level helpers
+// Filesystem helpers (local dev fallback)
 // ─────────────────────────────────────────────────────────────────────────────
-
-async function kvGet<T>(key: string): Promise<T | null> {
-  try {
-    const res = await fetch(`${KV_URL}/get/${encodeURIComponent(key)}`, {
-      headers: { Authorization: `Bearer ${KV_TOKEN}` },
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as { result: string | null };
-    return json.result ? (JSON.parse(json.result) as T) : null;
-  } catch {
-    return null;
-  }
-}
-
-async function kvSet(key: string, value: unknown): Promise<void> {
-  await fetch(`${KV_URL}/set/${encodeURIComponent(key)}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${KV_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(JSON.stringify(value)),
-  });
-}
 
 function fsRead<T>(filename: string, defaultValue: T): T {
   try {
-    const filePath = path.join(DATA_DIR, filename);
-    if (!fs.existsSync(filePath)) return defaultValue;
-    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T;
+    const p = path.join(DATA_DIR, filename);
+    if (!fs.existsSync(p)) return defaultValue;
+    return JSON.parse(fs.readFileSync(p, "utf-8")) as T;
   } catch {
     return defaultValue;
   }
@@ -132,160 +119,517 @@ function fsWrite(filename: string, data: unknown): void {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(path.join(DATA_DIR, filename), JSON.stringify(data, null, 2), "utf-8");
   } catch (e) {
-    console.error(`[storage] Failed to write ${filename}:`, e);
+    console.error("[storage] fsWrite error:", e);
   }
 }
 
-async function readStore<T>(key: string, filename: string, defaultValue: T): Promise<T> {
-  if (USE_KV) {
-    const result = await kvGet<T>(key);
-    return result ?? defaultValue;
-  }
-  return fsRead<T>(filename, defaultValue);
+// ─────────────────────────────────────────────────────────────────────────────
+// Row → TypeScript mappers
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToCert(r: any): Certificate {
+  return {
+    id: r.id,
+    certificateNumber: r.certificate_number,
+    holderFirstName: r.holder_first_name,
+    holderLastName: r.holder_last_name,
+    course: r.course,
+    courseType: r.course_type,
+    issueDate: r.issue_date,
+    expiryDate: r.expiry_date,
+    status: r.status,
+    trainingCentre: r.training_centre ?? undefined,
+    notes: r.notes ?? undefined,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
 }
 
-async function writeStore(key: string, filename: string, value: unknown): Promise<void> {
-  if (USE_KV) {
-    await kvSet(key, value);
-  } else {
-    fsWrite(filename, value);
-  }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToPage(r: any): CustomPage {
+  return {
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    navLabel: r.nav_label,
+    navCategory: r.nav_category,
+    content: r.content,
+    heroTitle: r.hero_title ?? undefined,
+    heroSubtitle: r.hero_subtitle ?? undefined,
+    metaDescription: r.meta_description ?? undefined,
+    published: r.published,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToOffer(r: any): SpecialOffer {
+  return {
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    discountType: r.discount_type,
+    discountValue: Number(r.discount_value),
+    courseId: r.course_id ?? undefined,
+    courseName: r.course_name ?? undefined,
+    validUntil: r.valid_until ?? undefined,
+    active: r.active,
+    promoCode: r.promo_code ?? undefined,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToOverride(r: any): PriceOverride {
+  return {
+    id: r.id,
+    courseId: r.course_id,
+    courseName: r.course_name,
+    originalPrice: r.original_price,
+    overridePrice: r.override_price,
+    label: r.label ?? undefined,
+    active: r.active,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToCourse(r: any): UpcomingCourse {
+  return {
+    id: r.id,
+    courseId: r.course_id,
+    courseName: r.course_name,
+    date: r.date,
+    endDate: r.end_date ?? undefined,
+    location: r.location,
+    spotsAvailable: r.spots_available,
+    totalSpots: r.total_spots,
+    price: r.price,
+    bookingUrl: r.booking_url ?? undefined,
+    notes: r.notes ?? undefined,
+    active: r.active,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Certificates
 // ─────────────────────────────────────────────────────────────────────────────
 
-type CertStore = { certificates: Certificate[] };
-
 export async function getCertificates(): Promise<Certificate[]> {
-  const store = await readStore<CertStore>("tag:certificates", "certificates.json", { certificates: [] });
+  if (USE_NEON) {
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM certificates ORDER BY created_at DESC`;
+    return rows.map(rowToCert);
+  }
+  const store = fsRead<{ certificates: Certificate[] }>("certificates.json", { certificates: [] });
   return store.certificates;
 }
 
-export async function verifyCertificate(certNumber: string, lastName?: string): Promise<Certificate | null> {
+export async function verifyCertificate(
+  certNumber: string,
+  lastName?: string
+): Promise<Certificate | null> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const rows = await sql`
+      SELECT * FROM certificates
+      WHERE LOWER(certificate_number) = LOWER(${certNumber.trim()})
+      LIMIT 1
+    `;
+    if (rows.length === 0) return null;
+    const cert = rowToCert(rows[0]);
+    if (lastName && cert.holderLastName.toLowerCase() !== lastName.trim().toLowerCase()) return null;
+    return cert;
+  }
   const certs = await getCertificates();
-  const cert = certs.find((c) => c.certificateNumber.toLowerCase() === certNumber.toLowerCase().trim());
+  const cert = certs.find(
+    (c) => c.certificateNumber.toLowerCase() === certNumber.trim().toLowerCase()
+  );
   if (!cert) return null;
-  if (lastName && cert.holderLastName.toLowerCase() !== lastName.toLowerCase().trim()) return null;
+  if (lastName && cert.holderLastName.toLowerCase() !== lastName.trim().toLowerCase()) return null;
   return cert;
 }
 
-export async function addCertificate(cert: Certificate): Promise<void> {
-  const store = await readStore<CertStore>("tag:certificates", "certificates.json", { certificates: [] });
-  store.certificates.push(cert);
-  await writeStore("tag:certificates", "certificates.json", store);
+export async function addCertificate(c: Certificate): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO certificates
+        (id, certificate_number, holder_first_name, holder_last_name, course, course_type,
+         issue_date, expiry_date, status, training_centre, notes)
+      VALUES
+        (${c.id}, ${c.certificateNumber}, ${c.holderFirstName}, ${c.holderLastName},
+         ${c.course}, ${c.courseType}, ${c.issueDate}, ${c.expiryDate}, ${c.status},
+         ${c.trainingCentre ?? null}, ${c.notes ?? null})
+    `;
+    return;
+  }
+  const store = fsRead<{ certificates: Certificate[] }>("certificates.json", { certificates: [] });
+  store.certificates.push(c);
+  fsWrite("certificates.json", store);
 }
 
-export async function updateCertificate(id: string, updates: Partial<Certificate>): Promise<boolean> {
-  const store = await readStore<CertStore>("tag:certificates", "certificates.json", { certificates: [] });
+export async function updateCertificate(
+  id: string,
+  u: Partial<Certificate>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE certificates SET
+        certificate_number = COALESCE(${u.certificateNumber ?? null}, certificate_number),
+        holder_first_name  = COALESCE(${u.holderFirstName ?? null}, holder_first_name),
+        holder_last_name   = COALESCE(${u.holderLastName ?? null}, holder_last_name),
+        course             = COALESCE(${u.course ?? null}, course),
+        course_type        = COALESCE(${u.courseType ?? null}, course_type),
+        issue_date         = COALESCE(${u.issueDate ?? null}, issue_date),
+        expiry_date        = COALESCE(${u.expiryDate ?? null}, expiry_date),
+        status             = COALESCE(${u.status ?? null}, status),
+        training_centre    = COALESCE(${u.trainingCentre ?? null}, training_centre),
+        notes              = COALESCE(${u.notes ?? null}, notes)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ certificates: Certificate[] }>("certificates.json", { certificates: [] });
   const idx = store.certificates.findIndex((c) => c.id === id);
   if (idx === -1) return false;
-  store.certificates[idx] = { ...store.certificates[idx], ...updates };
-  await writeStore("tag:certificates", "certificates.json", store);
+  store.certificates[idx] = { ...store.certificates[idx], ...u };
+  fsWrite("certificates.json", store);
   return true;
 }
 
 export async function deleteCertificate(id: string): Promise<boolean> {
-  const store = await readStore<CertStore>("tag:certificates", "certificates.json", { certificates: [] });
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM certificates WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ certificates: Certificate[] }>("certificates.json", { certificates: [] });
   const before = store.certificates.length;
   store.certificates = store.certificates.filter((c) => c.id !== id);
-  if (store.certificates.length === before) return false;
-  await writeStore("tag:certificates", "certificates.json", store);
-  return true;
+  fsWrite("certificates.json", store);
+  return store.certificates.length < before;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Custom Pages
 // ─────────────────────────────────────────────────────────────────────────────
 
-type PageStore = { pages: CustomPage[] };
-
 export async function getCustomPages(publishedOnly = false): Promise<CustomPage[]> {
-  const store = await readStore<PageStore>("tag:custom-pages", "custom-pages.json", { pages: [] });
+  if (USE_NEON) {
+    const sql = getDb();
+    const rows = publishedOnly
+      ? await sql`SELECT * FROM custom_pages WHERE published = TRUE ORDER BY created_at DESC`
+      : await sql`SELECT * FROM custom_pages ORDER BY created_at DESC`;
+    return rows.map(rowToPage);
+  }
+  const store = fsRead<{ pages: CustomPage[] }>("custom-pages.json", { pages: [] });
   return publishedOnly ? store.pages.filter((p) => p.published) : store.pages;
 }
 
 export async function getCustomPageBySlug(slug: string): Promise<CustomPage | null> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM custom_pages WHERE slug = ${slug} LIMIT 1`;
+    return rows.length > 0 ? rowToPage(rows[0]) : null;
+  }
   const pages = await getCustomPages();
   return pages.find((p) => p.slug === slug) ?? null;
 }
 
-export async function addCustomPage(page: CustomPage): Promise<void> {
-  const store = await readStore<PageStore>("tag:custom-pages", "custom-pages.json", { pages: [] });
-  store.pages.push(page);
-  await writeStore("tag:custom-pages", "custom-pages.json", store);
+export async function addCustomPage(p: CustomPage): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO custom_pages
+        (id, slug, title, nav_label, nav_category, content, hero_title, hero_subtitle,
+         meta_description, published)
+      VALUES
+        (${p.id}, ${p.slug}, ${p.title}, ${p.navLabel}, ${p.navCategory}, ${p.content},
+         ${p.heroTitle ?? null}, ${p.heroSubtitle ?? null}, ${p.metaDescription ?? null},
+         ${p.published})
+    `;
+    return;
+  }
+  const store = fsRead<{ pages: CustomPage[] }>("custom-pages.json", { pages: [] });
+  store.pages.push(p);
+  fsWrite("custom-pages.json", store);
 }
 
-export async function updateCustomPage(id: string, updates: Partial<CustomPage>): Promise<boolean> {
-  const store = await readStore<PageStore>("tag:custom-pages", "custom-pages.json", { pages: [] });
+export async function updateCustomPage(
+  id: string,
+  u: Partial<CustomPage>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE custom_pages SET
+        slug              = COALESCE(${u.slug ?? null}, slug),
+        title             = COALESCE(${u.title ?? null}, title),
+        nav_label         = COALESCE(${u.navLabel ?? null}, nav_label),
+        nav_category      = COALESCE(${u.navCategory ?? null}, nav_category),
+        content           = COALESCE(${u.content ?? null}, content),
+        hero_title        = COALESCE(${u.heroTitle ?? null}, hero_title),
+        hero_subtitle     = COALESCE(${u.heroSubtitle ?? null}, hero_subtitle),
+        meta_description  = COALESCE(${u.metaDescription ?? null}, meta_description),
+        published         = COALESCE(${u.published ?? null}, published),
+        updated_at        = NOW()
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ pages: CustomPage[] }>("custom-pages.json", { pages: [] });
   const idx = store.pages.findIndex((p) => p.id === id);
   if (idx === -1) return false;
-  store.pages[idx] = { ...store.pages[idx], ...updates, updatedAt: new Date().toISOString() };
-  await writeStore("tag:custom-pages", "custom-pages.json", store);
+  store.pages[idx] = { ...store.pages[idx], ...u, updatedAt: new Date().toISOString() };
+  fsWrite("custom-pages.json", store);
   return true;
 }
 
 export async function deleteCustomPage(id: string): Promise<boolean> {
-  const store = await readStore<PageStore>("tag:custom-pages", "custom-pages.json", { pages: [] });
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM custom_pages WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ pages: CustomPage[] }>("custom-pages.json", { pages: [] });
   const before = store.pages.length;
   store.pages = store.pages.filter((p) => p.id !== id);
-  if (store.pages.length === before) return false;
-  await writeStore("tag:custom-pages", "custom-pages.json", store);
-  return true;
+  fsWrite("custom-pages.json", store);
+  return store.pages.length < before;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pricing & Offers
 // ─────────────────────────────────────────────────────────────────────────────
 
-export interface PricingStore {
-  specialOffers: SpecialOffer[];
-  priceOverrides: PriceOverride[];
-}
-
 export async function getPricingData(): Promise<PricingStore> {
-  return readStore<PricingStore>("tag:pricing", "pricing-offers.json", {
+  if (USE_NEON) {
+    const sql = getDb();
+    const [offerRows, overrideRows] = await Promise.all([
+      sql`SELECT * FROM special_offers ORDER BY created_at DESC`,
+      sql`SELECT * FROM price_overrides ORDER BY id`,
+    ]);
+    return {
+      specialOffers: offerRows.map(rowToOffer),
+      priceOverrides: overrideRows.map(rowToOverride),
+    };
+  }
+  return fsRead<PricingStore>("pricing-offers.json", {
     specialOffers: [],
     priceOverrides: [],
   });
 }
 
+export async function addSpecialOffer(o: SpecialOffer): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO special_offers
+        (id, title, description, discount_type, discount_value, course_id, course_name,
+         valid_until, active, promo_code)
+      VALUES
+        (${o.id}, ${o.title}, ${o.description}, ${o.discountType}, ${o.discountValue},
+         ${o.courseId ?? null}, ${o.courseName ?? null}, ${o.validUntil ?? null},
+         ${o.active}, ${o.promoCode ?? null})
+    `;
+    return;
+  }
+  const data = await getPricingData();
+  data.specialOffers.push(o);
+  fsWrite("pricing-offers.json", data);
+}
+
+export async function updateSpecialOffer(
+  id: string,
+  u: Partial<SpecialOffer>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE special_offers SET
+        title          = COALESCE(${u.title ?? null}, title),
+        description    = COALESCE(${u.description ?? null}, description),
+        discount_type  = COALESCE(${u.discountType ?? null}, discount_type),
+        discount_value = COALESCE(${u.discountValue ?? null}, discount_value),
+        course_id      = COALESCE(${u.courseId ?? null}, course_id),
+        course_name    = COALESCE(${u.courseName ?? null}, course_name),
+        valid_until    = COALESCE(${u.validUntil ?? null}, valid_until),
+        active         = COALESCE(${u.active ?? null}, active),
+        promo_code     = COALESCE(${u.promoCode ?? null}, promo_code)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const data = await getPricingData();
+  const idx = data.specialOffers.findIndex((o) => o.id === id);
+  if (idx === -1) return false;
+  data.specialOffers[idx] = { ...data.specialOffers[idx], ...u };
+  fsWrite("pricing-offers.json", data);
+  return true;
+}
+
+export async function deleteSpecialOffer(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM special_offers WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const data = await getPricingData();
+  const before = data.specialOffers.length;
+  data.specialOffers = data.specialOffers.filter((o) => o.id !== id);
+  fsWrite("pricing-offers.json", data);
+  return data.specialOffers.length < before;
+}
+
+export async function addPriceOverride(o: PriceOverride): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO price_overrides
+        (id, course_id, course_name, original_price, override_price, label, active)
+      VALUES
+        (${o.id}, ${o.courseId}, ${o.courseName}, ${o.originalPrice}, ${o.overridePrice},
+         ${o.label ?? null}, ${o.active})
+    `;
+    return;
+  }
+  const data = await getPricingData();
+  data.priceOverrides.push(o);
+  fsWrite("pricing-offers.json", data);
+}
+
+export async function updatePriceOverride(
+  id: string,
+  u: Partial<PriceOverride>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE price_overrides SET
+        course_id      = COALESCE(${u.courseId ?? null}, course_id),
+        course_name    = COALESCE(${u.courseName ?? null}, course_name),
+        original_price = COALESCE(${u.originalPrice ?? null}, original_price),
+        override_price = COALESCE(${u.overridePrice ?? null}, override_price),
+        label          = COALESCE(${u.label ?? null}, label),
+        active         = COALESCE(${u.active ?? null}, active)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const data = await getPricingData();
+  const idx = data.priceOverrides.findIndex((o) => o.id === id);
+  if (idx === -1) return false;
+  data.priceOverrides[idx] = { ...data.priceOverrides[idx], ...u };
+  fsWrite("pricing-offers.json", data);
+  return true;
+}
+
+export async function deletePriceOverride(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM price_overrides WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const data = await getPricingData();
+  const before = data.priceOverrides.length;
+  data.priceOverrides = data.priceOverrides.filter((o) => o.id !== id);
+  fsWrite("pricing-offers.json", data);
+  return data.priceOverrides.length < before;
+}
+
+// Keep the old savePricingData for API route backward compat (filesystem path only)
 export async function savePricingData(data: PricingStore): Promise<void> {
-  await writeStore("tag:pricing", "pricing-offers.json", data);
+  fsWrite("pricing-offers.json", data);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Upcoming Courses
 // ─────────────────────────────────────────────────────────────────────────────
 
-type CourseStore = { courses: UpcomingCourse[] };
-
 export async function getUpcomingCourses(activeOnly = false): Promise<UpcomingCourse[]> {
-  const store = await readStore<CourseStore>("tag:upcoming-courses", "upcoming-courses.json", { courses: [] });
+  if (USE_NEON) {
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM upcoming_courses WHERE active = TRUE ORDER BY date ASC`
+      : await sql`SELECT * FROM upcoming_courses ORDER BY date ASC`;
+    return rows.map(rowToCourse);
+  }
+  const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
   return activeOnly ? store.courses.filter((c) => c.active) : store.courses;
 }
 
-export async function addUpcomingCourse(course: UpcomingCourse): Promise<void> {
-  const store = await readStore<CourseStore>("tag:upcoming-courses", "upcoming-courses.json", { courses: [] });
-  store.courses.push(course);
-  await writeStore("tag:upcoming-courses", "upcoming-courses.json", store);
+export async function addUpcomingCourse(c: UpcomingCourse): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO upcoming_courses
+        (id, course_id, course_name, date, end_date, location, spots_available, total_spots,
+         price, booking_url, notes, active)
+      VALUES
+        (${c.id}, ${c.courseId}, ${c.courseName}, ${c.date}, ${c.endDate ?? null},
+         ${c.location}, ${c.spotsAvailable}, ${c.totalSpots}, ${c.price},
+         ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active})
+    `;
+    return;
+  }
+  const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
+  store.courses.push(c);
+  fsWrite("upcoming-courses.json", store);
 }
 
-export async function updateUpcomingCourse(id: string, updates: Partial<UpcomingCourse>): Promise<boolean> {
-  const store = await readStore<CourseStore>("tag:upcoming-courses", "upcoming-courses.json", { courses: [] });
+export async function updateUpcomingCourse(
+  id: string,
+  u: Partial<UpcomingCourse>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE upcoming_courses SET
+        course_id        = COALESCE(${u.courseId ?? null}, course_id),
+        course_name      = COALESCE(${u.courseName ?? null}, course_name),
+        date             = COALESCE(${u.date ?? null}, date),
+        end_date         = COALESCE(${u.endDate ?? null}, end_date),
+        location         = COALESCE(${u.location ?? null}, location),
+        spots_available  = COALESCE(${u.spotsAvailable ?? null}, spots_available),
+        total_spots      = COALESCE(${u.totalSpots ?? null}, total_spots),
+        price            = COALESCE(${u.price ?? null}, price),
+        booking_url      = COALESCE(${u.bookingUrl ?? null}, booking_url),
+        notes            = COALESCE(${u.notes ?? null}, notes),
+        active           = COALESCE(${u.active ?? null}, active)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
   const idx = store.courses.findIndex((c) => c.id === id);
   if (idx === -1) return false;
-  store.courses[idx] = { ...store.courses[idx], ...updates };
-  await writeStore("tag:upcoming-courses", "upcoming-courses.json", store);
+  store.courses[idx] = { ...store.courses[idx], ...u };
+  fsWrite("upcoming-courses.json", store);
   return true;
 }
 
 export async function deleteUpcomingCourse(id: string): Promise<boolean> {
-  const store = await readStore<CourseStore>("tag:upcoming-courses", "upcoming-courses.json", { courses: [] });
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM upcoming_courses WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
   const before = store.courses.length;
   store.courses = store.courses.filter((c) => c.id !== id);
-  if (store.courses.length === before) return false;
-  await writeStore("tag:upcoming-courses", "upcoming-courses.json", store);
-  return true;
+  fsWrite("upcoming-courses.json", store);
+  return store.courses.length < before;
 }
