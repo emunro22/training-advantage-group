@@ -3,6 +3,7 @@ import ServiceCards from "@/components/home/ServiceCards";
 import StatsSection from "@/components/home/StatsSection";
 import LocationsSection from "@/components/home/LocationsSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
+import GoogleReviewsSection from "@/components/home/GoogleReviewsSection";
 import CTASection from "@/components/home/CTASection";
 import WhyChooseSection from "@/components/home/WhyChooseSection";
 import UpcomingCoursesSection from "@/components/home/UpcomingCoursesSection";
@@ -31,6 +32,7 @@ export default async function HomePage() {
       <StatsSection />
       <WhyChooseSection />
       <TestimonialsSection testimonials={testimonialsForHome} />
+      <GoogleReviewsSection />
       <LocationsSection />
       <CTASection />
     </>
