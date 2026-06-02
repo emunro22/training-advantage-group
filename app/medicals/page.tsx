@@ -54,7 +54,7 @@ export default async function MedicalsPage() {
   const medicalOverride = pricingData.priceOverrides.find(
     (o) => o.active && (o.courseId === "medical" || o.courseName.toLowerCase().includes("medical"))
   );
-  const DEFAULT_PRICE = 65;
+  const DEFAULT_PRICE = 80;
   const price = medicalOverride
     ? parseInt(medicalOverride.overridePrice.replace(/[^0-9]/g, ""), 10) || DEFAULT_PRICE
     : DEFAULT_PRICE;

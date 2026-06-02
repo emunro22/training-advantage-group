@@ -1,10 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MessageSquare, Plus, Trash2, Edit2, X, Star, ToggleLeft, ToggleRight } from "lucide-react";
+import { MessageSquare, Plus, Trash2, Edit2, X, Star, ToggleLeft, ToggleRight, Download } from "lucide-react";
 import type { Testimonial } from "@/lib/storage";
 
 const CATEGORIES = ["Driver CPC", "TM CPC", "HGV Training", "ADR Training", "Plant Training", "Fleet Training", "Consultancy", "E-Learning", "General"];
+
+const DEFAULT_TESTIMONIALS = [
+  { name: "Derek Morrison", company: "Morrison Haulage Ltd", role: "Transport Manager", text: "Excellent TM CPC training. The instructors are highly experienced and really know their stuff. Passed my exams first time and the support throughout was outstanding.", rating: 5, category: "TM CPC", active: true, featured: true },
+  { name: "Sarah McAllister", company: "West Coast Logistics", role: "Fleet Manager", text: "We've used TAG for all our driver CPC training for the past three years. Always professional, flexible around our operations, and our drivers consistently enjoy the sessions.", rating: 5, category: "Driver CPC", active: true, featured: true },
+  { name: "Jamie Henderson", company: "Individual Learner", role: "HGV Driver", text: "Got my Class 1 licence through TAG. The instructors are patient and knowledgeable. Passed my test first time and couldn't be happier. Highly recommend to anyone looking to progress.", rating: 5, category: "HGV Training", active: true, featured: true },
+  { name: "Craig Watson", company: "Watson Plant Hire", role: "Operations Director", text: "Booked our whole team in for forklift refresher training. TAG came on-site to us which was ideal. Professional delivery, NPORS cards issued promptly. Will definitely use again.", rating: 5, category: "Plant Training", active: true, featured: true },
+  { name: "Gillian Fraser", company: "Stagecoach", role: "Training Coordinator", text: "We needed ADR requalification for a large number of drivers at short notice. TAG scheduled multiple sessions efficiently and all delegates passed. Exceptional service.", rating: 5, category: "ADR Training", active: true, featured: false },
+  { name: "Robert Campbell", company: "Campbell Transport Ltd", role: "Managing Director", text: "Used TAG for our entire fleet driver CPC programme. Having a dedicated account manager and the flexibility to schedule around our operations made a huge difference.", rating: 5, category: "Fleet Training", active: true, featured: false },
+  { name: "Angela Brennan", company: "Individual Learner", role: "TM CPC Candidate", text: "I was nervous about the TM CPC exams but the tutors really put me at ease. The study materials were excellent and I passed all four modules. Very grateful to the TAG team.", rating: 5, category: "TM CPC", active: true, featured: false },
+  { name: "Paul Stewart", company: "Stewart Logistics", role: "Transport Manager", text: "The consultancy service is genuinely valuable. After our DVSA visit, the team helped us improve our OCRS and implement proper compliance systems. Cannot recommend highly enough.", rating: 5, category: "Consultancy", active: true, featured: false },
+];
 
 const EMPTY_FORM = {
   name: "",
@@ -24,6 +35,7 @@ export default function TestimonialsAdmin() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState("");
 
   async function load() {
@@ -74,6 +86,20 @@ export default function TestimonialsAdmin() {
     setSaving(false);
   }
 
+  async function seedDefaults() {
+    if (!confirm("This will load all the existing testimonials from the site into the database so you can edit them. Continue?")) return;
+    setSeeding(true);
+    for (const d of DEFAULT_TESTIMONIALS) {
+      await fetch("/api/admin/testimonials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(d),
+      });
+    }
+    await load();
+    setSeeding(false);
+  }
+
   async function remove(id: string) {
     if (!confirm("Delete this testimonial?")) return;
     await fetch("/api/admin/testimonials", {
@@ -117,6 +143,13 @@ export default function TestimonialsAdmin() {
           <MessageSquare size={32} className="text-gray-200 mx-auto mb-3" />
           <p className="text-gray-500 text-sm">No testimonials yet.</p>
           <button onClick={openAdd} className="text-blue-brand font-semibold text-sm hover:underline mt-2">Add your first testimonial →</button>
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-400 mb-3">Or load the testimonials already showing on the site so you can edit them:</p>
+            <button onClick={seedDefaults} disabled={seeding} className="inline-flex items-center gap-2 bg-orange-brand text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-orange-dark disabled:opacity-40">
+              <Download size={14} />
+              {seeding ? "Loading…" : "Load Existing Site Testimonials"}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

@@ -16,7 +16,7 @@ export const COURSES: Course[] = [
   { id: "hgv-class1", name: "HGV Class 1 (Cat C+E) Upgrade", category: "hgv-training", priceLabel: "From £2,695", url: "/hgv-training" },
   { id: "pcv-catd", name: "PCV / Bus Category D", category: "hgv-training", priceLabel: "From £1,795", url: "/hgv-training" },
   { id: "module4", name: "Module 4 CPC Practical", category: "hgv-training", price: 295, url: "/hgv-training" },
-  { id: "medical", name: "Medical Assessment", category: "hgv-training", price: 65, url: "/hgv-training" },
+  { id: "medical", name: "Medical Assessment", category: "hgv-training", price: 80, url: "/hgv-training" },
   { id: "fleet-assessment", name: "Fleet Driver Assessment", category: "hgv-training", priceLabel: "From £95", url: "/hgv-training" },
   { id: "manoeuvres-3a", name: "3A Off Road Manoeuvres", category: "hgv-training", price: 250, url: "/hgv-training" },
 

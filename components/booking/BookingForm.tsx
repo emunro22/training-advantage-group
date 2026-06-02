@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Loader2, ChevronDown, AlertCircle, Calendar, Users, MapPin, User, Phone, Mail, Building2, MessageSquare } from "lucide-react";
+import { CheckCircle2, Loader2, ChevronDown, AlertCircle, Calendar, Users, MapPin, User, Phone, Mail, Building2, MessageSquare, CalendarDays, Clock } from "lucide-react";
 import { COURSES, LOCATIONS, COURSE_CATEGORIES } from "@/lib/courses";
 import type { BookingFormData } from "@/lib/types";
+import type { UpcomingCourse } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({
@@ -28,17 +29,44 @@ type FormValues = z.infer<typeof schema>;
 
 type Step = 1 | 2 | 3;
 
+function mapLocationToValue(loc: string): string {
+  const l = loc.toLowerCase();
+  if (l.includes("bothwell")) return "bothwell";
+  if (l.includes("motherwell")) return "motherwell";
+  if (l.includes("glasgow")) return "glasgow";
+  if (l.includes("remote") || l.includes("online")) return "remote";
+  return "";
+}
+
+function formatDate(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function BookingForm({ defaultCourse }: { defaultCourse?: string }) {
   const [step, setStep] = useState<Step>(1);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [upcomingCourses, setUpcomingCourses] = useState<UpcomingCourse[]>([]);
+  const [selectedUpcomingId, setSelectedUpcomingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/upcoming-courses")
+      .then((r) => r.json())
+      .then((d) => setUpcomingCourses(d.courses ?? []))
+      .catch(() => {});
+  }, []);
 
   const {
     register,
     handleSubmit,
     watch,
     trigger,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -52,6 +80,18 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   const selectedCourseId = watch("courseId");
   const filteredCourses = COURSES.filter((c) => !selectedCategory || c.category === selectedCategory);
   const selectedCourse = COURSES.find((c) => c.id === selectedCourseId);
+
+  function selectUpcomingCourse(uc: UpcomingCourse) {
+    const course = COURSES.find((c) => c.id === uc.courseId);
+    if (course) {
+      setValue("category", course.category, { shouldValidate: true });
+      setValue("courseId", course.id, { shouldValidate: true });
+    }
+    setValue("preferredDate", uc.date, { shouldValidate: true });
+    const locValue = mapLocationToValue(uc.location);
+    if (locValue) setValue("location", locValue, { shouldValidate: true });
+    setSelectedUpcomingId(uc.id);
+  }
 
   const goToStep2 = async () => {
     const ok = await trigger(["firstName", "lastName", "email", "phone", "company"]);
@@ -216,6 +256,74 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 Course Details
               </h3>
 
+              {/* Upcoming scheduled sessions */}
+              {upcomingCourses.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CalendarDays size={15} className="text-orange-brand" />
+                    <span className="text-sm font-bold text-navy">Available Scheduled Sessions</span>
+                    <span className="text-xs text-gray-400">— click to pre-fill your booking</span>
+                  </div>
+                  <div className="grid gap-2">
+                    {upcomingCourses.map((uc) => {
+                      const isSelected = selectedUpcomingId === uc.id;
+                      const spotsLeft = uc.spotsAvailable;
+                      const isFull = spotsLeft <= 0;
+                      return (
+                        <button
+                          key={uc.id}
+                          type="button"
+                          disabled={isFull}
+                          onClick={() => selectUpcomingCourse(uc)}
+                          className={cn(
+                            "w-full text-left rounded-xl border-2 px-4 py-3 transition-all",
+                            isSelected
+                              ? "border-orange-brand bg-orange-50"
+                              : isFull
+                              ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
+                              : "border-gray-200 hover:border-orange-brand/50 hover:bg-orange-50/50"
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm text-navy truncate">{uc.courseName}</div>
+                              <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={11} />
+                                  {formatDate(uc.date)}
+                                </span>
+                                {uc.startTime && (
+                                  <span className="flex items-center gap-1">
+                                    <Clock size={11} />
+                                    {uc.startTime}{uc.endTime ? ` – ${uc.endTime}` : ""}
+                                  </span>
+                                )}
+                                <span className="flex items-center gap-1">
+                                  <MapPin size={11} />
+                                  {uc.location}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex-shrink-0 text-right">
+                              <div className="font-bold text-sm text-orange-brand">{uc.price}</div>
+                              <div className={cn("text-xs mt-0.5", isFull ? "text-red-500" : spotsLeft <= 3 ? "text-orange-600" : "text-green-600")}>
+                                {isFull ? "Full" : `${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left`}
+                              </div>
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="flex items-center gap-1 mt-1.5 text-xs text-orange-brand font-semibold">
+                              <CheckCircle2 size={11} /> Selected — details pre-filled below
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Don&apos;t see your date? Fill in your preference below and we&apos;ll check availability.</p>
+                </div>
+              )}
+
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <Field label="Training Category *" error={errors.category?.message}>
                   <div className="relative">
@@ -310,7 +418,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
 
               <div className="bg-navy/5 rounded-xl p-5 mb-4 space-y-3">
                 <ReviewRow label="Course" value={selectedCourse?.name ?? watch("courseId")} highlight />
-                <ReviewRow label="Date" value={watch("preferredDate")} />
+                <ReviewRow label="Date" value={formatDate(watch("preferredDate"))} />
                 <ReviewRow label="Delegates" value={`${watch("delegates")} person(s)`} />
                 <ReviewRow label="Location" value={LOCATIONS.find((l) => l.value === watch("location"))?.label ?? ""} />
                 {watch("message") && <ReviewRow label="Notes" value={watch("message") ?? ""} />}
