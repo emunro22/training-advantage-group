@@ -85,6 +85,118 @@ export async function sendBookingConfirmation(data: BookingFormData) {
   ]);
 }
 
+export interface OrderConfirmationData {
+  orderId: string;
+  paymentType: "full" | "deposit";
+  amountPaidPence: number;
+  totalAmountPence: number;
+  remainingBalancePence: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company: string;
+  courseName: string;
+  preferredDate: string;
+  delegates: number;
+  location: string;
+  notes: string;
+}
+
+function formatGBP(pence: number): string {
+  return `£${(pence / 100).toFixed(2)}`;
+}
+
+export async function sendOrderConfirmation(data: OrderConfirmationData) {
+  const isDeposit = data.paymentType === "deposit";
+  const subjectVerb = isDeposit ? "Deposit Received" : "Payment Confirmed";
+
+  const depositNote = isDeposit
+    ? `<div style="background:#fff7e6;border-left:4px solid #ff6600;border-radius:6px;padding:16px;margin:16px 0;">
+        <strong>Deposit Payment</strong><br/>
+        You paid a deposit of <strong>${formatGBP(data.amountPaidPence)}</strong> today.<br/>
+        The remaining balance of <strong>${formatGBP(data.remainingBalancePence)}</strong> is due before your course date.
+        Our team will contact you with payment details for the balance.
+      </div>`
+    : "";
+
+  const customerHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #0d1b4b 0%, #0066cc 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">${subjectVerb} — Booking Confirmed</h1>
+        <p style="color: #cce0ff; margin: 8px 0 0;">Training Advantage Group Ltd</p>
+      </div>
+      <div style="padding: 30px; background: #f4f7fa;">
+        <p style="color: #333; font-size: 16px;">Dear ${data.firstName},</p>
+        <p style="color: #333;">Thank you — your payment has been received and your booking is confirmed. A member of our team will be in touch shortly with joining instructions.</p>
+        ${depositNote}
+        <div style="background: white; border-radius: 8px; padding: 24px; margin: 20px 0; border-left: 4px solid #ff6600;">
+          <h2 style="color: #0d1b4b; margin: 0 0 16px; font-size: 18px;">Booking Summary</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; color: #666; width: 40%;">Course:</td><td style="padding: 8px 0; color: #333; font-weight: bold;">${data.courseName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;">Preferred Date:</td><td style="padding: 8px 0; color: #333;">${data.preferredDate}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;">Location:</td><td style="padding: 8px 0; color: #333;">${data.location}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;">Delegates:</td><td style="padding: 8px 0; color: #333;">${data.delegates}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;">Amount Paid:</td><td style="padding: 8px 0; color: #333; font-weight: bold; color: #16a34a;">${formatGBP(data.amountPaidPence)}</td></tr>
+            ${data.company ? `<tr><td style="padding: 8px 0; color: #666;">Company:</td><td style="padding: 8px 0; color: #333;">${data.company}</td></tr>` : ""}
+            <tr><td style="padding: 8px 0; color: #666;">Booking Ref:</td><td style="padding: 8px 0; color: #999; font-size: 12px;">${data.orderId}</td></tr>
+          </table>
+        </div>
+        <p style="color: #333;">If you have any questions, please contact us:</p>
+        <ul style="color: #333; list-style: none; padding: 0;">
+          <li style="padding: 4px 0;">📞 <a href="tel:01412582024" style="color: #0066cc;">0141 258 2024</a></li>
+          <li style="padding: 4px 0;">✉️ <a href="mailto:office@trainingadvantagegroup.co.uk" style="color: #0066cc;">office@trainingadvantagegroup.co.uk</a></li>
+        </ul>
+      </div>
+      <div style="background: #0d1b4b; padding: 20px; text-align: center;">
+        <p style="color: #8899bb; margin: 0; font-size: 12px;">Training Advantage Group Ltd | Registered in Scotland No. SC765674</p>
+        <p style="color: #8899bb; margin: 4px 0 0; font-size: 12px;">1st Floor Training Suite, APC Depot, Coalburn Road, Bothwell, G71 8DA</p>
+      </div>
+    </div>
+  `;
+
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #0d1b4b; padding: 20px;">
+        <h2 style="color: white; margin: 0;">💳 New Paid Order — ${isDeposit ? "DEPOSIT" : "FULL PAYMENT"}</h2>
+      </div>
+      <div style="padding: 24px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666; width: 35%;">Name:</td><td style="padding: 10px; font-weight: bold;">${data.firstName} ${data.lastName}</td></tr>
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Email:</td><td style="padding: 10px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Phone:</td><td style="padding: 10px;"><a href="tel:${data.phone}">${data.phone}</a></td></tr>
+          ${data.company ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Company:</td><td style="padding: 10px;">${data.company}</td></tr>` : ""}
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Course:</td><td style="padding: 10px; font-weight: bold; color: #0066cc;">${data.courseName}</td></tr>
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Preferred Date:</td><td style="padding: 10px;">${data.preferredDate}</td></tr>
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Location:</td><td style="padding: 10px;">${data.location}</td></tr>
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Delegates:</td><td style="padding: 10px;">${data.delegates}</td></tr>
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Amount Paid:</td><td style="padding: 10px; font-weight: bold; color: #16a34a;">${formatGBP(data.amountPaidPence)}</td></tr>
+          ${isDeposit ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Balance Due:</td><td style="padding: 10px; font-weight: bold; color: #dc2626;">${formatGBP(data.remainingBalancePence)}</td></tr>` : ""}
+          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Payment Type:</td><td style="padding: 10px;">${isDeposit ? "Deposit" : "Full Payment"}</td></tr>
+          ${data.notes ? `<tr><td style="padding: 10px; color: #666; vertical-align: top;">Notes:</td><td style="padding: 10px;">${data.notes}</td></tr>` : ""}
+        </table>
+        <p style="color: #999; font-size: 12px; margin-top: 16px;">Order ID: ${data.orderId}</p>
+      </div>
+    </div>
+  `;
+
+  await Promise.all([
+    resend.emails.send({
+      from: FROM,
+      to: [data.email],
+      subject: `${subjectVerb} – ${data.courseName} | Training Advantage Group`,
+      html: customerHtml,
+    }),
+    resend.emails.send({
+      from: FROM,
+      to: [TO],
+      subject: `New Order (${isDeposit ? "Deposit" : "Full"}): ${data.courseName} – ${data.firstName} ${data.lastName}`,
+      html: adminHtml,
+      replyTo: data.email,
+    }),
+  ]);
+}
+
 export async function sendContactEmail(data: ContactFormData) {
   const adminHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

@@ -5,11 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Loader2, ChevronDown, AlertCircle, Calendar, Users, MapPin, User, Phone, Mail, Building2, MessageSquare, CalendarDays, Clock } from "lucide-react";
+import { CheckCircle2, Loader2, ChevronDown, AlertCircle, Calendar, Users, MapPin, User, Phone, Mail, Building2, MessageSquare, CalendarDays, Clock, CreditCard, Banknote } from "lucide-react";
 import { COURSES, LOCATIONS, COURSE_CATEGORIES } from "@/lib/courses";
 import type { BookingFormData } from "@/lib/types";
 import type { UpcomingCourse } from "@/lib/storage";
 import { cn } from "@/lib/utils";
+import { DEPOSIT_AMOUNT_PENCE, DEPOSIT_THRESHOLD_PENCE } from "@/lib/square";
 
 const schema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -26,8 +27,8 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-
 type Step = 1 | 2 | 3;
+type PaymentType = "full" | "deposit";
 
 function mapLocationToValue(loc: string): string {
   const l = loc.toLowerCase();
@@ -46,6 +47,10 @@ function formatDate(dateStr: string): string {
   }
 }
 
+function formatGBP(pence: number): string {
+  return `£${(pence / 100).toFixed(2)}`;
+}
+
 export default function BookingForm({ defaultCourse }: { defaultCourse?: string }) {
   const [step, setStep] = useState<Step>(1);
   const [submitted, setSubmitted] = useState(false);
@@ -53,6 +58,8 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [upcomingCourses, setUpcomingCourses] = useState<UpcomingCourse[]>([]);
   const [selectedUpcomingId, setSelectedUpcomingId] = useState<string | null>(null);
+  const [paymentType, setPaymentType] = useState<PaymentType>("full");
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     fetch("/api/upcoming-courses")
@@ -78,8 +85,13 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
 
   const selectedCategory = watch("category");
   const selectedCourseId = watch("courseId");
+  const delegates = watch("delegates") || 1;
   const filteredCourses = COURSES.filter((c) => !selectedCategory || c.category === selectedCategory);
   const selectedCourse = COURSES.find((c) => c.id === selectedCourseId);
+
+  const totalAmountPence = selectedCourse?.price ? selectedCourse.price * delegates * 100 : 0;
+  const canPayOnline = totalAmountPence > 0;
+  const canPayDeposit = totalAmountPence >= DEPOSIT_THRESHOLD_PENCE;
 
   function selectUpcomingCourse(uc: UpcomingCourse) {
     const course = COURSES.find((c) => c.id === uc.courseId);
@@ -103,7 +115,8 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
     if (ok) setStep(3);
   };
 
-  const onSubmit = async (values: FormValues) => {
+  // Enquiry-only submission (no price or POA courses)
+  const onSubmitEnquiry = async (values: FormValues) => {
     setIsSubmitting(true);
     setError(null);
     try {
@@ -120,23 +133,53 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
         location: LOCATIONS.find((l) => l.value === values.location)?.label ?? values.location,
         message: values.message,
       };
-
       const res = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error ?? "Submission failed");
       }
-
       setSubmitted(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "An unexpected error occurred. Please try again or call us on 0141 258 2024.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Payment submission — redirect to Square
+  const onSubmitPayment = async (values: FormValues) => {
+    setRedirecting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          phone: values.phone,
+          company: values.company ?? "",
+          courseId: values.courseId,
+          courseName: selectedCourse?.name ?? values.courseId,
+          preferredDate: values.preferredDate,
+          delegates: values.delegates,
+          location: LOCATIONS.find((l) => l.value === values.location)?.label ?? values.location,
+          notes: values.message ?? "",
+          paymentType,
+          totalAmountPence,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Could not create payment session");
+      window.location.href = data.checkoutUrl;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not start payment. Please call us on 0141 258 2024.");
+      setRedirecting(false);
     }
   };
 
@@ -172,7 +215,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
         {[
           { n: 1, label: "Your Details" },
           { n: 2, label: "Course Info" },
-          { n: 3, label: "Review" },
+          { n: 3, label: "Review & Pay" },
         ].map(({ n, label }, i) => (
           <div key={n} className="flex items-center flex-1">
             <div className="flex flex-col items-center">
@@ -199,7 +242,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
         ))}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(canPayOnline ? onSubmitPayment : onSubmitEnquiry)}>
         <AnimatePresence mode="wait">
           {/* Step 1: Personal Details */}
           {step === 1 && (
@@ -256,7 +299,6 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 Course Details
               </h3>
 
-              {/* Upcoming scheduled sessions */}
               {upcomingCourses.length > 0 && (
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
@@ -398,7 +440,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
             </motion.div>
           )}
 
-          {/* Step 3: Review */}
+          {/* Step 3: Review & Pay */}
           {step === 3 && (
             <motion.div
               key="step3"
@@ -407,7 +449,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}
             >
-              <h3 className="text-lg font-bold text-navy mb-5">Review Your Booking</h3>
+              <h3 className="text-lg font-bold text-navy mb-5">Review &amp; Pay</h3>
 
               <div className="bg-gray-light rounded-xl p-5 mb-4 space-y-3">
                 <ReviewRow label="Name" value={`${watch("firstName")} ${watch("lastName")}`} />
@@ -422,7 +464,64 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 <ReviewRow label="Delegates" value={`${watch("delegates")} person(s)`} />
                 <ReviewRow label="Location" value={LOCATIONS.find((l) => l.value === watch("location"))?.label ?? ""} />
                 {watch("message") && <ReviewRow label="Notes" value={watch("message") ?? ""} />}
+                {canPayOnline && (
+                  <ReviewRow label="Total" value={formatGBP(totalAmountPence)} highlight />
+                )}
               </div>
+
+              {/* Payment options */}
+              {canPayOnline ? (
+                <div className="mb-5">
+                  <p className="text-sm font-bold text-navy mb-3">Choose payment option</p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentType("full")}
+                      className={cn(
+                        "rounded-xl border-2 p-4 text-left transition-all",
+                        paymentType === "full"
+                          ? "border-navy bg-navy/5"
+                          : "border-gray-200 hover:border-navy/40"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <CreditCard size={16} className="text-navy" />
+                        <span className="font-bold text-sm text-navy">Pay in Full</span>
+                        {paymentType === "full" && <CheckCircle2 size={14} className="text-green-600 ml-auto" />}
+                      </div>
+                      <div className="text-xl font-black text-navy">{formatGBP(totalAmountPence)}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">Nothing more to pay</div>
+                    </button>
+
+                    {canPayDeposit && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentType("deposit")}
+                        className={cn(
+                          "rounded-xl border-2 p-4 text-left transition-all",
+                          paymentType === "deposit"
+                            ? "border-orange-brand bg-orange-50"
+                            : "border-gray-200 hover:border-orange-brand/40"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Banknote size={16} className="text-orange-brand" />
+                          <span className="font-bold text-sm text-orange-900">Pay Deposit</span>
+                          {paymentType === "deposit" && <CheckCircle2 size={14} className="text-green-600 ml-auto" />}
+                        </div>
+                        <div className="text-xl font-black text-orange-brand">{formatGBP(DEPOSIT_AMOUNT_PENCE)}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          Balance of {formatGBP(totalAmountPence - DEPOSIT_AMOUNT_PENCE)} due before course
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm text-blue-800">
+                  <strong>Price on application</strong> — this course is priced individually. Submit your request and we&apos;ll be in touch within 24 hours to confirm details and arrange payment.
+                </div>
+              )}
 
               {error && (
                 <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-sm text-red-700">
@@ -432,19 +531,28 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
               )}
 
               <p className="text-xs text-gray-500 mb-5">
-                By submitting this form you agree to be contacted by Training Advantage Group regarding your booking request.
+                By submitting this form you agree to be contacted by Training Advantage Group regarding your booking.
                 We will not share your details with third parties.
+                {canPayOnline && " You will be securely redirected to Square to complete payment."}
               </p>
 
               <div className="flex justify-between gap-3">
-                <button type="button" onClick={() => setStep(2)} className="btn-outline">
+                <button type="button" onClick={() => setStep(2)} className="btn-outline" disabled={redirecting}>
                   ← Back
                 </button>
-                <button type="submit" disabled={isSubmitting} className="btn-primary min-w-[160px] justify-center">
-                  {isSubmitting ? (
+                <button
+                  type="submit"
+                  disabled={isSubmitting || redirecting}
+                  className="btn-primary min-w-[180px] justify-center"
+                >
+                  {redirecting ? (
+                    <><Loader2 size={16} className="animate-spin" /> Redirecting to payment…</>
+                  ) : isSubmitting ? (
                     <><Loader2 size={16} className="animate-spin" /> Submitting…</>
+                  ) : canPayOnline ? (
+                    <><CreditCard size={16} /> Proceed to Payment</>
                   ) : (
-                    "Confirm Booking Request"
+                    "Submit Enquiry"
                   )}
                 </button>
               </div>
@@ -499,10 +607,7 @@ function ReviewRow({ label, value, highlight }: { label: string; value: string; 
 }
 
 const inputCls = (hasError: boolean) =>
-  cn(
-    "input-field",
-    hasError ? "border-red-400 focus:ring-red-400" : ""
-  );
+  cn("input-field", hasError ? "border-red-400 focus:ring-red-400" : "");
 
 const selectCls = (hasError: boolean) =>
   cn(

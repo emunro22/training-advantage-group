@@ -15,10 +15,12 @@ import {
   ChevronRight,
   PenLine,
   MessageSquare,
+  ShoppingBag,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/content", label: "Edit Page Content", icon: PenLine },
   { href: "/admin/pages", label: "Custom Pages & Nav", icon: FileText },
   { href: "/admin/certificates", label: "Certificates", icon: Award },

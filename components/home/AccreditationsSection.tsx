@@ -15,21 +15,6 @@ export default function AccreditationsSection() {
   return (
     <section className="py-16 bg-gray-light">
       <div className="max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
-          <span className="inline-block px-4 py-1 bg-navy/10 text-navy text-xs font-bold uppercase tracking-widest rounded-full mb-3">
-            Accreditations
-          </span>
-          <h2 className="text-2xl md:text-3xl font-bold text-navy mb-2">Fully Approved &amp; Accredited</h2>
-          <p className="text-gray-dark text-sm max-w-xl mx-auto">
-            Guaranteed quality, compliance and nationally recognised qualifications — backed by the leading industry bodies.
-          </p>
-        </motion.div>
-
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {ACCREDITATIONS.map((acc, i) => (
             <motion.div

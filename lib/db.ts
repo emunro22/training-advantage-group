@@ -129,5 +129,34 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY,
+      status TEXT NOT NULL DEFAULT 'pending',
+      payment_type TEXT NOT NULL DEFAULT 'full',
+      amount_paid_pence INTEGER NOT NULL DEFAULT 0,
+      total_amount_pence INTEGER NOT NULL DEFAULT 0,
+      remaining_balance_pence INTEGER NOT NULL DEFAULT 0,
+      square_order_id TEXT,
+      square_payment_id TEXT,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      company TEXT NOT NULL DEFAULT '',
+      course_id TEXT NOT NULL,
+      course_name TEXT NOT NULL,
+      preferred_date TEXT NOT NULL,
+      delegates INTEGER NOT NULL DEFAULT 1,
+      location TEXT NOT NULL,
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`;
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`;
+
   migrated = true;
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { FileText, Award, Tag, CalendarDays, ArrowRight, Globe, PlusCircle, RefreshCw } from "lucide-react";
+import { FileText, Award, Tag, CalendarDays, ArrowRight, Globe, PlusCircle, RefreshCw, ShoppingBag } from "lucide-react";
 
 interface DashboardStats {
   certificates: number;
@@ -10,6 +10,8 @@ interface DashboardStats {
   publishedPages: number;
   specialOffers: number;
   upcomingCourses: number;
+  orders: number;
+  pendingOrders: number;
 }
 
 // Bust browser cache by appending a timestamp so re-visiting the dashboard
@@ -25,26 +27,31 @@ export default function AdminDashboard() {
   const loadStats = useCallback(async () => {
     setRefreshing(true);
     try {
-      const [certsRes, pagesRes, pricingRes, coursesRes] = await Promise.all([
+      const [certsRes, pagesRes, pricingRes, coursesRes, ordersRes] = await Promise.all([
         fetch(noCache("/api/admin/certificates"), { cache: "no-store" }),
         fetch(noCache("/api/admin/pages"), { cache: "no-store" }),
         fetch(noCache("/api/admin/pricing"), { cache: "no-store" }),
         fetch(noCache("/api/admin/upcoming-courses"), { cache: "no-store" }),
+        fetch(noCache("/api/admin/orders"), { cache: "no-store" }),
       ]);
 
-      const [certs, pages, pricing, courses] = await Promise.all([
+      const [certs, pages, pricing, courses, ordersData] = await Promise.all([
         certsRes.json(),
         pagesRes.json(),
         pricingRes.json(),
         coursesRes.json(),
+        ordersRes.json(),
       ]);
 
+      const allOrders: { status: string }[] = ordersData.orders ?? [];
       setStats({
         certificates: certs.certificates?.length ?? 0,
         customPages: pages.pages?.length ?? 0,
         publishedPages: pages.pages?.filter((p: { published: boolean }) => p.published).length ?? 0,
         specialOffers: pricing.specialOffers?.filter((o: { active: boolean }) => o.active).length ?? 0,
         upcomingCourses: courses.courses?.filter((c: { active: boolean }) => c.active).length ?? 0,
+        orders: allOrders.length,
+        pendingOrders: allOrders.filter((o) => o.status === "pending").length,
       });
     } finally {
       setRefreshing(false);
@@ -54,6 +61,14 @@ export default function AdminDashboard() {
   useEffect(() => { loadStats(); }, [loadStats]);
 
   const STAT_CARDS = [
+    {
+      label: "Orders",
+      value: stats?.orders,
+      icon: ShoppingBag,
+      color: "bg-emerald-50 text-emerald-600",
+      href: "/admin/orders",
+      desc: stats?.pendingOrders ? `${stats.pendingOrders} pending` : "All paid orders",
+    },
     {
       label: "Certificates",
       value: stats?.certificates,
@@ -89,6 +104,7 @@ export default function AdminDashboard() {
   ];
 
   const QUICK_ACTIONS = [
+    { label: "View Orders", href: "/admin/orders", icon: ShoppingBag, desc: "See all paid bookings" },
     { label: "Add Certificate", href: "/admin/certificates", icon: Award, desc: "Record a new issued certificate" },
     { label: "Create New Page", href: "/admin/pages/new", icon: PlusCircle, desc: "Build a new site page" },
     { label: "Add Special Offer", href: "/admin/pricing", icon: Tag, desc: "Promote a course or discount" },
@@ -116,7 +132,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {STAT_CARDS.map(({ label, value, icon: Icon, color, href, desc }) => (
           <Link
             key={label}
