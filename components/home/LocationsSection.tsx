@@ -19,7 +19,7 @@ const LOCATIONS = [
     id: "motherwell",
     name: "Motherwell",
     subtitle: "Training Centre",
-    address: ["Unit 5, Hope Street", "Motherwell", "ML1 1TA"],
+    address: ["28 Hope Street", "Motherwell", "ML1 1TA"],
     features: ["Full Training Facilities", "Modern Classrooms", "Central Location"],
     gradient: "from-blue-brand to-blue-dark",
     accent: "bg-white",

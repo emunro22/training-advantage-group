@@ -14,6 +14,7 @@ import {
   Shield,
   ChevronRight,
   PenLine,
+  MessageSquare,
 } from "lucide-react";
 
 const NAV = [
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/admin/certificates", label: "Certificates", icon: Award },
   { href: "/admin/pricing", label: "Pricing & Offers", icon: Tag },
   { href: "/admin/upcoming-courses", label: "Upcoming Courses", icon: CalendarDays },
+  { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquare },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

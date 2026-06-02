@@ -5,11 +5,14 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, Clock, MapPin, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { getPricingData } from "@/lib/storage";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "DVLA Group 2 Medical Assessment Scotland | HGV & PCV Medicals",
   description:
-    "DVLA Group 2 medical assessments for HGV, PCV and LGV licence applicants across Scotland. In-house at our training centres. £65 per assessment.",
+    "DVLA Group 2 medical assessments for HGV, PCV and LGV licence applicants across Scotland. In-house at our training centres. £80 per assessment.",
 };
 
 const WHAT_INVOLVED = [
@@ -46,7 +49,16 @@ const FAQS = [
   },
 ];
 
-export default function MedicalsPage() {
+export default async function MedicalsPage() {
+  const pricingData = await getPricingData();
+  const medicalOverride = pricingData.priceOverrides.find(
+    (o) => o.active && (o.courseId === "medical" || o.courseName.toLowerCase().includes("medical"))
+  );
+  const DEFAULT_PRICE = 65;
+  const price = medicalOverride
+    ? parseInt(medicalOverride.overridePrice.replace(/[^0-9]/g, ""), 10) || DEFAULT_PRICE
+    : DEFAULT_PRICE;
+
   return (
     <>
       <PageHero
@@ -76,7 +88,7 @@ export default function MedicalsPage() {
               </p>
             </div>
             <Link href="/booking?course=medical" className="btn-primary">
-              Book Your Medical — £65
+              Book Your Medical — £{price}
             </Link>
           </AnimatedSection>
 
@@ -114,7 +126,7 @@ export default function MedicalsPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <PriceCard
               title="Group 2 Medical Assessment"
-              price={65}
+              price={price}
               priceNote="per candidate, excl. VAT"
               highlighted
               features={[
@@ -162,7 +174,7 @@ export default function MedicalsPage() {
           <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
               { name: "Bothwell HQ", detail: "APC Depot, Coalburn Road, G71 8DA" },
-              { name: "Motherwell", detail: "Unit 5, Hope Street, ML1 1TA" },
+              { name: "Motherwell", detail: "28 Hope Street, ML1 1TA" },
               { name: "Glasgow", detail: "South Street, G14 0BX" },
             ].map((loc) => (
               <div key={loc.name} className="bg-gray-light rounded-xl p-4 flex items-start gap-3">

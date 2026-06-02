@@ -95,6 +95,19 @@ export interface UpcomingCourse {
   createdAt: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  company: string;
+  role: string;
+  text: string;
+  rating: number;
+  category?: string;
+  active: boolean;
+  featured: boolean;
+  createdAt: string;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Backend detection
 // ─────────────────────────────────────────────────────────────────────────────
@@ -560,6 +573,94 @@ export async function deletePriceOverride(id: string): Promise<boolean> {
 // Keep the old savePricingData for API route backward compat (filesystem path only)
 export async function savePricingData(data: PricingStore): Promise<void> {
   fsWrite("pricing-offers.json", data);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Testimonials
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToTestimonial(r: any): Testimonial {
+  return {
+    id: r.id,
+    name: r.name,
+    company: r.company ?? "",
+    role: r.role ?? "",
+    text: r.text,
+    rating: Number(r.rating),
+    category: r.category ?? undefined,
+    active: r.active,
+    featured: r.featured,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getTestimonials(activeOnly = false): Promise<Testimonial[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM testimonials WHERE active = TRUE ORDER BY created_at ASC`
+      : await sql`SELECT * FROM testimonials ORDER BY created_at ASC`;
+    return rows.map(rowToTestimonial);
+  }
+  const store = fsRead<{ testimonials: Testimonial[] }>("testimonials.json", { testimonials: [] });
+  return activeOnly ? store.testimonials.filter((t) => t.active) : store.testimonials;
+}
+
+export async function addTestimonial(t: Testimonial): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO testimonials (id, name, company, role, text, rating, category, active, featured)
+      VALUES (${t.id}, ${t.name}, ${t.company}, ${t.role}, ${t.text}, ${t.rating},
+              ${t.category ?? null}, ${t.active}, ${t.featured})
+    `;
+    return;
+  }
+  const store = fsRead<{ testimonials: Testimonial[] }>("testimonials.json", { testimonials: [] });
+  store.testimonials.push(t);
+  fsWrite("testimonials.json", store);
+}
+
+export async function updateTestimonial(id: string, u: Partial<Testimonial>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE testimonials SET
+        name     = COALESCE(${u.name ?? null}, name),
+        company  = COALESCE(${u.company ?? null}, company),
+        role     = COALESCE(${u.role ?? null}, role),
+        text     = COALESCE(${u.text ?? null}, text),
+        rating   = COALESCE(${u.rating ?? null}, rating),
+        category = COALESCE(${u.category ?? null}, category),
+        active   = COALESCE(${u.active ?? null}, active),
+        featured = COALESCE(${u.featured ?? null}, featured)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ testimonials: Testimonial[] }>("testimonials.json", { testimonials: [] });
+  const idx = store.testimonials.findIndex((t) => t.id === id);
+  if (idx === -1) return false;
+  store.testimonials[idx] = { ...store.testimonials[idx], ...u };
+  fsWrite("testimonials.json", store);
+  return true;
+}
+
+export async function deleteTestimonial(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM testimonials WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ testimonials: Testimonial[] }>("testimonials.json", { testimonials: [] });
+  const before = store.testimonials.length;
+  store.testimonials = store.testimonials.filter((t) => t.id !== id);
+  fsWrite("testimonials.json", store);
+  return store.testimonials.length < before;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

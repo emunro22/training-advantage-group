@@ -36,10 +36,10 @@ const CENTRES = [
     id: "motherwell",
     name: "Motherwell Training Centre",
     emoji: "🏫",
-    address: "Unit 5, Hope Street, Motherwell, ML1 1TA",
+    address: "28 Hope Street, Motherwell, ML1 1TA",
     postcode: "ML1 1TA",
     description:
-      "Our Motherwell training centre is located in the heart of Motherwell town centre on Hope Street. Modern training facilities with easy access by public transport and good local parking options.",
+      "Our Motherwell training centre is located at 28 Hope Street in Motherwell town centre. Modern training facilities with easy access by public transport and good local parking options.",
     features: [
       "Full Training Facilities",
       "Modern Classrooms",

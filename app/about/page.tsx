@@ -107,7 +107,7 @@ export default function AboutPage() {
               },
               {
                 name: "Motherwell Training Centre",
-                address: "Unit 5, Hope Street\nMotherwell\nML1 1TA",
+                address: "28 Hope Street\nMotherwell\nML1 1TA",
                 tag: "Training Centre",
                 color: "bg-blue-brand",
               },

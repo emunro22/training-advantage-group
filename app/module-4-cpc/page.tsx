@@ -136,7 +136,7 @@ export default function Module4CPCPage() {
           <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
               { name: "Bothwell HQ", detail: "APC Depot, Coalburn Road, G71 8DA" },
-              { name: "Motherwell", detail: "Unit 5, Hope Street, ML1 1TA" },
+              { name: "Motherwell", detail: "28 Hope Street, ML1 1TA" },
               { name: "Glasgow", detail: "South Street, G14 0BX" },
             ].map((loc) => (
               <div key={loc.name} className="bg-gray-light rounded-xl p-4 flex items-start gap-3">

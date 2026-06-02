@@ -4,7 +4,16 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Star, Quote } from "lucide-react";
 
-const TESTIMONIALS = [
+interface TestimonialItem {
+  name: string;
+  company: string;
+  role: string;
+  text: string;
+  rating: number;
+  initial: string;
+}
+
+const FALLBACK_TESTIMONIALS: TestimonialItem[] = [
   {
     name: "Derek Morrison",
     company: "Morrison Haulage Ltd",
@@ -39,9 +48,10 @@ const TESTIMONIALS = [
   },
 ];
 
-const COLORS = ["bg-blue-600", "bg-orange-500", "bg-purple-600", "bg-green-600"];
+const COLORS = ["bg-blue-600", "bg-orange-500", "bg-purple-600", "bg-green-600", "bg-red-500", "bg-teal-600", "bg-indigo-600", "bg-yellow-600"];
 
-export default function TestimonialsSection() {
+export default function TestimonialsSection({ testimonials: propTestimonials }: { testimonials?: TestimonialItem[] }) {
+  const testimonials = propTestimonials && propTestimonials.length > 0 ? propTestimonials : FALLBACK_TESTIMONIALS;
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   useTransform(scrollYProgress, [0, 1], [0, -40]);
@@ -76,7 +86,7 @@ export default function TestimonialsSection() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
-          {TESTIMONIALS.map((t, i) => (
+          {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
               initial={{ opacity: 0, y: 40 }}

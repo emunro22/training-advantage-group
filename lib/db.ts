@@ -114,5 +114,20 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS testimonials (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      company TEXT NOT NULL DEFAULT '',
+      role TEXT NOT NULL DEFAULT '',
+      text TEXT NOT NULL,
+      rating INTEGER NOT NULL DEFAULT 5,
+      category TEXT,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      featured BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   migrated = true;
 }

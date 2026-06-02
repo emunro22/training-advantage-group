@@ -192,7 +192,7 @@ export default function ContactClient() {
                 },
                 {
                   name: "Motherwell Training Centre",
-                  address: "Unit 5, Hope Street, Motherwell, ML1 1TA",
+                  address: "28 Hope Street, Motherwell, ML1 1TA",
                   note: "Fully equipped training rooms in central Motherwell.",
                   color: "border-blue-brand",
                 },
