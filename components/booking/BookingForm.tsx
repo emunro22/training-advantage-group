@@ -5,7 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Loader2, ChevronDown, AlertCircle, Calendar, Users, MapPin, User, Phone, Mail, Building2, MessageSquare, CalendarDays, Clock, CreditCard, Banknote } from "lucide-react";
+import {
+  CheckCircle2, Loader2, ChevronDown, AlertCircle, Calendar, Users,
+  MapPin, User, Phone, Mail, Building2, MessageSquare, CalendarDays,
+  Clock, CreditCard, Banknote, X,
+} from "lucide-react";
 import { COURSES, LOCATIONS, COURSE_CATEGORIES } from "@/lib/courses";
 import type { BookingFormData } from "@/lib/types";
 import type { UpcomingCourse } from "@/lib/storage";
@@ -30,21 +34,43 @@ type FormValues = z.infer<typeof schema>;
 type Step = 1 | 2 | 3;
 type PaymentType = "full" | "deposit";
 
+// Parse upcoming course price string to pence. Returns -1 when price is unknown/POA.
+function parseUpcomingPrice(price: string): number {
+  const match = price.match(/\d[\d,]*/);
+  if (!match) return -1;
+  const num = parseInt(match[0].replace(/,/g, ""), 10);
+  return isNaN(num) ? -1 : num * 100;
+}
+
+// Guess a catalog category from an upcoming course name
+function guessCategoryFromName(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("driver cpc") || n.includes("dcpc")) return "driver-cpc";
+  if (n.includes("tm cpc") || n.includes("transport manager")) return "tm-cpc";
+  if (n.includes("hgv") || n.includes("pcv") || n.includes("cat c")) return "hgv-training";
+  if (n.includes("adr")) return "adr";
+  if (n.includes("plant") || n.includes("forklift") || n.includes("mewp") || n.includes("reach") || n.includes("telehandler")) return "plant-training";
+  if (n.includes("consult") || n.includes("audit") || n.includes("olat") || n.includes("tacho")) return "consultancy";
+  if (n.includes("instructor")) return "instructor-training";
+  return "driver-cpc";
+}
+
 function mapLocationToValue(loc: string): string {
   const l = loc.toLowerCase();
   if (l.includes("bothwell")) return "bothwell";
   if (l.includes("motherwell")) return "motherwell";
   if (l.includes("glasgow")) return "glasgow";
   if (l.includes("remote") || l.includes("online")) return "remote";
+  if (l.includes("on-site") || l.includes("onsite") || l.includes("client")) return "onsite";
   return "";
 }
 
 function formatDate(dateStr: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-  } catch {
-    return dateStr;
-  }
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      weekday: "short", day: "numeric", month: "short", year: "numeric",
+    });
+  } catch { return dateStr; }
 }
 
 function formatGBP(pence: number): string {
@@ -69,18 +95,10 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   }, []);
 
   const {
-    register,
-    handleSubmit,
-    watch,
-    trigger,
-    setValue,
-    formState: { errors },
+    register, handleSubmit, watch, trigger, setValue, formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      delegates: 1,
-      courseId: defaultCourse || "",
-    },
+    defaultValues: { delegates: 1, courseId: defaultCourse || "" },
   });
 
   const selectedCategory = watch("category");
@@ -89,20 +107,41 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   const filteredCourses = COURSES.filter((c) => !selectedCategory || c.category === selectedCategory);
   const selectedCourse = COURSES.find((c) => c.id === selectedCourseId);
 
-  const totalAmountPence = selectedCourse?.price ? selectedCourse.price * delegates * 100 : 0;
+  // The actual upcoming course object (when one is pre-selected)
+  const selectedUpcoming = upcomingCourses.find((uc) => uc.id === selectedUpcomingId) ?? null;
+
+  // Price: upcoming course's own price takes priority over catalog price
+  const upcomingPricePence = selectedUpcoming ? parseUpcomingPrice(selectedUpcoming.price) : -1;
+  const totalAmountPence = selectedUpcoming
+    ? (upcomingPricePence >= 0 ? upcomingPricePence * delegates : 0)
+    : (selectedCourse?.price ? selectedCourse.price * delegates * 100 : 0);
+
+  // Course name for review/payment display
+  const effectiveCourseName = selectedUpcoming?.courseName ?? selectedCourse?.name ?? selectedCourseId;
+
   const canPayOnline = totalAmountPence > 0;
   const canPayDeposit = totalAmountPence >= DEPOSIT_THRESHOLD_PENCE;
 
   function selectUpcomingCourse(uc: UpcomingCourse) {
-    const course = COURSES.find((c) => c.id === uc.courseId);
-    if (course) {
-      setValue("category", course.category, { shouldValidate: true });
-      setValue("courseId", course.id, { shouldValidate: true });
+    const catalogCourse = COURSES.find((c) => c.id === uc.courseId);
+    if (catalogCourse) {
+      setValue("category", catalogCourse.category, { shouldValidate: true });
+      setValue("courseId", catalogCourse.id, { shouldValidate: true });
+    } else {
+      // Course not in catalog — set a guessed category and use the upcoming course's own ID
+      setValue("category", guessCategoryFromName(uc.courseName), { shouldValidate: true });
+      setValue("courseId", uc.id, { shouldValidate: true });
     }
     setValue("preferredDate", uc.date, { shouldValidate: true });
     const locValue = mapLocationToValue(uc.location);
     if (locValue) setValue("location", locValue, { shouldValidate: true });
     setSelectedUpcomingId(uc.id);
+  }
+
+  function clearUpcomingSelection() {
+    setSelectedUpcomingId(null);
+    setValue("courseId", "");
+    setValue("category", "");
   }
 
   const goToStep2 = async () => {
@@ -115,7 +154,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
     if (ok) setStep(3);
   };
 
-  // Enquiry-only submission (no price or POA courses)
+  // Enquiry submission (POA courses or upcoming at £0)
   const onSubmitEnquiry = async (values: FormValues) => {
     setIsSubmitting(true);
     setError(null);
@@ -127,7 +166,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
         phone: values.phone,
         company: values.company,
         courseId: values.courseId,
-        courseName: selectedCourse?.name ?? values.courseId,
+        courseName: effectiveCourseName,
         preferredDate: values.preferredDate,
         delegates: values.delegates,
         location: LOCATIONS.find((l) => l.value === values.location)?.label ?? values.location,
@@ -150,7 +189,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
     }
   };
 
-  // Payment submission — redirect to Square
+  // Payment submission — redirect to Square checkout
   const onSubmitPayment = async (values: FormValues) => {
     setRedirecting(true);
     setError(null);
@@ -165,7 +204,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
           phone: values.phone,
           company: values.company ?? "",
           courseId: values.courseId,
-          courseName: selectedCourse?.name ?? values.courseId,
+          courseName: effectiveCourseName,
           preferredDate: values.preferredDate,
           delegates: values.delegates,
           location: LOCATIONS.find((l) => l.value === values.location)?.label ?? values.location,
@@ -219,16 +258,10 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
         ].map(({ n, label }, i) => (
           <div key={n} className="flex items-center flex-1">
             <div className="flex flex-col items-center">
-              <div
-                className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all",
-                  step > n
-                    ? "bg-green-500 text-white"
-                    : step === n
-                    ? "bg-navy text-white ring-4 ring-navy/20"
-                    : "bg-gray-200 text-gray-500"
-                )}
-              >
+              <div className={cn(
+                "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all",
+                step > n ? "bg-green-500 text-white" : step === n ? "bg-navy text-white ring-4 ring-navy/20" : "bg-gray-200 text-gray-500"
+              )}>
                 {step > n ? <CheckCircle2 size={18} /> : n}
               </div>
               <span className={cn("text-xs mt-1.5 font-medium hidden sm:block", step === n ? "text-navy" : "text-gray-400")}>
@@ -244,15 +277,10 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
 
       <form onSubmit={handleSubmit(canPayOnline ? onSubmitPayment : onSubmitEnquiry)}>
         <AnimatePresence mode="wait">
-          {/* Step 1: Personal Details */}
+
+          {/* ── Step 1: Personal Details ── */}
           {step === 1 && (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
-            >
+            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
               <h3 className="text-lg font-bold text-navy mb-5 flex items-center gap-2">
                 <User size={18} className="text-orange-brand" />
                 Your Details
@@ -276,7 +304,6 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
               <Field label="Company / Organisation" icon={<Building2 size={15} />}>
                 <input {...register("company")} placeholder="Optional" className={inputCls(false)} />
               </Field>
-
               <div className="mt-6 flex justify-end">
                 <button type="button" onClick={goToStep2} className="btn-primary">
                   Continue to Course Details →
@@ -285,20 +312,15 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
             </motion.div>
           )}
 
-          {/* Step 2: Course Details */}
+          {/* ── Step 2: Course Details ── */}
           {step === 2 && (
-            <motion.div
-              key="step2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
-            >
+            <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
               <h3 className="text-lg font-bold text-navy mb-5 flex items-center gap-2">
                 <Calendar size={18} className="text-orange-brand" />
                 Course Details
               </h3>
 
+              {/* Upcoming scheduled sessions */}
               {upcomingCourses.length > 0 && (
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
@@ -319,10 +341,8 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                           onClick={() => selectUpcomingCourse(uc)}
                           className={cn(
                             "w-full text-left rounded-xl border-2 px-4 py-3 transition-all",
-                            isSelected
-                              ? "border-orange-brand bg-orange-50"
-                              : isFull
-                              ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
+                            isSelected ? "border-orange-brand bg-orange-50"
+                              : isFull ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
                               : "border-gray-200 hover:border-orange-brand/50 hover:bg-orange-50/50"
                           )}
                         >
@@ -330,20 +350,13 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                             <div className="flex-1 min-w-0">
                               <div className="font-semibold text-sm text-navy truncate">{uc.courseName}</div>
                               <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
-                                <span className="flex items-center gap-1">
-                                  <Calendar size={11} />
-                                  {formatDate(uc.date)}
-                                </span>
+                                <span className="flex items-center gap-1"><Calendar size={11} />{formatDate(uc.date)}</span>
                                 {uc.startTime && (
                                   <span className="flex items-center gap-1">
-                                    <Clock size={11} />
-                                    {uc.startTime}{uc.endTime ? ` – ${uc.endTime}` : ""}
+                                    <Clock size={11} />{uc.startTime}{uc.endTime ? ` – ${uc.endTime}` : ""}
                                   </span>
                                 )}
-                                <span className="flex items-center gap-1">
-                                  <MapPin size={11} />
-                                  {uc.location}
-                                </span>
+                                <span className="flex items-center gap-1"><MapPin size={11} />{uc.location}</span>
                               </div>
                             </div>
                             <div className="flex-shrink-0 text-right">
@@ -366,33 +379,52 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 </div>
               )}
 
-              <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                <Field label="Training Category *" error={errors.category?.message}>
-                  <div className="relative">
-                    <select {...register("category")} className={selectCls(!!errors.category)}>
-                      <option value="">Select category…</option>
-                      {COURSE_CATEGORIES.map((cat) => (
-                        <option key={cat.value} value={cat.value}>{cat.label}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              {/* Course selection — locked when an upcoming session is chosen */}
+              {selectedUpcoming ? (
+                <div className="rounded-xl border-2 border-orange-brand/30 bg-orange-50/50 px-4 py-3 mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-bold text-orange-900 uppercase tracking-wide mb-0.5">Course (pre-selected)</div>
+                    <div className="font-semibold text-sm text-navy">{selectedUpcoming.courseName}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {selectedUpcoming.price && selectedUpcoming.price !== "£0" ? selectedUpcoming.price : "Price on enquiry"}
+                    </div>
                   </div>
-                </Field>
-
-                <Field label="Course *" error={errors.courseId?.message}>
-                  <div className="relative">
-                    <select {...register("courseId")} className={selectCls(!!errors.courseId)} disabled={!selectedCategory}>
-                      <option value="">Select course…</option>
-                      {filteredCourses.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}{c.price ? ` – £${c.price}` : c.priceLabel ? ` – ${c.priceLabel}` : ""}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                  </div>
-                </Field>
-              </div>
+                  <button
+                    type="button"
+                    onClick={clearUpcomingSelection}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 transition-colors flex-shrink-0 border border-gray-200 hover:border-red-200 px-2.5 py-1.5 rounded-lg"
+                  >
+                    <X size={12} /> Change
+                  </button>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                  <Field label="Training Category *" error={errors.category?.message}>
+                    <div className="relative">
+                      <select {...register("category")} className={selectCls(!!errors.category)}>
+                        <option value="">Select category…</option>
+                        {COURSE_CATEGORIES.map((cat) => (
+                          <option key={cat.value} value={cat.value}>{cat.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </Field>
+                  <Field label="Course *" error={errors.courseId?.message}>
+                    <div className="relative">
+                      <select {...register("courseId")} className={selectCls(!!errors.courseId)} disabled={!selectedCategory}>
+                        <option value="">Select course…</option>
+                        {filteredCourses.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}{c.price ? ` – £${c.price}` : c.priceLabel ? ` – ${c.priceLabel}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </Field>
+                </div>
+              )}
 
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <Field label="Preferred Date *" error={errors.preferredDate?.message} icon={<Calendar size={15} />}>
@@ -430,25 +462,15 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
               </Field>
 
               <div className="mt-6 flex justify-between gap-3">
-                <button type="button" onClick={() => setStep(1)} className="btn-outline">
-                  ← Back
-                </button>
-                <button type="button" onClick={goToStep3} className="btn-primary">
-                  Review Booking →
-                </button>
+                <button type="button" onClick={() => setStep(1)} className="btn-outline">← Back</button>
+                <button type="button" onClick={goToStep3} className="btn-primary">Review Booking →</button>
               </div>
             </motion.div>
           )}
 
-          {/* Step 3: Review & Pay */}
+          {/* ── Step 3: Review & Pay ── */}
           {step === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
-            >
+            <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
               <h3 className="text-lg font-bold text-navy mb-5">Review &amp; Pay</h3>
 
               <div className="bg-gray-light rounded-xl p-5 mb-4 space-y-3">
@@ -459,14 +481,12 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
               </div>
 
               <div className="bg-navy/5 rounded-xl p-5 mb-4 space-y-3">
-                <ReviewRow label="Course" value={selectedCourse?.name ?? watch("courseId")} highlight />
+                <ReviewRow label="Course" value={effectiveCourseName} highlight />
                 <ReviewRow label="Date" value={formatDate(watch("preferredDate"))} />
                 <ReviewRow label="Delegates" value={`${watch("delegates")} person(s)`} />
                 <ReviewRow label="Location" value={LOCATIONS.find((l) => l.value === watch("location"))?.label ?? ""} />
                 {watch("message") && <ReviewRow label="Notes" value={watch("message") ?? ""} />}
-                {canPayOnline && (
-                  <ReviewRow label="Total" value={formatGBP(totalAmountPence)} highlight />
-                )}
+                {canPayOnline && <ReviewRow label="Total" value={formatGBP(totalAmountPence)} highlight />}
               </div>
 
               {/* Payment options */}
@@ -479,9 +499,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                       onClick={() => setPaymentType("full")}
                       className={cn(
                         "rounded-xl border-2 p-4 text-left transition-all",
-                        paymentType === "full"
-                          ? "border-navy bg-navy/5"
-                          : "border-gray-200 hover:border-navy/40"
+                        paymentType === "full" ? "border-navy bg-navy/5" : "border-gray-200 hover:border-navy/40"
                       )}
                     >
                       <div className="flex items-center gap-2 mb-1">
@@ -499,9 +517,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                         onClick={() => setPaymentType("deposit")}
                         className={cn(
                           "rounded-xl border-2 p-4 text-left transition-all",
-                          paymentType === "deposit"
-                            ? "border-orange-brand bg-orange-50"
-                            : "border-gray-200 hover:border-orange-brand/40"
+                          paymentType === "deposit" ? "border-orange-brand bg-orange-50" : "border-gray-200 hover:border-orange-brand/40"
                         )}
                       >
                         <div className="flex items-center gap-2 mb-1">
@@ -537,14 +553,8 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
               </p>
 
               <div className="flex justify-between gap-3">
-                <button type="button" onClick={() => setStep(2)} className="btn-outline" disabled={redirecting}>
-                  ← Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || redirecting}
-                  className="btn-primary min-w-[180px] justify-center"
-                >
+                <button type="button" onClick={() => setStep(2)} className="btn-outline" disabled={redirecting}>← Back</button>
+                <button type="submit" disabled={isSubmitting || redirecting} className="btn-primary min-w-[180px] justify-center">
                   {redirecting ? (
                     <><Loader2 size={16} className="animate-spin" /> Redirecting to payment…</>
                   ) : isSubmitting ? (
@@ -564,27 +574,15 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   );
 }
 
-function Field({
-  label,
-  children,
-  error,
-  icon,
-  className,
-}: {
-  label: string;
-  children: React.ReactNode;
-  error?: string;
-  icon?: React.ReactNode;
-  className?: string;
+function Field({ label, children, error, icon, className }: {
+  label: string; children: React.ReactNode; error?: string; icon?: React.ReactNode; className?: string;
 }) {
   return (
     <div className={className}>
       <label className="label">{label}</label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
-            {icon}
-          </div>
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">{icon}</div>
         )}
         <div className={icon ? "[&>input]:pl-9 [&>select]:pl-9 [&>textarea]:pl-9" : ""}>{children}</div>
       </div>
@@ -606,12 +604,9 @@ function ReviewRow({ label, value, highlight }: { label: string; value: string; 
   );
 }
 
-const inputCls = (hasError: boolean) =>
-  cn("input-field", hasError ? "border-red-400 focus:ring-red-400" : "");
-
-const selectCls = (hasError: boolean) =>
-  cn(
-    "input-field appearance-none pr-9",
-    hasError ? "border-red-400 focus:ring-red-400" : "",
-    "disabled:bg-gray-100 disabled:cursor-not-allowed"
-  );
+const inputCls = (hasError: boolean) => cn("input-field", hasError ? "border-red-400 focus:ring-red-400" : "");
+const selectCls = (hasError: boolean) => cn(
+  "input-field appearance-none pr-9",
+  hasError ? "border-red-400 focus:ring-red-400" : "",
+  "disabled:bg-gray-100 disabled:cursor-not-allowed"
+);
