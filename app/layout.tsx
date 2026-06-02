@@ -21,6 +21,10 @@ export const metadata: Metadata = {
     "TM CPC Scotland",
     "Fleet Training",
   ],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/images/logo.png",
+  },
   openGraph: {
     siteName: "Training Advantage Group Ltd",
     locale: "en_GB",
@@ -38,8 +42,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="icon" href="/images/logo-mark.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/images/logo-mark.png" />
       </head>
       <body className="font-sans antialiased">
         <Header />
