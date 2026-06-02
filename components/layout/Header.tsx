@@ -141,6 +141,13 @@ const STATIC_NAV = [
     ],
   },
   {
+    label: "Testimonials",
+    href: "/testimonials",
+    icon: Users2,
+    color: "text-orange-brand",
+    items: [],
+  },
+  {
     label: "About",
     href: "/about",
     icon: AlertTriangle,
@@ -149,7 +156,6 @@ const STATIC_NAV = [
       { label: "About TAG", href: "/about", desc: "Our story & team" },
       { label: "Accreditations", href: "/accreditations", desc: "Our approvals & standards" },
       { label: "Training Centres", href: "/training-centres", desc: "Bothwell, Motherwell, Glasgow" },
-      { label: "Testimonials", href: "/testimonials", desc: "What learners say" },
       { label: "News & Updates", href: "/news", desc: "Latest from TAG" },
       { label: "Instructor Training", href: "/instructor-training", desc: "Become a TAG approved instructor" },
       { label: "Careers", href: "/careers", desc: "Join our team" },

@@ -1,9 +1,127 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Award, Plus, Trash2, Edit2, CheckCircle2, AlertCircle, XCircle, X, Search, Info } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Award, Plus, Trash2, Edit2, CheckCircle2, AlertCircle, XCircle, X, Search, Info, Upload, Download } from "lucide-react";
 import type { Certificate } from "@/lib/storage";
 import { CERT_TYPES } from "@/lib/cert-types";
+
+// ─── CSV helpers ─────────────────────────────────────────────────────────────
+
+function parseCSVRow(line: string): string[] {
+  const cells: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === "," && !inQuotes) {
+      cells.push(cur.trim()); cur = "";
+    } else { cur += ch; }
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function parseDate(d: string): string {
+  const t = d.trim();
+  if (!t) return "";
+  if (/^\d{4}-\d{2}-\d{2}/.test(t)) return t.slice(0, 10);
+  const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) {
+    const yr = m[3].length === 2 ? `20${m[3]}` : m[3];
+    return `${yr}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  }
+  return t;
+}
+
+type RawRow = Record<string, string>;
+
+function colIdx(headers: string[], ...aliases: string[]): number {
+  for (const alias of aliases) {
+    const a = alias.toLowerCase();
+    const idx = headers.findIndex((h) => h === a || h.includes(a) || a.includes(h));
+    if (idx !== -1) return idx;
+  }
+  return -1;
+}
+
+function parseCertificateCSV(text: string): Partial<Certificate>[] {
+  const lines = text.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const rawHeaders = parseCSVRow(lines[0]);
+  const headers = rawHeaders.map((h) => h.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim());
+
+  // Find column indices — support their existing spreadsheet headers + template headers
+  const certNumIdx = colIdx(headers, "certificate number", "cert number", "certificatenumber", "cert no");
+  // If there are two columns matching "certificate", prefer the one containing TAG- style values
+  // We handle this by also checking position-based: if the above didn't match, try 2nd "certificate" col
+  const allCertCols = headers.reduce<number[]>((acc, h, i) => {
+    if (h === "certificate" || h.includes("certificate")) acc.push(i);
+    return acc;
+  }, []);
+
+  const fNameIdx = colIdx(headers, "first name", "firstname", "holder first", "given name");
+  const lNameIdx = colIdx(headers, "last name", "lastname", "surname", "holder last", "family name");
+  const courseIdx = colIdx(headers, "course name", "course", "training course");
+  const courseTypeIdx = colIdx(headers, "course type", "coursetype", "course typ", "type", "category");
+  const issueDateIdx = colIdx(headers, "issue date", "issued", "date issued", "issueddate");
+  const expiryDateIdx = colIdx(headers, "expiry date", "expiry", "expires", "expiration", "valid until");
+  const statusIdx = colIdx(headers, "status", "cert status");
+  const centreIdx = colIdx(headers, "training centre", "training center", "centre", "training ce", "center", "venue");
+  const notesIdx = colIdx(headers, "notes", "note", "comments");
+
+  return lines.slice(1).map((line) => {
+    const vals = parseCSVRow(line);
+    const get = (idx: number) => (idx >= 0 ? (vals[idx] ?? "").trim() : "");
+
+    // Determine cert number: prefer certNumIdx, else detect TAG- from allCertCols
+    let certNumber = get(certNumIdx);
+    if (!certNumber && allCertCols.length > 0) {
+      for (const ci of allCertCols) {
+        const v = get(ci);
+        if (/^TAG-/i.test(v) || /^\w+-\w+-\d{4}/.test(v)) { certNumber = v; break; }
+      }
+      if (!certNumber && allCertCols.length >= 2) certNumber = get(allCertCols[1]);
+    }
+
+    // courseType: prefer courseTypeIdx, else first non-certNumber certificate column
+    let courseType = get(courseTypeIdx);
+    if (!courseType && allCertCols.length > 0 && courseTypeIdx === -1) {
+      const firstCertCol = allCertCols.find((ci) => get(ci) !== certNumber);
+      if (firstCertCol !== undefined) courseType = get(firstCertCol);
+    }
+
+    const course = get(courseIdx) || courseType;
+    const rawStatus = get(statusIdx).toLowerCase();
+    const status: Certificate["status"] = rawStatus === "expired" ? "expired" : rawStatus === "revoked" ? "revoked" : "valid";
+
+    return {
+      certificateNumber: certNumber,
+      holderFirstName: get(fNameIdx),
+      holderLastName: get(lNameIdx),
+      course,
+      courseType,
+      issueDate: parseDate(get(issueDateIdx)),
+      expiryDate: parseDate(get(expiryDateIdx)),
+      status,
+      trainingCentre: get(centreIdx) || undefined,
+      notes: get(notesIdx) || undefined,
+    } satisfies Partial<Certificate>;
+  }).filter((r) => r.certificateNumber || r.holderLastName);
+}
+
+const CERT_TEMPLATE_HEADERS = "certificateNumber,holderFirstName,holderLastName,course,courseType,issueDate,expiryDate,status,trainingCentre,notes";
+const CERT_TEMPLATE_EXAMPLE = "TAG-DCPC-2024-001,John,Smith,Driver CPC,driver-cpc,2024-01-15,2029-01-15,valid,Bothwell,";
+
+function downloadTemplate() {
+  const csv = [CERT_TEMPLATE_HEADERS, CERT_TEMPLATE_EXAMPLE].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "certificates-template.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
 
 const EMPTY_FORM = {
   certificateNumber: "",
@@ -19,6 +137,8 @@ const EMPTY_FORM = {
   notes: "",
 };
 
+type ImportResult = { added: number; skipped: number; errors: number; invalid: number } | null;
+
 export default function CertificatesAdmin() {
   const [certs, setCerts] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +149,9 @@ export default function CertificatesAdmin() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<ImportResult>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     const res = await fetch("/api/admin/certificates");
@@ -104,6 +227,34 @@ export default function CertificatesAdmin() {
     setDeleting(null);
   }
 
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const text = await file.text();
+      const parsed = parseCertificateCSV(text);
+      if (parsed.length === 0) {
+        setImportResult({ added: 0, skipped: 0, errors: 0, invalid: 0 });
+        setImporting(false);
+        return;
+      }
+      const res = await fetch("/api/admin/certificates/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ certificates: parsed }),
+      });
+      const data = await res.json();
+      setImportResult(data);
+      await load();
+    } catch {
+      setImportResult({ added: 0, skipped: 0, errors: 1, invalid: 0 });
+    }
+    setImporting(false);
+  }
+
   const filtered = certs.filter(
     (c) =>
       c.certificateNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -126,19 +277,59 @@ export default function CertificatesAdmin() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Certificates</h1>
           <p className="text-gray-500 text-sm mt-1">Manage certificate records for the public checker</p>
         </div>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 bg-navy text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-navy-light transition-colors shadow-sm"
-        >
-          <Plus size={16} />
-          Add Certificate
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={downloadTemplate}
+            className="flex items-center gap-2 border-2 border-gray-200 text-gray-600 px-3 py-2 rounded-xl font-semibold text-sm hover:border-gray-300 hover:text-gray-800 transition-colors"
+            title="Download CSV template"
+          >
+            <Download size={14} />
+            Template
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="flex items-center gap-2 border-2 border-blue-brand/30 text-blue-brand px-3 py-2 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors disabled:opacity-50"
+            title="Import from CSV or Excel (save as CSV first)"
+          >
+            <Upload size={14} />
+            {importing ? "Importing…" : "Import CSV"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.txt"
+            className="hidden"
+            onChange={handleImportFile}
+          />
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 bg-navy text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-navy-light transition-colors shadow-sm"
+          >
+            <Plus size={16} />
+            Add Certificate
+          </button>
+        </div>
       </div>
+
+      {/* Import result banner */}
+      {importResult && (
+        <div className={`flex items-start justify-between gap-3 px-4 py-3 rounded-xl text-sm border ${importResult.added > 0 ? "bg-green-50 border-green-200 text-green-800" : "bg-amber-50 border-amber-200 text-amber-800"}`}>
+          <div>
+            <span className="font-semibold">Import complete: </span>
+            {importResult.added} added
+            {importResult.skipped > 0 && `, ${importResult.skipped} skipped (duplicate)`}
+            {importResult.invalid > 0 && `, ${importResult.invalid} invalid (missing required fields)`}
+            {importResult.errors > 0 && `, ${importResult.errors} errors`}
+          </div>
+          <button onClick={() => setImportResult(null)} className="text-current opacity-60 hover:opacity-100 flex-shrink-0"><X size={14} /></button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
+import GoogleReviewsSection from "@/components/home/GoogleReviewsSection";
 import { Star, Quote } from "lucide-react";
 import Link from "next/link";
 import { getTestimonials } from "@/lib/storage";
@@ -176,6 +177,9 @@ export default async function TestimonialsPage() {
           </div>
         </div>
       </section>
+
+      {/* Google Reviews */}
+      <GoogleReviewsSection />
 
       {/* CTA for more reviews */}
       <section className="py-16 bg-white">

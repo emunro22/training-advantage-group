@@ -794,3 +794,108 @@ export async function deleteUpcomingCourse(id: string): Promise<boolean> {
   fsWrite("upcoming-courses.json", store);
   return store.courses.length < before;
 }
+
+export async function bulkAddCertificates(
+  certs: Certificate[]
+): Promise<{ added: number; skipped: number; errors: number }> {
+  if (certs.length === 0) return { added: 0, skipped: 0, errors: 0 };
+
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const numbers = certs.map((c) => c.certificateNumber);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existing = await sql`SELECT certificate_number FROM certificates WHERE certificate_number = ANY(${numbers as any})`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existingSet = new Set((existing as Array<{ certificate_number: string }>).map((r) => r.certificate_number.toLowerCase()));
+    const toInsert = certs.filter((c) => !existingSet.has(c.certificateNumber.toLowerCase()));
+    let added = 0;
+    let errors = 0;
+    const batchSize = 50;
+    for (let i = 0; i < toInsert.length; i += batchSize) {
+      const batch = toInsert.slice(i, i + batchSize);
+      const results = await Promise.all(
+        batch.map(async (c) => {
+          try {
+            await sql`
+              INSERT INTO certificates
+                (id, certificate_number, holder_first_name, holder_last_name, course, course_type,
+                 issue_date, expiry_date, status, training_centre, notes)
+              VALUES
+                (${c.id}, ${c.certificateNumber}, ${c.holderFirstName}, ${c.holderLastName},
+                 ${c.course}, ${c.courseType}, ${c.issueDate}, ${c.expiryDate}, ${c.status},
+                 ${c.trainingCentre ?? null}, ${c.notes ?? null})
+              ON CONFLICT (certificate_number) DO NOTHING
+            `;
+            return true;
+          } catch {
+            return false;
+          }
+        })
+      );
+      added += results.filter(Boolean).length;
+      errors += results.filter((r) => !r).length;
+    }
+    return { added, skipped: certs.length - toInsert.length, errors };
+  }
+
+  const store = fsRead<{ certificates: Certificate[] }>("certificates.json", { certificates: [] });
+  const existingSet = new Set(store.certificates.map((c) => c.certificateNumber.toLowerCase()));
+  let added = 0;
+  let skipped = 0;
+  for (const cert of certs) {
+    if (existingSet.has(cert.certificateNumber.toLowerCase())) {
+      skipped++;
+    } else {
+      store.certificates.push(cert);
+      existingSet.add(cert.certificateNumber.toLowerCase());
+      added++;
+    }
+  }
+  if (added > 0) fsWrite("certificates.json", store);
+  return { added, skipped, errors: 0 };
+}
+
+export async function bulkAddUpcomingCourses(
+  courses: UpcomingCourse[]
+): Promise<{ added: number; errors: number }> {
+  if (courses.length === 0) return { added: 0, errors: 0 };
+
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    let added = 0;
+    let errors = 0;
+    const batchSize = 50;
+    for (let i = 0; i < courses.length; i += batchSize) {
+      const batch = courses.slice(i, i + batchSize);
+      const results = await Promise.all(
+        batch.map(async (c) => {
+          try {
+            await sql`
+              INSERT INTO upcoming_courses
+                (id, course_id, course_name, date, end_date, start_time, end_time,
+                 location, spots_available, total_spots, price, booking_url, notes, active)
+              VALUES
+                (${c.id}, ${c.courseId}, ${c.courseName}, ${c.date}, ${c.endDate ?? null},
+                 ${c.startTime ?? null}, ${c.endTime ?? null},
+                 ${c.location}, ${c.spotsAvailable}, ${c.totalSpots}, ${c.price},
+                 ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active})
+            `;
+            return true;
+          } catch {
+            return false;
+          }
+        })
+      );
+      added += results.filter(Boolean).length;
+      errors += results.filter((r) => !r).length;
+    }
+    return { added, errors };
+  }
+
+  const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
+  for (const course of courses) store.courses.push(course);
+  fsWrite("upcoming-courses.json", store);
+  return { added: courses.length, errors: 0 };
+}

@@ -13,8 +13,8 @@ export default async function HomePage() {
       <ServiceCards />
       <UpcomingCoursesSection />
       <StatsSection />
-      <WhyChooseSection />
       <GoogleReviewsSection />
+      <WhyChooseSection />
       <LocationsSection />
       <CTASection />
     </>

@@ -1,8 +1,115 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CalendarDays, Plus, Trash2, Edit2, X, ToggleRight, ToggleLeft } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { CalendarDays, Plus, Trash2, Edit2, X, ToggleRight, ToggleLeft, Upload, Download } from "lucide-react";
 import type { UpcomingCourse } from "@/lib/storage";
+
+// ─── CSV helpers ─────────────────────────────────────────────────────────────
+
+function parseCSVRow(line: string): string[] {
+  const cells: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === "," && !inQuotes) {
+      cells.push(cur.trim()); cur = "";
+    } else { cur += ch; }
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function parseDate(d: string): string {
+  const t = d.trim();
+  if (!t) return "";
+  if (/^\d{4}-\d{2}-\d{2}/.test(t)) return t.slice(0, 10);
+  const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) {
+    const yr = m[3].length === 2 ? `20${m[3]}` : m[3];
+    return `${yr}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  }
+  return t;
+}
+
+function parseTime(t: string): string {
+  const v = t.trim();
+  if (!v) return "";
+  // Accept HH:MM or H:MM
+  if (/^\d{1,2}:\d{2}/.test(v)) return v.slice(0, 5);
+  return v;
+}
+
+function colIdx(headers: string[], ...aliases: string[]): number {
+  for (const alias of aliases) {
+    const a = alias.toLowerCase();
+    const idx = headers.findIndex((h) => h === a || h.includes(a) || a.includes(h));
+    if (idx !== -1) return idx;
+  }
+  return -1;
+}
+
+function parseCourseCSV(text: string): Partial<UpcomingCourse>[] {
+  const lines = text.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const rawHeaders = parseCSVRow(lines[0]);
+  const headers = rawHeaders.map((h) => h.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim());
+
+  const nameIdx = colIdx(headers, "course name", "course nar", "coursename", "course", "name");
+  const dateIdx = colIdx(headers, "start date", "date", "course date", "startdate");
+  const endDateIdx = colIdx(headers, "end date", "enddate", "finish date");
+  const startTimeIdx = colIdx(headers, "start time", "starttime", "time start", "from");
+  const endTimeIdx = colIdx(headers, "finish time", "end time", "endtime", "finish", "to");
+  const locationIdx = colIdx(headers, "location", "venue", "centre", "center", "place");
+  const priceIdx = colIdx(headers, "price", "cost", "fee");
+  const totalSpotsIdx = colIdx(headers, "total spots", "total", "capacity", "max spots", "max");
+  const spotsAvailIdx = colIdx(headers, "spots avail", "spots available", "available", "spaces", "remaining");
+  const bookingIdx = colIdx(headers, "booking url", "booking uf", "booking", "url", "link");
+  const notesIdx = colIdx(headers, "notes", "note", "comments");
+  const activeIdx = colIdx(headers, "show on site", "show on sit", "active", "visible", "show");
+
+  return lines.slice(1).map((line) => {
+    const vals = parseCSVRow(line);
+    const get = (idx: number) => (idx >= 0 ? (vals[idx] ?? "").trim() : "");
+
+    const rawActive = get(activeIdx).toLowerCase();
+    const active = rawActive === "" || rawActive === "yes" || rawActive === "true" || rawActive === "1";
+    const totalSpots = parseInt(get(totalSpotsIdx)) || 10;
+    const spotsAvail = parseInt(get(spotsAvailIdx)) || totalSpots;
+
+    // Clean price — strip currency symbol if needed, keep as string
+    const price = get(priceIdx).replace(/^([£$€])/, (_, sym) => sym) || get(priceIdx);
+
+    return {
+      courseName: get(nameIdx),
+      date: parseDate(get(dateIdx)),
+      endDate: parseDate(get(endDateIdx)) || undefined,
+      startTime: parseTime(get(startTimeIdx)) || undefined,
+      endTime: parseTime(get(endTimeIdx)) || undefined,
+      location: get(locationIdx) || "Bothwell",
+      price,
+      totalSpots,
+      spotsAvailable: Math.min(spotsAvail, totalSpots),
+      bookingUrl: get(bookingIdx) || undefined,
+      notes: get(notesIdx) || undefined,
+      active,
+    } satisfies Partial<UpcomingCourse>;
+  }).filter((r) => r.courseName);
+}
+
+const COURSE_TEMPLATE_HEADERS = "courseName,date,endDate,startTime,endTime,location,price,totalSpots,spotsAvailable,bookingUrl,notes,showOnSite";
+const COURSE_TEMPLATE_EXAMPLE = "IOSH Managing Safely,2024-09-07,2024-09-08,09:00,16:30,Glasgow,£95,12,12,/booking,,Yes";
+
+function downloadTemplate() {
+  const csv = [COURSE_TEMPLATE_HEADERS, COURSE_TEMPLATE_EXAMPLE].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "courses-template.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
 
 const LOCATIONS = ["Bothwell", "Motherwell", "Glasgow", "Remote / Online", "On-site"];
 
@@ -22,6 +129,8 @@ const EMPTY_FORM = {
   active: true,
 };
 
+type ImportResult = { added: number; errors: number; invalid: number } | null;
+
 export default function UpcomingCoursesAdmin() {
   const [courses, setCourses] = useState<UpcomingCourse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +139,9 @@ export default function UpcomingCoursesAdmin() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<ImportResult>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     const res = await fetch("/api/admin/upcoming-courses");
@@ -97,6 +209,34 @@ export default function UpcomingCoursesAdmin() {
     await load();
   }
 
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const text = await file.text();
+      const parsed = parseCourseCSV(text);
+      if (parsed.length === 0) {
+        setImportResult({ added: 0, errors: 0, invalid: 0 });
+        setImporting(false);
+        return;
+      }
+      const res = await fetch("/api/admin/upcoming-courses/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courses: parsed }),
+      });
+      const data = await res.json();
+      setImportResult(data);
+      await load();
+    } catch {
+      setImportResult({ added: 0, errors: 1, invalid: 0 });
+    }
+    setImporting(false);
+  }
+
   async function toggleActive(c: UpcomingCourse) {
     await fetch("/api/admin/upcoming-courses", {
       method: "PUT",
@@ -120,15 +260,54 @@ export default function UpcomingCoursesAdmin() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Upcoming Courses</h1>
           <p className="text-gray-500 text-sm mt-1">Manage upcoming course dates shown on the site</p>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 bg-navy text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-navy-light transition-colors shadow-sm">
-          <Plus size={16} /> Add Course Date
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={downloadTemplate}
+            className="flex items-center gap-2 border-2 border-gray-200 text-gray-600 px-3 py-2 rounded-xl font-semibold text-sm hover:border-gray-300 hover:text-gray-800 transition-colors"
+            title="Download CSV template"
+          >
+            <Download size={14} />
+            Template
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="flex items-center gap-2 border-2 border-blue-brand/30 text-blue-brand px-3 py-2 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors disabled:opacity-50"
+            title="Import from CSV (save Excel as CSV first)"
+          >
+            <Upload size={14} />
+            {importing ? "Importing…" : "Import CSV"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.txt"
+            className="hidden"
+            onChange={handleImportFile}
+          />
+          <button onClick={openAdd} className="flex items-center gap-2 bg-navy text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-navy-light transition-colors shadow-sm">
+            <Plus size={16} /> Add Course Date
+          </button>
+        </div>
       </div>
+
+      {/* Import result banner */}
+      {importResult && (
+        <div className={`flex items-start justify-between gap-3 px-4 py-3 rounded-xl text-sm border ${importResult.added > 0 ? "bg-green-50 border-green-200 text-green-800" : "bg-amber-50 border-amber-200 text-amber-800"}`}>
+          <div>
+            <span className="font-semibold">Import complete: </span>
+            {importResult.added} course{importResult.added !== 1 ? "s" : ""} added
+            {importResult.invalid > 0 && `, ${importResult.invalid} invalid (missing course name or date)`}
+            {importResult.errors > 0 && `, ${importResult.errors} errors`}
+          </div>
+          <button onClick={() => setImportResult(null)} className="text-current opacity-60 hover:opacity-100 flex-shrink-0"><X size={14} /></button>
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400 text-sm">Loading…</div>
