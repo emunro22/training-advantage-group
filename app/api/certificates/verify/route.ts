@@ -30,6 +30,8 @@ export async function POST(request: Request) {
         expiryDate: cert.expiryDate,
         status: effectiveStatus,
         trainingCentre: cert.trainingCentre,
+        accreditedBy: cert.accreditedBy?.length ? cert.accreditedBy : undefined,
+        accreditedRef: cert.accreditedRef || undefined,
       },
     });
   } catch {

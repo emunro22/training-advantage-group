@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Search, CheckCircle2, XCircle, AlertCircle, Award, Calendar, MapPin, BookOpen, Shield } from "lucide-react";
 import Link from "next/link";
 import { CERT_TYPES, guessCertType } from "@/lib/cert-types";
@@ -16,8 +17,18 @@ interface CertResult {
     expiryDate: string;
     status: "valid" | "expired" | "revoked";
     trainingCentre?: string;
+    accreditedBy?: string[];
+    accreditedRef?: string;
   };
 }
+
+const ACCREDITATION_LOGOS: Record<string, string> = {
+  "NPORS": "/images/accreditations/npors-accredited.png",
+  "NLTC": "/images/accreditations/nltc.png",
+  "NLTC QUALS": "/images/accreditations/nltc.png",
+  "OFQUAL": "/images/accreditations/ofqual.png",
+  "DVSA": "/images/accreditations/dvsa-adr.png",
+};
 
 function fmtDate(d: string) {
   if (!d) return "—";
@@ -304,6 +315,42 @@ export default function VerifyCertificatePage() {
                       </div>
                     )}
                   </div>
+
+                  {cert.accreditedBy && cert.accreditedBy.length > 0 && (
+                    <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold uppercase tracking-wide mb-3">
+                        <Shield size={12} className="text-blue-brand" />
+                        Accredited By
+                      </div>
+                      <div className="flex flex-wrap gap-3 items-center">
+                        {cert.accreditedBy.map((body) => {
+                          const logo = ACCREDITATION_LOGOS[body];
+                          return logo ? (
+                            <div key={body} className="bg-white rounded-xl border border-gray-200 px-3 py-2 flex items-center gap-2 shadow-sm">
+                              <Image
+                                src={logo}
+                                alt={body}
+                                width={56}
+                                height={28}
+                                className="h-7 w-auto object-contain"
+                              />
+                              <span className="text-xs font-bold text-gray-700">{body}</span>
+                            </div>
+                          ) : (
+                            <span key={body} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold px-3 py-2 rounded-xl shadow-sm">
+                              <CheckCircle2 size={12} className="text-blue-brand" />
+                              {body}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      {cert.accreditedRef && (
+                        <div className="mt-2.5 text-xs text-gray-500">
+                          Ref: <span className="font-mono font-semibold text-gray-700">{cert.accreditedRef}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-xl px-4 py-3">
                     <Shield size={14} className="text-blue-brand flex-shrink-0" />
