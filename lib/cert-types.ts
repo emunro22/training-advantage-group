@@ -10,6 +10,7 @@ export interface CertType {
   validity: string;
   issuedBy: string;
   color: string; // Tailwind bg class for the badge
+  defaultAccreditedBy?: string[];
 }
 
 export const CERT_TYPES: CertType[] = [
@@ -23,6 +24,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "5 years (35 hours)",
     issuedBy: "DVSA / JAUPT approved consortium",
     color: "bg-blue-100 text-blue-800",
+    defaultAccreditedBy: ["DVSA"],
   },
   {
     id: "adr",
@@ -34,6 +36,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "5 years",
     issuedBy: "DVSA approved ADR training body",
     color: "bg-red-100 text-red-800",
+    defaultAccreditedBy: ["DVSA"],
   },
   {
     id: "npors",
@@ -45,6 +48,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "5 years",
     issuedBy: "NPORS accredited training provider",
     color: "bg-orange-100 text-orange-800",
+    defaultAccreditedBy: ["NPORS"],
   },
   {
     id: "forklift",
@@ -56,6 +60,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "5 years",
     issuedBy: "NPORS accredited",
     color: "bg-yellow-100 text-yellow-800",
+    defaultAccreditedBy: ["NPORS"],
   },
   {
     id: "iosh",
@@ -67,17 +72,19 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "IOSH approved training provider",
     color: "bg-green-100 text-green-800",
+    defaultAccreditedBy: ["TAG IQA"],
   },
   {
     id: "tm-cpc",
     label: "Transport Manager CPC",
     shortLabel: "TM CPC",
-    prefix: "TAG-TM-",
-    exampleNumber: "TAG-TM-2024-001",
+    prefix: "TAG-TMCPC-",
+    exampleNumber: "TAG-TMCPC-2024-001",
     description: "Transport Manager Certificate of Professional Competence — Road Haulage or PSV. NLTC qualification, no expiry.",
     validity: "No expiry",
     issuedBy: "NLTC / DVSA approved",
     color: "bg-navy/10 text-navy",
+    defaultAccreditedBy: ["NLTC", "DVSA"],
   },
   {
     id: "radat",
@@ -89,6 +96,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "RADAT register",
     color: "bg-purple-100 text-purple-800",
+    defaultAccreditedBy: ["DVSA"],
   },
   {
     id: "first-aid",
@@ -100,6 +108,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "HSE approved",
     color: "bg-pink-100 text-pink-800",
+    defaultAccreditedBy: ["NLTC", "OFQUAL"],
   },
   {
     id: "manual-handling",
@@ -111,6 +120,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "Training Advantage Group",
     color: "bg-teal-100 text-teal-800",
+    defaultAccreditedBy: ["TAG IQA"],
   },
   {
     id: "health-safety",
@@ -122,6 +132,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "1–3 years",
     issuedBy: "Training Advantage Group",
     color: "bg-lime-100 text-lime-800",
+    defaultAccreditedBy: ["TAG IQA"],
   },
   {
     id: "efaw",
@@ -133,6 +144,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "NLTC / OFQUAL regulated",
     color: "bg-red-100 text-red-800",
+    defaultAccreditedBy: ["NLTC", "NLTC QUALS", "OFQUAL"],
   },
   {
     id: "faw",
@@ -144,6 +156,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "NLTC / OFQUAL regulated",
     color: "bg-red-100 text-red-900",
+    defaultAccreditedBy: ["NLTC", "NLTC QUALS", "OFQUAL"],
   },
   {
     id: "paediatric-fa",
@@ -155,6 +168,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "Training Advantage Group",
     color: "bg-pink-100 text-pink-800",
+    defaultAccreditedBy: ["NLTC", "NLTC QUALS", "OFQUAL"],
   },
   {
     id: "mhfa",
@@ -166,6 +180,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "3 years",
     issuedBy: "NLTC accredited — RQF regulated",
     color: "bg-purple-100 text-purple-800",
+    defaultAccreditedBy: ["NLTC", "NLTC QUALS"],
   },
   {
     id: "mh-awareness",
@@ -177,6 +192,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "CPD — no fixed expiry",
     issuedBy: "Public Health Scotland accredited",
     color: "bg-purple-100 text-purple-700",
+    defaultAccreditedBy: ["PUBLIC HEALTH SCOTLAND"],
   },
   {
     id: "other",
@@ -188,6 +204,7 @@ export const CERT_TYPES: CertType[] = [
     validity: "As stated on certificate",
     issuedBy: "Training Advantage Group",
     color: "bg-gray-100 text-gray-700",
+    defaultAccreditedBy: ["TAG IQA"],
   },
 ];
 

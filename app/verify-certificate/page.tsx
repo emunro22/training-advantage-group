@@ -232,6 +232,9 @@ export default function VerifyCertificatePage() {
             const cfg = statusConfig[cert.status];
             const Icon = cfg.icon;
             const certType = guessCertType(cert.certificateNumber);
+            const accreditedBy = cert.accreditedBy?.length
+              ? cert.accreditedBy
+              : (certType?.defaultAccreditedBy ?? []);
 
             return (
               <div className={`bg-white rounded-2xl shadow-card overflow-hidden border-2 ${cfg.border}`}>
@@ -316,14 +319,14 @@ export default function VerifyCertificatePage() {
                     )}
                   </div>
 
-                  {cert.accreditedBy && cert.accreditedBy.length > 0 && (
+                  {accreditedBy.length > 0 && (
                     <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                       <div className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold uppercase tracking-wide mb-3">
                         <Shield size={12} className="text-blue-brand" />
                         Accredited By
                       </div>
                       <div className="flex flex-wrap gap-3 items-center">
-                        {cert.accreditedBy.map((body) => {
+                        {accreditedBy.map((body) => {
                           const logo = ACCREDITATION_LOGOS[body];
                           return logo ? (
                             <div key={body} className="bg-white rounded-xl border border-gray-200 px-3 py-2 flex items-center gap-2 shadow-sm">
