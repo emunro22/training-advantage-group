@@ -719,12 +719,32 @@ export async function getUpcomingCourses(activeOnly = false): Promise<UpcomingCo
     await ensureSchema();
     const sql = getDb();
     const rows = activeOnly
-      ? await sql`SELECT * FROM upcoming_courses WHERE active = TRUE ORDER BY date ASC`
+      ? await sql`SELECT * FROM upcoming_courses WHERE active = TRUE AND date >= CURRENT_DATE ORDER BY date ASC`
       : await sql`SELECT * FROM upcoming_courses ORDER BY date ASC`;
     return rows.map(rowToCourse);
   }
   const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
-  return activeOnly ? store.courses.filter((c) => c.active) : store.courses;
+  const today = new Date().toISOString().split("T")[0];
+  return activeOnly
+    ? store.courses.filter((c) => c.active && c.date >= today)
+    : store.courses;
+}
+
+export async function deletePastUpcomingCourses(): Promise<number> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const result = await sql`
+      DELETE FROM upcoming_courses WHERE date < CURRENT_DATE RETURNING id
+    `;
+    return result.length;
+  }
+  const store = fsRead<{ courses: UpcomingCourse[] }>("upcoming-courses.json", { courses: [] });
+  const today = new Date().toISOString().split("T")[0];
+  const before = store.courses.length;
+  store.courses = store.courses.filter((c) => c.date >= today);
+  fsWrite("upcoming-courses.json", store);
+  return before - store.courses.length;
 }
 
 export async function addUpcomingCourse(c: UpcomingCourse): Promise<void> {

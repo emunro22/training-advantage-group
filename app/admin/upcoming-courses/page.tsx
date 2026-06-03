@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { CalendarDays, Plus, Trash2, Edit2, X, ToggleRight, ToggleLeft, Upload, Download } from "lucide-react";
+import { CalendarDays, Plus, Trash2, Edit2, X, ToggleRight, ToggleLeft, Upload, Download, CalendarX } from "lucide-react";
 import type { UpcomingCourse } from "@/lib/storage";
 
 // ─── CSV helpers ─────────────────────────────────────────────────────────────
@@ -209,6 +209,18 @@ export default function UpcomingCoursesAdmin() {
     await load();
   }
 
+  async function handleDeletePast() {
+    if (!confirm("Remove all course dates before today? This cannot be undone.")) return;
+    const res = await fetch("/api/admin/upcoming-courses", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deletePast: true }),
+    });
+    const data = await res.json();
+    alert(`Removed ${data.deleted ?? 0} past course date${data.deleted !== 1 ? "s" : ""}.`);
+    await load();
+  }
+
   async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -266,6 +278,14 @@ export default function UpcomingCoursesAdmin() {
           <p className="text-gray-500 text-sm mt-1">Manage upcoming course dates shown on the site</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleDeletePast}
+            className="flex items-center gap-2 border-2 border-red-200 text-red-600 px-3 py-2 rounded-xl font-semibold text-sm hover:bg-red-50 transition-colors"
+            title="Remove all course dates before today"
+          >
+            <CalendarX size={14} />
+            Remove Past
+          </button>
           <button
             onClick={downloadTemplate}
             className="flex items-center gap-2 border-2 border-gray-200 text-gray-600 px-3 py-2 rounded-xl font-semibold text-sm hover:border-gray-300 hover:text-gray-800 transition-colors"

@@ -5,6 +5,7 @@ import {
   addUpcomingCourse,
   updateUpcomingCourse,
   deleteUpcomingCourse,
+  deletePastUpcomingCourses,
   type UpcomingCourse,
 } from "@/lib/storage";
 import { cookies } from "next/headers";
@@ -78,8 +79,13 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const { id } = (await request.json()) as { id: string };
-    const ok = await deleteUpcomingCourse(id);
+    const body = (await request.json()) as { id?: string; deletePast?: boolean };
+    if (body.deletePast) {
+      const count = await deletePastUpcomingCourses();
+      return NextResponse.json({ ok: true, deleted: count });
+    }
+    if (!body.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const ok = await deleteUpcomingCourse(body.id);
     if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch {
