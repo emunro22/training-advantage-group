@@ -42,6 +42,8 @@ export async function POST(request: Request) {
       status: body.status ?? "valid",
       trainingCentre: body.trainingCentre,
       notes: body.notes,
+      accreditedBy: body.accreditedBy ?? [],
+      accreditedRef: body.accreditedRef,
       createdAt: new Date().toISOString(),
     };
 

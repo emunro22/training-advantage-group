@@ -21,6 +21,8 @@ export interface Certificate {
   status: "valid" | "expired" | "revoked";
   trainingCentre?: string;
   notes?: string;
+  accreditedBy?: string[];
+  accreditedRef?: string;
   createdAt: string;
 }
 
@@ -156,6 +158,8 @@ function rowToCert(r: any): Certificate {
     status: r.status,
     trainingCentre: r.training_centre ?? undefined,
     notes: r.notes ?? undefined,
+    accreditedBy: Array.isArray(r.accredited_by) ? r.accredited_by : undefined,
+    accreditedRef: r.accredited_ref ?? undefined,
     createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
   };
 }
@@ -277,11 +281,12 @@ export async function addCertificate(c: Certificate): Promise<void> {
     await sql`
       INSERT INTO certificates
         (id, certificate_number, holder_first_name, holder_last_name, course, course_type,
-         issue_date, expiry_date, status, training_centre, notes)
+         issue_date, expiry_date, status, training_centre, notes, accredited_by, accredited_ref)
       VALUES
         (${c.id}, ${c.certificateNumber}, ${c.holderFirstName}, ${c.holderLastName},
          ${c.course}, ${c.courseType}, ${c.issueDate}, ${c.expiryDate}, ${c.status},
-         ${c.trainingCentre ?? null}, ${c.notes ?? null})
+         ${c.trainingCentre ?? null}, ${c.notes ?? null},
+         ${JSON.stringify(c.accreditedBy ?? [])}, ${c.accreditedRef ?? null})
     `;
     return;
   }
@@ -307,7 +312,9 @@ export async function updateCertificate(
         expiry_date        = COALESCE(${u.expiryDate ?? null}, expiry_date),
         status             = COALESCE(${u.status ?? null}, status),
         training_centre    = COALESCE(${u.trainingCentre ?? null}, training_centre),
-        notes              = COALESCE(${u.notes ?? null}, notes)
+        notes              = COALESCE(${u.notes ?? null}, notes),
+        accredited_by      = COALESCE(${u.accreditedBy != null ? JSON.stringify(u.accreditedBy) : null}, accredited_by),
+        accredited_ref     = COALESCE(${u.accreditedRef ?? null}, accredited_ref)
       WHERE id = ${id}
       RETURNING id
     `;

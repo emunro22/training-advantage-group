@@ -123,6 +123,8 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 
+const ACCREDITATION_BODIES = ["NPORS", "NLTC", "NLTC QUALS", "OFQUAL", "DVSA", "PUBLIC HEALTH SCOTLAND", "TAG IQA"];
+
 const EMPTY_FORM = {
   certificateNumber: "",
   holderFirstName: "",
@@ -135,6 +137,8 @@ const EMPTY_FORM = {
   status: "valid" as Certificate["status"],
   trainingCentre: "",
   notes: "",
+  accreditedBy: [] as string[],
+  accreditedRef: "",
 };
 
 type ImportResult = { added: number; skipped: number; errors: number; invalid: number } | null;
@@ -182,6 +186,8 @@ export default function CertificatesAdmin() {
       status: cert.status,
       trainingCentre: cert.trainingCentre ?? "",
       notes: cert.notes ?? "",
+      accreditedBy: cert.accreditedBy ?? [],
+      accreditedRef: cert.accreditedRef ?? "",
     });
     setEditId(cert.id);
     setError("");
@@ -506,6 +512,37 @@ export default function CertificatesAdmin() {
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Notes</label>
                   <textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} rows={2} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand resize-none" placeholder="Internal notes (not shown publicly)" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Accredited By</label>
+                  <div className="grid grid-cols-2 gap-1.5 p-3 border-2 border-gray-200 rounded-xl bg-gray-50/50">
+                    {ACCREDITATION_BODIES.map((body) => (
+                      <label key={body} className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={form.accreditedBy.includes(body)}
+                          onChange={(e) => setForm((f) => ({
+                            ...f,
+                            accreditedBy: e.target.checked
+                              ? [...f.accreditedBy, body]
+                              : f.accreditedBy.filter((b) => b !== body),
+                          }))}
+                          className="w-4 h-4 rounded accent-navy"
+                        />
+                        <span className="text-gray-700 font-medium">{body}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Accredited Ref <span className="normal-case font-normal text-gray-400">(optional)</span></label>
+                  <input
+                    type="text"
+                    value={form.accreditedRef}
+                    onChange={(e) => setForm((f) => ({ ...f, accreditedRef: e.target.value }))}
+                    className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand"
+                    placeholder="e.g. NPORS-12345 or centre approval reference"
+                  />
                 </div>
               </div>
             </div>
