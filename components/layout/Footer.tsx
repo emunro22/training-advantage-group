@@ -48,6 +48,7 @@ const ACCREDITATION_LOGOS = [
   { name: "NLTC Qualifications", src: "/images/accreditations/nltc.png", width: 130, height: 60 },
   { name: "Ofqual Department for Education", src: "/images/accreditations/ofqual.png", width: 130, height: 60 },
   { name: "RADAT Register of Approved Driver Assessors & Trainers", src: "/images/accreditations/radat.png", width: 80, height: 80 },
+  { name: "Public Health Scotland Accredited Training Provider", src: "/images/accreditations/public-health-scotland.jpg", width: 140, height: 60 },
 ];
 
 export default function Footer() {
