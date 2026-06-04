@@ -101,11 +101,6 @@ export async function ensureSchema() {
     )
   `;
 
-  // Add time columns to upcoming_courses for existing deployments where the
-  // table was already created without them.
-  await sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`;
-  await sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`;
-
   await sql`
     CREATE TABLE IF NOT EXISTS page_overrides (
       slug TEXT PRIMARY KEY,
@@ -155,11 +150,18 @@ export async function ensureSchema() {
     )
   `;
 
-  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`;
-  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`;
-
-  await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB DEFAULT '[]'`;
-  await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_ref TEXT`;
+  // ALTER TABLE migrations — each wrapped individually so one failure never blocks the rest
+  const migrations = [
+    sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`,
+    sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`,
+    sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB DEFAULT '[]'`,
+    sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_ref TEXT`,
+  ];
+  for (const m of migrations) {
+    try { await m; } catch (e) { console.warn("[db] migration skipped:", e); }
+  }
 
   migrated = true;
 }

@@ -28,8 +28,9 @@ export default async function UpcomingCoursesSection() {
   let courses;
   try {
     courses = await getUpcomingCourses(true);
-  } catch {
-    return null; // DB not yet set up — hide section gracefully
+  } catch (e) {
+    console.error("[UpcomingCoursesSection] failed to load courses:", e);
+    return null;
   }
 
   // Show at most 5 upcoming
