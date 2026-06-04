@@ -726,7 +726,7 @@ export async function getUpcomingCourses(activeOnly = false): Promise<UpcomingCo
     await ensureSchema();
     const sql = getDb();
     const rows = activeOnly
-      ? await sql`SELECT * FROM upcoming_courses WHERE active = TRUE AND date >= CURRENT_DATE ORDER BY date ASC`
+      ? await sql`SELECT * FROM upcoming_courses WHERE active = TRUE AND date >= CURRENT_DATE::TEXT ORDER BY date ASC`
       : await sql`SELECT * FROM upcoming_courses ORDER BY date ASC`;
     return rows.map(rowToCourse);
   }
@@ -742,7 +742,7 @@ export async function deletePastUpcomingCourses(): Promise<number> {
     await ensureSchema();
     const sql = getDb();
     const result = await sql`
-      DELETE FROM upcoming_courses WHERE date < CURRENT_DATE RETURNING id
+      DELETE FROM upcoming_courses WHERE date < CURRENT_DATE::TEXT RETURNING id
     `;
     return result.length;
   }
