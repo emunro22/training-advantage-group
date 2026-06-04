@@ -158,7 +158,7 @@ export async function ensureSchema() {
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`;
   await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`;
 
-  await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB NOT NULL DEFAULT '[]'::jsonb`;
+  await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_ref TEXT`;
 
   migrated = true;

@@ -25,7 +25,7 @@ interface CertResult {
 const ACCREDITATION_LOGOS: Record<string, string> = {
   "NPORS": "/images/accreditations/npors-accredited.png",
   "NLTC": "/images/accreditations/driver-cpc.png",
-  "NLTC QUALS": "/images/accreditations/driver-cpc.png",
+  "NLTC QUALS": "/images/accreditations/nltc.png",
   "OFQUAL": "/images/accreditations/ofqual.png",
   "DVSA": "/images/accreditations/dvsa-adr.png",
   "TAG IQA": "/images/logo.png",
