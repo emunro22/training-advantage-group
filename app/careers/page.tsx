@@ -4,6 +4,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, Mail, Briefcase, GraduationCap, Users, Heart } from "lucide-react";
 import Link from "next/link";
+import { getJobVacancies } from "@/lib/storage";
 
 export const metadata: Metadata = {
   title: "Careers at Training Advantage Group | Join Our Team",
@@ -11,40 +12,7 @@ export const metadata: Metadata = {
     "Join the team at Training Advantage Group Ltd. We're always looking for passionate instructors, assessors and training professionals to help deliver Scotland's best transport training.",
 };
 
-const ROLES = [
-  {
-    title: "Driver CPC Instructor",
-    type: "Full-time / Part-time",
-    location: "Bothwell / Motherwell / Glasgow",
-    desc: "Deliver engaging Driver CPC periodic training sessions across our Scottish training centres. JAUPT approved content, professional facilities.",
-    requirements: ["Current Driver CPC qualification", "Strong communication skills", "Transport industry background preferred"],
-    icon: "🚛",
-  },
-  {
-    title: "Transport Manager CPC Tutor",
-    type: "Full-time / Freelance",
-    location: "Bothwell HQ + Remote",
-    desc: "Teach Transport Manager CPC classroom intensive courses. Thorough knowledge of the TM CPC syllabus and NLTC qualification framework required.",
-    requirements: ["Transport Manager CPC qualification", "Teaching experience preferred", "Real TM operational experience"],
-    icon: "📋",
-  },
-  {
-    title: "ADR Instructor",
-    type: "Full-time / Freelance",
-    location: "Central Scotland",
-    desc: "Deliver DVSA-approved ADR (Dangerous Goods) training across initial and requalification programmes.",
-    requirements: ["DVSA approved ADR instructor status", "ADR all classes experience", "Excellent presentation skills"],
-    icon: "⚠️",
-  },
-  {
-    title: "Plant / NPORS Assessor",
-    type: "Full-time",
-    location: "Central Scotland",
-    desc: "Deliver and assess counterbalance, reach truck, telehandler and plant operator training. Onsite and centre-based delivery.",
-    requirements: ["NPORS registration or equivalent", "Relevant plant operator experience", "Assessor qualification"],
-    icon: "🏗️",
-  },
-];
+export const dynamic = "force-dynamic";
 
 const BENEFITS = [
   { icon: Heart, text: "Supportive, professional working environment" },
@@ -55,7 +23,9 @@ const BENEFITS = [
   { icon: CheckCircle2, text: "Modern, well-equipped training facilities" },
 ];
 
-export default function CareersPage() {
+export default async function CareersPage() {
+  const roles = await getJobVacancies(true).catch(() => []);
+
   return (
     <>
       <PageHero
@@ -116,35 +86,59 @@ export default function CareersPage() {
               We regularly recruit across all training disciplines. If you don&apos;t see the exact role you&apos;re looking for, send us your CV — we keep all applications on file.
             </p>
           </AnimatedSection>
-          <div className="grid md:grid-cols-2 gap-6">
-            {ROLES.map((role, i) => (
-              <AnimatedSection key={role.title} delay={i * 0.08}>
-                <div className="bg-white rounded-2xl p-6 shadow-card h-full flex flex-col">
-                  <div className="text-3xl mb-3">{role.icon}</div>
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-bold text-navy text-lg">{role.title}</h3>
-                    <span className="text-xs bg-blue-50 text-blue-brand px-2 py-1 rounded-full font-semibold flex-shrink-0">{role.type}</span>
-                  </div>
-                  <div className="text-xs text-gray-400 mb-3">{role.location}</div>
-                  <p className="text-sm text-gray-600 mb-4 flex-1">{role.desc}</p>
-                  <div className="space-y-1 mb-5">
-                    {role.requirements.map((req) => (
-                      <div key={req} className="flex items-center gap-2 text-xs text-gray-600">
-                        <CheckCircle2 size={12} className="text-blue-brand flex-shrink-0" />
-                        {req}
+
+          {roles.length === 0 ? (
+            <AnimatedSection className="text-center">
+              <div className="bg-white rounded-2xl p-10 max-w-xl mx-auto shadow-card">
+                <Briefcase size={36} className="text-gray-200 mx-auto mb-4" />
+                <h3 className="font-bold text-navy text-lg mb-2">No Current Openings</h3>
+                <p className="text-gray-500 text-sm mb-6">
+                  We don&apos;t have any specific vacancies listed right now, but we&apos;re always interested in hearing from experienced transport training professionals.
+                </p>
+                <a
+                  href="mailto:office@trainingadvantagegroup.co.uk"
+                  className="btn-primary inline-flex"
+                >
+                  <Mail size={16} />
+                  Send a Speculative Application
+                </a>
+              </div>
+            </AnimatedSection>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {roles.map((role, i) => (
+                <AnimatedSection key={role.id} delay={i * 0.08}>
+                  <div className="bg-white rounded-2xl p-6 shadow-card h-full flex flex-col">
+                    <div className="text-3xl mb-3">{role.icon}</div>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-bold text-navy text-lg">{role.title}</h3>
+                      {role.type && (
+                        <span className="text-xs bg-blue-50 text-blue-brand px-2 py-1 rounded-full font-semibold flex-shrink-0">{role.type}</span>
+                      )}
+                    </div>
+                    {role.location && <div className="text-xs text-gray-400 mb-3">{role.location}</div>}
+                    <p className="text-sm text-gray-600 mb-4 flex-1">{role.description}</p>
+                    {role.requirements.length > 0 && (
+                      <div className="space-y-1 mb-5">
+                        {role.requirements.map((req) => (
+                          <div key={req} className="flex items-center gap-2 text-xs text-gray-600">
+                            <CheckCircle2 size={12} className="text-blue-brand flex-shrink-0" />
+                            {req}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
+                    <Link
+                      href="mailto:office@trainingadvantagegroup.co.uk"
+                      className="btn-navy text-sm w-full justify-center"
+                    >
+                      Apply for This Role
+                    </Link>
                   </div>
-                  <Link
-                    href="mailto:office@trainingadvantagegroup.co.uk"
-                    className="btn-navy text-sm w-full justify-center"
-                  >
-                    Apply for This Role
-                  </Link>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
+                </AnimatedSection>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

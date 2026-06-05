@@ -150,6 +150,21 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS job_vacancies (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT '',
+      location TEXT NOT NULL DEFAULT '',
+      description TEXT NOT NULL DEFAULT '',
+      requirements JSONB NOT NULL DEFAULT '[]',
+      icon TEXT NOT NULL DEFAULT '💼',
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // ALTER TABLE migrations — each wrapped individually so one failure never blocks the rest
   const migrations = [
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`,

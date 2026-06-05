@@ -110,6 +110,19 @@ export interface Testimonial {
   createdAt: string;
 }
 
+export interface JobVacancy {
+  id: string;
+  title: string;
+  type: string;
+  location: string;
+  description: string;
+  requirements: string[];
+  icon: string;
+  active: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Backend detection
 // ─────────────────────────────────────────────────────────────────────────────
@@ -820,6 +833,96 @@ export async function deleteUpcomingCourse(id: string): Promise<boolean> {
   store.courses = store.courses.filter((c) => c.id !== id);
   fsWrite("upcoming-courses.json", store);
   return store.courses.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Job Vacancies
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToVacancy(r: any): JobVacancy {
+  return {
+    id: r.id,
+    title: r.title,
+    type: r.type,
+    location: r.location,
+    description: r.description,
+    requirements: Array.isArray(r.requirements) ? r.requirements : [],
+    icon: r.icon ?? "💼",
+    active: r.active,
+    sortOrder: Number(r.sort_order ?? 0),
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getJobVacancies(activeOnly = false): Promise<JobVacancy[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM job_vacancies WHERE active = TRUE ORDER BY sort_order ASC, created_at ASC`
+      : await sql`SELECT * FROM job_vacancies ORDER BY sort_order ASC, created_at ASC`;
+    return rows.map(rowToVacancy);
+  }
+  const store = fsRead<{ vacancies: JobVacancy[] }>("job-vacancies.json", { vacancies: [] });
+  return activeOnly ? store.vacancies.filter((v) => v.active) : store.vacancies;
+}
+
+export async function addJobVacancy(v: JobVacancy): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO job_vacancies
+        (id, title, type, location, description, requirements, icon, active, sort_order)
+      VALUES
+        (${v.id}, ${v.title}, ${v.type}, ${v.location}, ${v.description},
+         ${JSON.stringify(v.requirements)}, ${v.icon}, ${v.active}, ${v.sortOrder})
+    `;
+    return;
+  }
+  const store = fsRead<{ vacancies: JobVacancy[] }>("job-vacancies.json", { vacancies: [] });
+  store.vacancies.push(v);
+  fsWrite("job-vacancies.json", store);
+}
+
+export async function updateJobVacancy(id: string, u: Partial<JobVacancy>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE job_vacancies SET
+        title       = COALESCE(${u.title ?? null}, title),
+        type        = COALESCE(${u.type ?? null}, type),
+        location    = COALESCE(${u.location ?? null}, location),
+        description = COALESCE(${u.description ?? null}, description),
+        requirements = COALESCE(${u.requirements != null ? JSON.stringify(u.requirements) : null}, requirements),
+        icon        = COALESCE(${u.icon ?? null}, icon),
+        active      = COALESCE(${u.active ?? null}, active),
+        sort_order  = COALESCE(${u.sortOrder ?? null}, sort_order)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ vacancies: JobVacancy[] }>("job-vacancies.json", { vacancies: [] });
+  const idx = store.vacancies.findIndex((v) => v.id === id);
+  if (idx === -1) return false;
+  store.vacancies[idx] = { ...store.vacancies[idx], ...u };
+  fsWrite("job-vacancies.json", store);
+  return true;
+}
+
+export async function deleteJobVacancy(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM job_vacancies WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ vacancies: JobVacancy[] }>("job-vacancies.json", { vacancies: [] });
+  const before = store.vacancies.length;
+  store.vacancies = store.vacancies.filter((v) => v.id !== id);
+  fsWrite("job-vacancies.json", store);
+  return store.vacancies.length < before;
 }
 
 export async function bulkAddCertificates(

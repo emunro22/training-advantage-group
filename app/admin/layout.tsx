@@ -16,6 +16,7 @@ import {
   PenLine,
   MessageSquare,
   ShoppingBag,
+  Briefcase,
 } from "lucide-react";
 
 const NAV = [
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/admin/certificates", label: "Certificates", icon: Award },
   { href: "/admin/pricing", label: "Pricing & Offers", icon: Tag },
   { href: "/admin/upcoming-courses", label: "Upcoming Courses", icon: CalendarDays },
+  { href: "/admin/vacancies", label: "Job Vacancies", icon: Briefcase },
   { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquare },
 ];
 
