@@ -95,7 +95,8 @@ function parseCertificateCSV(text: string): Partial<Certificate>[] {
 
     const course = get(courseIdx) || courseType;
     const rawStatus = get(statusIdx).toLowerCase();
-    const status: Certificate["status"] = rawStatus === "expired" ? "expired" : rawStatus === "revoked" ? "revoked" : "valid";
+    const status: Certificate["status"] =
+      rawStatus === "expired" ? "expired" : rawStatus === "revoked" ? "revoked" : rawStatus === "replaced" ? "replaced" : "valid";
 
     return {
       certificateNumber: certNumber,
@@ -273,12 +274,14 @@ export default function CertificatesAdmin() {
     valid: <CheckCircle2 size={14} className="text-green-600" />,
     expired: <AlertCircle size={14} className="text-amber-500" />,
     revoked: <XCircle size={14} className="text-red-500" />,
+    replaced: <AlertCircle size={14} className="text-blue-brand" />,
   };
 
   const statusBadge = {
     valid: "bg-green-100 text-green-700",
     expired: "bg-amber-100 text-amber-700",
     revoked: "bg-red-100 text-red-600",
+    replaced: "bg-blue-100 text-blue-700",
   };
 
   return (
@@ -503,6 +506,7 @@ export default function CertificatesAdmin() {
                     <option value="valid">Valid</option>
                     <option value="expired">Expired</option>
                     <option value="revoked">Revoked</option>
+                    <option value="replaced">Replaced</option>
                   </select>
                 </div>
                 <div>

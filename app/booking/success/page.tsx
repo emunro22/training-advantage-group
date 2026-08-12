@@ -2,9 +2,12 @@ import { Suspense } from "react";
 import SuccessPageClient from "./SuccessPageClient";
 
 export default function BookingSuccessPage() {
+  // TAG-SEC-PROC-001 §6: the confirmation page issues the Jotform registration/update link,
+  // carrying only the non-sensitive Order ID as a reference — never DOB, ID, signature etc.
+  const registrationUrl = process.env.JOTFORM_REGISTRATION_URL;
   return (
     <Suspense>
-      <SuccessPageClient />
+      <SuccessPageClient registrationUrl={registrationUrl} />
     </Suspense>
   );
 }

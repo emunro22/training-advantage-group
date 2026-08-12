@@ -2,12 +2,15 @@
 
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle2, Phone, Mail, Calendar } from "lucide-react";
+import { CheckCircle2, Phone, Mail, Calendar, ClipboardEdit } from "lucide-react";
 import Link from "next/link";
 
-export default function SuccessPageClient() {
+export default function SuccessPageClient({ registrationUrl }: { registrationUrl?: string }) {
   const params = useSearchParams();
   const orderId = params.get("orderId");
+  const candidateLink = registrationUrl && orderId
+    ? `${registrationUrl}${registrationUrl.includes("?") ? "&" : "?"}orderId=${encodeURIComponent(orderId)}`
+    : registrationUrl;
 
   return (
     <>
@@ -63,6 +66,27 @@ export default function SuccessPageClient() {
                 ))}
               </div>
             </div>
+
+            {candidateLink && (
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-8 text-left">
+                <h3 className="font-bold text-navy mb-2 flex items-center gap-2">
+                  <ClipboardEdit size={16} className="text-orange-brand" />
+                  Candidate registration
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Complete your secure candidate registration next — this is where ID, signature and other
+                  evidence are collected, never by email.
+                </p>
+                <a
+                  href={candidateLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-orange-brand text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-orange-dark transition-colors"
+                >
+                  Complete candidate registration
+                </a>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
               <a

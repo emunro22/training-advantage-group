@@ -18,7 +18,7 @@ export interface Certificate {
   courseType: string;
   issueDate: string;
   expiryDate: string;
-  status: "valid" | "expired" | "revoked";
+  status: "valid" | "expired" | "revoked" | "replaced";
   trainingCentre?: string;
   notes?: string;
   accreditedBy?: string[];
@@ -107,6 +107,59 @@ export interface Testimonial {
   category?: string;
   active: boolean;
   featured: boolean;
+  createdAt: string;
+}
+
+export interface WebsiteProduct {
+  id: string;
+  publishDecision: "Review Required" | "Director Approved" | "Web Pending" | "Published";
+  priceId: string;
+  websiteProductId?: string;
+  category: string;
+  courseService: string;
+  variant: string;
+  accreditation: string;
+  delivery: string;
+  durationRatio: string;
+  maxCandidates: string;
+  pricingBasis: string;
+  priceIncVatPence: number;
+  vatTreatment: string;
+  netExVatPence: number;
+  vatAmountPence: number;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+  publicNote: string;
+  joiningPackCode?: string;
+  issuePackCode?: string;
+  webSlug?: string;
+  saleMode: "book" | "enquire" | "quote";
+  directorApprovedBy?: string;
+  directorApprovedAt?: string;
+  independentCheckBy?: string;
+  independentCheckAt?: string;
+  lastWebCheck?: string;
+  needsVerification: boolean;
+  source: "seed" | "csv_import" | "manual";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicationLogEntry {
+  id: string;
+  priceId?: string;
+  changeType: string;
+  previousValue?: string;
+  newValue?: string;
+  effectiveFrom?: string;
+  requestedBy?: string;
+  approvedBy?: string;
+  webUpdatedBy?: string;
+  publishedAt?: string;
+  independentCheckBy?: string;
+  verifiedAt?: string;
+  evidenceTicket?: string;
+  outcome?: string;
   createdAt: string;
 }
 
@@ -923,6 +976,328 @@ export async function deleteJobVacancy(id: string): Promise<boolean> {
   store.vacancies = store.vacancies.filter((v) => v.id !== id);
   fsWrite("job-vacancies.json", store);
   return store.vacancies.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Website Products (governed Master Pricing → Website catalogue)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToProduct(r: any): WebsiteProduct {
+  return {
+    id: r.id,
+    publishDecision: r.publish_decision,
+    priceId: r.price_id,
+    websiteProductId: r.website_product_id ?? undefined,
+    category: r.category,
+    courseService: r.course_service,
+    variant: r.variant ?? "",
+    accreditation: r.accreditation ?? "",
+    delivery: r.delivery ?? "",
+    durationRatio: r.duration_ratio ?? "",
+    maxCandidates: r.max_candidates ?? "",
+    pricingBasis: r.pricing_basis ?? "",
+    priceIncVatPence: Number(r.price_inc_vat_pence ?? 0),
+    vatTreatment: r.vat_treatment ?? "Standard 20%",
+    netExVatPence: Number(r.net_ex_vat_pence ?? 0),
+    vatAmountPence: Number(r.vat_amount_pence ?? 0),
+    effectiveFrom: r.effective_from ?? undefined,
+    effectiveTo: r.effective_to ?? undefined,
+    publicNote: r.public_note ?? "",
+    joiningPackCode: r.joining_pack_code ?? undefined,
+    issuePackCode: r.issue_pack_code ?? undefined,
+    webSlug: r.web_slug ?? undefined,
+    saleMode: r.sale_mode ?? "enquire",
+    directorApprovedBy: r.director_approved_by ?? undefined,
+    directorApprovedAt:
+      r.director_approved_at instanceof Date ? r.director_approved_at.toISOString() : r.director_approved_at ?? undefined,
+    independentCheckBy: r.independent_check_by ?? undefined,
+    independentCheckAt:
+      r.independent_check_at instanceof Date ? r.independent_check_at.toISOString() : r.independent_check_at ?? undefined,
+    lastWebCheck: r.last_web_check ?? undefined,
+    needsVerification: r.needs_verification,
+    source: r.source,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToLogEntry(r: any): PublicationLogEntry {
+  return {
+    id: r.id,
+    priceId: r.price_id ?? undefined,
+    changeType: r.change_type,
+    previousValue: r.previous_value ?? undefined,
+    newValue: r.new_value ?? undefined,
+    effectiveFrom: r.effective_from ?? undefined,
+    requestedBy: r.requested_by ?? undefined,
+    approvedBy: r.approved_by ?? undefined,
+    webUpdatedBy: r.web_updated_by ?? undefined,
+    publishedAt: r.published_at instanceof Date ? r.published_at.toISOString() : r.published_at ?? undefined,
+    independentCheckBy: r.independent_check_by ?? undefined,
+    verifiedAt: r.verified_at instanceof Date ? r.verified_at.toISOString() : r.verified_at ?? undefined,
+    evidenceTicket: r.evidence_ticket ?? undefined,
+    outcome: r.outcome ?? undefined,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getWebsiteProducts(): Promise<WebsiteProduct[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM website_products ORDER BY category, course_service, variant`;
+    return rows.map(rowToProduct);
+  }
+  const store = fsRead<{ products: WebsiteProduct[] }>("website-products.json", { products: [] });
+  return store.products;
+}
+
+// Only rows an admin has explicitly moved to Published, and within their effective date window,
+// may ever reach a public page — enforces TAG-WEB-REQ-001 §4 ("Review Required is not authority to publish").
+export async function getPublishedWebsiteProducts(): Promise<WebsiteProduct[]> {
+  const all = await getWebsiteProducts();
+  const today = new Date().toISOString().split("T")[0];
+  return all.filter((p) => {
+    if (p.publishDecision !== "Published") return false;
+    if (p.effectiveFrom && p.effectiveFrom > today) return false;
+    if (p.effectiveTo && p.effectiveTo < today) return false;
+    return true;
+  });
+}
+
+export async function getWebsiteProductById(id: string): Promise<WebsiteProduct | null> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM website_products WHERE id = ${id} LIMIT 1`;
+    return rows.length > 0 ? rowToProduct(rows[0]) : null;
+  }
+  const products = await getWebsiteProducts();
+  return products.find((p) => p.id === id) ?? null;
+}
+
+export async function addWebsiteProduct(p: WebsiteProduct): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO website_products
+        (id, publish_decision, price_id, website_product_id, category, course_service, variant,
+         accreditation, delivery, duration_ratio, max_candidates, pricing_basis,
+         price_inc_vat_pence, vat_treatment, net_ex_vat_pence, vat_amount_pence,
+         effective_from, effective_to, public_note, joining_pack_code, issue_pack_code,
+         web_slug, sale_mode, needs_verification, source)
+      VALUES
+        (${p.id}, ${p.publishDecision}, ${p.priceId}, ${p.websiteProductId ?? null}, ${p.category},
+         ${p.courseService}, ${p.variant}, ${p.accreditation}, ${p.delivery}, ${p.durationRatio},
+         ${p.maxCandidates}, ${p.pricingBasis}, ${p.priceIncVatPence}, ${p.vatTreatment},
+         ${p.netExVatPence}, ${p.vatAmountPence}, ${p.effectiveFrom ?? null}, ${p.effectiveTo ?? null},
+         ${p.publicNote}, ${p.joiningPackCode ?? null}, ${p.issuePackCode ?? null}, ${p.webSlug ?? null},
+         ${p.saleMode}, ${p.needsVerification}, ${p.source})
+      ON CONFLICT (price_id) DO NOTHING
+    `;
+    return;
+  }
+  const store = fsRead<{ products: WebsiteProduct[] }>("website-products.json", { products: [] });
+  if (store.products.some((x) => x.priceId === p.priceId)) return;
+  store.products.push(p);
+  fsWrite("website-products.json", store);
+}
+
+export async function updateWebsiteProduct(
+  id: string,
+  u: Partial<WebsiteProduct>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE website_products SET
+        publish_decision      = COALESCE(${u.publishDecision ?? null}, publish_decision),
+        website_product_id    = COALESCE(${u.websiteProductId ?? null}, website_product_id),
+        category               = COALESCE(${u.category ?? null}, category),
+        course_service         = COALESCE(${u.courseService ?? null}, course_service),
+        variant                = COALESCE(${u.variant ?? null}, variant),
+        accreditation          = COALESCE(${u.accreditation ?? null}, accreditation),
+        delivery               = COALESCE(${u.delivery ?? null}, delivery),
+        duration_ratio         = COALESCE(${u.durationRatio ?? null}, duration_ratio),
+        max_candidates         = COALESCE(${u.maxCandidates ?? null}, max_candidates),
+        pricing_basis          = COALESCE(${u.pricingBasis ?? null}, pricing_basis),
+        price_inc_vat_pence    = COALESCE(${u.priceIncVatPence ?? null}, price_inc_vat_pence),
+        vat_treatment          = COALESCE(${u.vatTreatment ?? null}, vat_treatment),
+        net_ex_vat_pence       = COALESCE(${u.netExVatPence ?? null}, net_ex_vat_pence),
+        vat_amount_pence       = COALESCE(${u.vatAmountPence ?? null}, vat_amount_pence),
+        effective_from         = COALESCE(${u.effectiveFrom ?? null}, effective_from),
+        effective_to           = COALESCE(${u.effectiveTo ?? null}, effective_to),
+        public_note            = COALESCE(${u.publicNote ?? null}, public_note),
+        joining_pack_code      = COALESCE(${u.joiningPackCode ?? null}, joining_pack_code),
+        issue_pack_code        = COALESCE(${u.issuePackCode ?? null}, issue_pack_code),
+        web_slug               = COALESCE(${u.webSlug ?? null}, web_slug),
+        sale_mode              = COALESCE(${u.saleMode ?? null}, sale_mode),
+        director_approved_by   = COALESCE(${u.directorApprovedBy ?? null}, director_approved_by),
+        director_approved_at   = COALESCE(${u.directorApprovedAt ?? null}, director_approved_at),
+        independent_check_by   = COALESCE(${u.independentCheckBy ?? null}, independent_check_by),
+        independent_check_at   = COALESCE(${u.independentCheckAt ?? null}, independent_check_at),
+        last_web_check         = COALESCE(${u.lastWebCheck ?? null}, last_web_check),
+        needs_verification     = COALESCE(${u.needsVerification ?? null}, needs_verification),
+        updated_at             = NOW()
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ products: WebsiteProduct[] }>("website-products.json", { products: [] });
+  const idx = store.products.findIndex((p) => p.id === id);
+  if (idx === -1) return false;
+  store.products[idx] = { ...store.products[idx], ...u, updatedAt: new Date().toISOString() };
+  fsWrite("website-products.json", store);
+  return true;
+}
+
+export async function deleteWebsiteProduct(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM website_products WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ products: WebsiteProduct[] }>("website-products.json", { products: [] });
+  const before = store.products.length;
+  store.products = store.products.filter((p) => p.id !== id);
+  fsWrite("website-products.json", store);
+  return store.products.length < before;
+}
+
+export async function addPublicationLogEntry(e: PublicationLogEntry): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO pricing_publication_log
+        (id, price_id, change_type, previous_value, new_value, effective_from, requested_by,
+         approved_by, web_updated_by, published_at, independent_check_by, verified_at,
+         evidence_ticket, outcome)
+      VALUES
+        (${e.id}, ${e.priceId ?? null}, ${e.changeType}, ${e.previousValue ?? null}, ${e.newValue ?? null},
+         ${e.effectiveFrom ?? null}, ${e.requestedBy ?? null}, ${e.approvedBy ?? null},
+         ${e.webUpdatedBy ?? null}, ${e.publishedAt ?? null}, ${e.independentCheckBy ?? null},
+         ${e.verifiedAt ?? null}, ${e.evidenceTicket ?? null}, ${e.outcome ?? null})
+    `;
+    return;
+  }
+  const store = fsRead<{ log: PublicationLogEntry[] }>("pricing-publication-log.json", { log: [] });
+  store.log.push(e);
+  fsWrite("pricing-publication-log.json", store);
+}
+
+export async function getPublicationLog(): Promise<PublicationLogEntry[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM pricing_publication_log ORDER BY created_at DESC`;
+    return rows.map(rowToLogEntry);
+  }
+  const store = fsRead<{ log: PublicationLogEntry[] }>("pricing-publication-log.json", { log: [] });
+  return store.log;
+}
+
+// CSV/manual bulk import. Re-importing an existing Price ID updates only the catalogue fields
+// (never publish state/approval metadata) and — if the price or course details actually changed —
+// resets publish_decision back to "Review Required" so a changed price is never left live
+// without fresh Director approval, and logs the change for audit.
+export type WebsiteProductImportRow = Omit<
+  WebsiteProduct,
+  "id" | "createdAt" | "updatedAt" | "publishDecision" | "source" | "needsVerification"
+> & { id?: string };
+
+export async function bulkImportWebsiteProducts(
+  rows: WebsiteProductImportRow[],
+  source: WebsiteProduct["source"] = "csv_import"
+): Promise<{ added: number; updated: number; unchanged: number; errors: number }> {
+  const existing = await getWebsiteProducts();
+  const existingByPriceId = new Map(existing.map((p) => [p.priceId, p]));
+  let added = 0;
+  let updated = 0;
+  let unchanged = 0;
+  let errors = 0;
+
+  for (const row of rows as WebsiteProduct[]) {
+    try {
+      const current = existingByPriceId.get(row.priceId);
+      if (!current) {
+        const id = row.id ?? `wp-${row.priceId}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const now = new Date().toISOString();
+        await addWebsiteProduct({
+          ...row,
+          id,
+          publishDecision: "Review Required",
+          needsVerification: true,
+          source,
+          createdAt: now,
+          updatedAt: now,
+        });
+        await addPublicationLogEntry({
+          id: `log-${id}`,
+          priceId: row.priceId,
+          changeType: source === "seed" ? "Seed — new product" : "CSV import — new product",
+          newValue: `${row.courseService} / ${row.variant} — £${(row.priceIncVatPence / 100).toFixed(2)} inc VAT`,
+          requestedBy: source === "seed" ? "Sample seed" : "CSV import",
+          outcome: "Added as Review Required",
+          createdAt: now,
+        });
+        added++;
+        continue;
+      }
+
+      const changed =
+        current.priceIncVatPence !== row.priceIncVatPence ||
+        current.vatTreatment !== row.vatTreatment ||
+        current.courseService !== row.courseService ||
+        current.variant !== row.variant;
+
+      if (!changed) {
+        unchanged++;
+        continue;
+      }
+
+      const now = new Date().toISOString();
+      await updateWebsiteProduct(current.id, {
+        category: row.category,
+        courseService: row.courseService,
+        variant: row.variant,
+        accreditation: row.accreditation,
+        delivery: row.delivery,
+        durationRatio: row.durationRatio,
+        maxCandidates: row.maxCandidates,
+        pricingBasis: row.pricingBasis,
+        priceIncVatPence: row.priceIncVatPence,
+        vatTreatment: row.vatTreatment,
+        netExVatPence: row.netExVatPence,
+        vatAmountPence: row.vatAmountPence,
+        effectiveFrom: row.effectiveFrom,
+        effectiveTo: row.effectiveTo,
+        publicNote: row.publicNote,
+        publishDecision: "Review Required",
+        needsVerification: true,
+      });
+      await addPublicationLogEntry({
+        id: `log-${current.id}-${Date.now()}`,
+        priceId: row.priceId,
+        changeType: "CSV import — price/detail change",
+        previousValue: `£${(current.priceIncVatPence / 100).toFixed(2)} (${current.vatTreatment})`,
+        newValue: `£${(row.priceIncVatPence / 100).toFixed(2)} (${row.vatTreatment})`,
+        requestedBy: "CSV import",
+        outcome: "Reset to Review Required — requires re-approval before publishing",
+        createdAt: now,
+      });
+      updated++;
+    } catch (e) {
+      console.error("[storage] bulkImportWebsiteProducts row error:", e);
+      errors++;
+    }
+  }
+
+  return { added, updated, unchanged, errors };
 }
 
 export async function bulkAddCertificates(

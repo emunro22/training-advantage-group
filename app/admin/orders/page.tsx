@@ -355,6 +355,26 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StatusFilter>("confirmed");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [sendingTestHandoff, setSendingTestHandoff] = useState(false);
+  const [testHandoffMessage, setTestHandoffMessage] = useState("");
+
+  const sendTestHandoff = useCallback(async () => {
+    setSendingTestHandoff(true);
+    setTestHandoffMessage("");
+    try {
+      const res = await fetch("/api/admin/orders/test-handoff", { method: "POST" });
+      const data = await res.json();
+      if (!data.mailboxConfigured) {
+        setTestHandoffMessage("ORDER_HANDOFF_MAILBOX is not set — nothing was sent. Set it in your environment first.");
+      } else {
+        setTestHandoffMessage(`Sent ${data.sent} of 5 test handoff messages${data.failed ? ` (${data.failed} failed)` : ""}.`);
+      }
+    } catch {
+      setTestHandoffMessage("Failed to send test handoff messages.");
+    } finally {
+      setSendingTestHandoff(false);
+    }
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -408,6 +428,12 @@ export default function AdminOrdersPage() {
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             Refresh
           </button>
+          <button onClick={sendTestHandoff} disabled={sendingTestHandoff}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-navy border border-gray-200 hover:border-gray-300 px-3 py-2 rounded-xl transition-all disabled:opacity-40"
+            title="TAG-WEB-REQ-001 §5 — sends the 5 required test order-handoff messages">
+            <Mail size={14} />
+            {sendingTestHandoff ? "Sending…" : "Send 5 test handoff emails"}
+          </button>
           <button onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 text-sm bg-navy text-white px-4 py-2 rounded-xl hover:bg-navy/90 transition-colors font-semibold">
             <PlusCircle size={15} />
@@ -415,6 +441,10 @@ export default function AdminOrdersPage() {
           </button>
         </div>
       </div>
+
+      {testHandoffMessage && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-3 rounded-xl">{testHandoffMessage}</div>
+      )}
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WebhooksHelper } from "square";
 import { getDb, ensureSchema } from "@/lib/db";
-import { sendOrderConfirmation } from "@/lib/email";
+import { sendOrderConfirmation, sendOrderHandoffEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -69,6 +69,19 @@ export async function POST(request: NextRequest) {
     location: string;
     notes: string;
     status: string;
+    order_ref: string | null;
+    website_product_id: string | null;
+    tag_price_id: string | null;
+    net_ex_vat_pence: number | null;
+    vat_amount_pence: number | null;
+    vat_treatment: string | null;
+    terms_version: string | null;
+    privacy_notice_version: string | null;
+    candidate_registration_required: boolean | null;
+    joining_pack_code: string | null;
+    issue_pack_code: string | null;
+    handoff_sent_at: string | null;
+    created_at: string;
   };
 
   const rows = (await sql`
@@ -114,6 +127,40 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error("Failed to send order confirmation email:", e);
+  }
+
+  // TAG-WEB-REQ-001 §5 fixed-format order handoff. Guarded by the same "pending" check above —
+  // a re-delivered webhook for an already-processed order never reaches this point twice.
+  try {
+    await sendOrderHandoffEmail({
+      orderId: order.order_ref ?? order.id,
+      orderDateTime: order.created_at,
+      websiteProductId: order.website_product_id ?? undefined,
+      tagPriceId: order.tag_price_id ?? undefined,
+      purchaserFirstName: order.first_name,
+      purchaserLastName: order.last_name,
+      email: order.email,
+      phone: order.phone,
+      company: order.company,
+      courseServiceName: order.course_name,
+      venueOrSession: `${order.location} — ${order.preferred_date}`,
+      candidateCount: order.delegates,
+      currency: "GBP",
+      grossIncVatPence: order.total_amount_pence,
+      netExVatPence: order.net_ex_vat_pence ?? undefined,
+      vatAmountPence: order.vat_amount_pence ?? undefined,
+      vatTreatment: order.vat_treatment ?? undefined,
+      paymentStatus: order.payment_type === "deposit" ? "Deposit Paid" : "Paid",
+      paymentReference: squarePaymentId ?? undefined,
+      termsVersion: order.terms_version ?? undefined,
+      privacyNoticeVersion: order.privacy_notice_version ?? undefined,
+      candidateRegistrationRequired: order.candidate_registration_required ?? true,
+      joiningPackCode: order.joining_pack_code ?? undefined,
+      issuePackCode: order.issue_pack_code ?? undefined,
+    });
+    await sql`UPDATE orders SET handoff_sent_at = NOW() WHERE id = ${order.id}`;
+  } catch (e) {
+    console.error("Failed to send order handoff email:", e);
   }
 
   return NextResponse.json({ ok: true });

@@ -53,5 +53,6 @@ function normaliseStatus(s?: string): Certificate["status"] {
   const v = (s ?? "").toLowerCase().trim();
   if (v === "expired") return "expired";
   if (v === "revoked" || v === "cancelled" || v === "canceled") return "revoked";
+  if (v === "replaced") return "replaced";
   return "valid";
 }

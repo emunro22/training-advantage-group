@@ -15,7 +15,7 @@ interface CertResult {
     courseType: string;
     issueDate: string;
     expiryDate: string;
-    status: "valid" | "expired" | "revoked";
+    status: "valid" | "expired" | "revoked" | "replaced";
     trainingCentre?: string;
     accreditedBy?: string[];
     accreditedRef?: string;
@@ -83,6 +83,7 @@ export default function VerifyCertificatePage() {
     valid: {
       icon: CheckCircle2,
       color: "text-green-600",
+      textDark: "text-green-800",
       bg: "bg-green-50",
       border: "border-green-200",
       badge: "bg-green-100 text-green-700",
@@ -92,6 +93,7 @@ export default function VerifyCertificatePage() {
     expired: {
       icon: AlertCircle,
       color: "text-amber-600",
+      textDark: "text-amber-800",
       bg: "bg-amber-50",
       border: "border-amber-200",
       badge: "bg-amber-100 text-amber-700",
@@ -101,11 +103,22 @@ export default function VerifyCertificatePage() {
     revoked: {
       icon: XCircle,
       color: "text-red-600",
+      textDark: "text-red-800",
       bg: "bg-red-50",
       border: "border-red-200",
       badge: "bg-red-100 text-red-700",
       label: "Revoked",
       message: "This certificate has been revoked. Please contact us for more information.",
+    },
+    replaced: {
+      icon: AlertCircle,
+      color: "text-blue-brand",
+      textDark: "text-blue-800",
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+      badge: "bg-blue-100 text-blue-700",
+      label: "Replaced",
+      message: "This certificate has been replaced by a newer issue. Please check with the holder for the current certificate number.",
     },
   };
 
@@ -245,7 +258,7 @@ export default function VerifyCertificatePage() {
                   <Icon size={22} className={cfg.color} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-black text-gray-900">Certificate {cert.status === "valid" ? "Verified" : cert.status === "expired" ? "Expired" : "Revoked"}</span>
+                      <span className="font-black text-gray-900">Certificate {cert.status === "valid" ? "Verified" : cfg.label}</span>
                       <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase ${cfg.badge}`}>
                         {cfg.label}
                       </span>
@@ -300,12 +313,12 @@ export default function VerifyCertificatePage() {
                       <div className="font-bold text-gray-900 text-sm">{fmtDate(cert.issueDate)}</div>
                     </div>
 
-                    <div className={`rounded-xl p-4 ${cert.status === "valid" ? "bg-green-50" : cert.status === "expired" ? "bg-amber-50" : "bg-red-50"}`}>
+                    <div className={`rounded-xl p-4 ${cfg.bg}`}>
                       <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">
                         <Calendar size={12} />
                         Expiry Date
                       </div>
-                      <div className={`font-bold text-sm ${cert.status === "valid" ? "text-green-800" : cert.status === "expired" ? "text-amber-800" : "text-red-800"}`}>
+                      <div className={`font-bold text-sm ${cfg.textDark}`}>
                         {cert.expiryDate ? fmtDate(cert.expiryDate) : "No expiry"}
                       </div>
                     </div>
@@ -387,7 +400,7 @@ export default function VerifyCertificatePage() {
                     "Enter the certificate number exactly as it appears on the certificate",
                     "Optionally add the holder's last name for extra verification",
                     "Results are instant — the system checks our certificate registry",
-                    "Valid, expired and revoked status is displayed clearly",
+                    "Valid, expired, replaced and revoked status is displayed clearly",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-gray-500">
                       <CheckCircle2 size={14} className="text-blue-brand flex-shrink-0 mt-0.5" />

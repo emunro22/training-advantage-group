@@ -22,6 +22,7 @@ const FOOTER_LINKS = {
   learner: [
     { label: "Learner Hub", href: "/learner-hub" },
     { label: "Book Training", href: "/booking" },
+    { label: "Secure Links", href: "/secure-links" },
     { label: "Course FAQs", href: "/learner-hub#faqs" },
     { label: "Joining Instructions", href: "/learner-hub#joining" },
     { label: "Funding Information", href: "/learner-hub#funding" },
@@ -29,6 +30,7 @@ const FOOTER_LINKS = {
   ],
   company: [
     { label: "About Us", href: "/about" },
+    { label: "Company Information", href: "/company-information" },
     { label: "Accreditations", href: "/accreditations" },
     { label: "Training Centres", href: "/training-centres" },
     { label: "Testimonials", href: "/testimonials" },

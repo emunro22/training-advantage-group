@@ -1,9 +1,12 @@
+export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import CourseProductTable from "@/components/ui/CourseProductTable";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2 } from "lucide-react";
 import { getPageContent } from "@/lib/storage";
+import { getPublishedProductsByCategories } from "@/lib/products-public";
 
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("plant-training");
@@ -22,6 +25,7 @@ const SAFETY_COURSES = [
 
 export default async function PlantTrainingPage() {
   const c = await getPageContent("plant-training");
+  const approvedProducts = await getPublishedProductsByCategories(["Forklift & MHE", "Plant & MHE"]);
   const COURSES = [
     { name: "Counterbalance Forklift – Refresher", price: c.counterbalanceRefresherPrice || "From £295", desc: "For operators with prior experience requiring renewal.", id: "counterbalance-refresher" },
     { name: "Counterbalance Forklift – Novice", price: c.counterbalanceNovicePrice || "From £595", desc: "Full novice course for new operators.", id: "counterbalance-novice" },
@@ -137,6 +141,20 @@ export default async function PlantTrainingPage() {
           </AnimatedSection>
         </div>
       </section>
+
+      {approvedProducts.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-4xl mx-auto px-4">
+            <AnimatedSection className="text-center mb-8">
+              <h2 className="section-heading">TAG-Approved Website Pricing</h2>
+              <p className="section-subheading mx-auto text-center mt-3">
+                Director-approved products from the current TAG Master Pricing catalogue.
+              </p>
+            </AnimatedSection>
+            <CourseProductTable products={approvedProducts} />
+          </div>
+        </section>
+      )}
 
       <CTASection />
     </>

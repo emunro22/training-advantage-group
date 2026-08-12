@@ -23,9 +23,17 @@ import {
   BookOpen,
   ShieldCheck,
   BadgeCheck,
+  CalendarDays,
 } from "lucide-react";
 
 const STATIC_NAV = [
+  {
+    label: "Upcoming Courses",
+    href: "/upcoming-courses",
+    icon: CalendarDays,
+    color: "text-orange-brand",
+    items: [],
+  },
   {
     label: "Transport",
     href: "/driver-cpc",
@@ -133,7 +141,7 @@ const STATIC_NAV = [
     icon: BookOpen,
     color: "text-teal-600",
     items: [
-      { label: "Upcoming Courses", href: "/upcoming-courses", desc: "Scheduled dates — book now" },
+      { label: "Secure Links", href: "/secure-links", desc: "Registration, updates, certificate checker & more" },
       { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },      { label: "Downloads & Resources", href: "/learner-hub#downloads", desc: "Forms and documents" },
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
@@ -336,6 +344,7 @@ export default function Header() {
             <nav className="hidden xl:flex items-center gap-px">
               {NAV.map((item) => {
                 const active = isActive(item.href);
+                const highlighted = item.label === "Upcoming Courses";
                 return (
                   <div
                     key={item.label}
@@ -346,7 +355,11 @@ export default function Header() {
                     <Link
                       href={item.href}
                       className={`relative flex items-center gap-0.5 px-2 py-2 text-[12px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
-                        active
+                        highlighted
+                          ? active
+                            ? "text-white bg-orange-brand shadow-sm shadow-orange-brand/40"
+                            : "text-orange-brand bg-orange-50 hover:bg-orange-brand hover:text-white"
+                          : active
                           ? "text-blue-brand bg-blue-50"
                           : activeMenu === item.label
                           ? "text-navy bg-gray-light"
@@ -526,15 +539,22 @@ function MobileNavItem({
 
   // If no sub-items, render as a plain Link instead of an accordion button
   if (!item.items || item.items.length === 0) {
+    const highlighted = item.label === "Upcoming Courses";
     return (
       <Link
         href={item.href}
         className={`flex items-center gap-2 w-full px-3 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
-          isActive ? "bg-blue-50 text-blue-brand" : "text-navy hover:bg-gray-light"
+          highlighted
+            ? isActive
+              ? "bg-orange-brand text-white"
+              : "bg-orange-50 text-orange-brand"
+            : isActive
+            ? "bg-blue-50 text-blue-brand"
+            : "text-navy hover:bg-gray-light"
         }`}
         onClick={onClose}
       >
-        <item.icon size={15} className={item.color} />
+        <item.icon size={15} className={highlighted ? "" : item.color} />
         {item.label}
       </Link>
     );

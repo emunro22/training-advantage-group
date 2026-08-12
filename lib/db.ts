@@ -165,14 +165,93 @@ export async function ensureSchema() {
     )
   `;
 
+  // TAG-WEB-REQ-001 / TAG-WEB-SPEC-001: governed Master Pricing → Website Products catalogue.
+  // publish_decision follows the workbook's own workflow: Review Required -> Director Approved
+  // -> Web Pending -> Published. Only Published rows may ever be shown on public pages.
+  await sql`
+    CREATE TABLE IF NOT EXISTS website_products (
+      id TEXT PRIMARY KEY,
+      publish_decision TEXT NOT NULL DEFAULT 'Review Required',
+      price_id TEXT NOT NULL UNIQUE,
+      website_product_id TEXT UNIQUE,
+      category TEXT NOT NULL,
+      course_service TEXT NOT NULL,
+      variant TEXT NOT NULL DEFAULT '',
+      accreditation TEXT NOT NULL DEFAULT '',
+      delivery TEXT NOT NULL DEFAULT '',
+      duration_ratio TEXT NOT NULL DEFAULT '',
+      max_candidates TEXT NOT NULL DEFAULT '',
+      pricing_basis TEXT NOT NULL DEFAULT '',
+      price_inc_vat_pence INTEGER NOT NULL DEFAULT 0,
+      vat_treatment TEXT NOT NULL DEFAULT 'Standard 20%',
+      net_ex_vat_pence INTEGER NOT NULL DEFAULT 0,
+      vat_amount_pence INTEGER NOT NULL DEFAULT 0,
+      effective_from TEXT,
+      effective_to TEXT,
+      public_note TEXT NOT NULL DEFAULT '',
+      joining_pack_code TEXT,
+      issue_pack_code TEXT,
+      web_slug TEXT,
+      sale_mode TEXT NOT NULL DEFAULT 'enquire',
+      director_approved_by TEXT,
+      director_approved_at TIMESTAMPTZ,
+      independent_check_by TEXT,
+      independent_check_at TIMESTAMPTZ,
+      last_web_check TEXT,
+      needs_verification BOOLEAN NOT NULL DEFAULT TRUE,
+      source TEXT NOT NULL DEFAULT 'seed',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  // Append-only audit trail — mirrors the workbook's Website Pricing and Document Publication Log.
+  await sql`
+    CREATE TABLE IF NOT EXISTS pricing_publication_log (
+      id TEXT PRIMARY KEY,
+      price_id TEXT,
+      change_type TEXT NOT NULL DEFAULT '',
+      previous_value TEXT,
+      new_value TEXT,
+      effective_from TEXT,
+      requested_by TEXT,
+      approved_by TEXT,
+      web_updated_by TEXT,
+      published_at TIMESTAMPTZ,
+      independent_check_by TEXT,
+      verified_at TIMESTAMPTZ,
+      evidence_ticket TEXT,
+      outcome TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // ALTER TABLE migrations — each wrapped individually so one failure never blocks the rest
   const migrations = [
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`,
+    sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS website_product_id TEXT`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`,
     sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB DEFAULT '[]'`,
     sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_ref TEXT`,
+    // TAG-WEB-SPEC-001 §3 Order Data Contract additions
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_ref TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS website_product_id TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS tag_price_id TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS net_ex_vat_pence INTEGER`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS vat_amount_pence INTEGER`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS vat_treatment TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS terms_version TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS privacy_notice_version TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS candidate_registration_required BOOLEAN DEFAULT TRUE`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS joining_pack_code TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS issue_pack_code TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS validation_status TEXT DEFAULT 'received'`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS error_code TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS reconciliation_status TEXT DEFAULT 'unmatched'`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS handoff_sent_at TIMESTAMPTZ`,
+    sql`CREATE UNIQUE INDEX IF NOT EXISTS orders_order_ref_idx ON orders(order_ref) WHERE order_ref IS NOT NULL`,
   ];
   for (const m of migrations) {
     try { await m; } catch (e) { console.warn("[db] migration skipped:", e); }

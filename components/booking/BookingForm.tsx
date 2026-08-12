@@ -14,7 +14,7 @@ import { COURSES, LOCATIONS, COURSE_CATEGORIES } from "@/lib/courses";
 import type { BookingFormData } from "@/lib/types";
 import type { UpcomingCourse } from "@/lib/storage";
 import { cn } from "@/lib/utils";
-import { DEPOSIT_AMOUNT_PENCE, DEPOSIT_THRESHOLD_PENCE } from "@/lib/square";
+import { computeDeposit } from "@/lib/order-contract";
 
 const schema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -119,8 +119,11 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   // Course name for review/payment display
   const effectiveCourseName = selectedUpcoming?.courseName ?? selectedCourse?.name ?? selectedCourseId;
 
+  const preferredDate = watch("preferredDate");
+  const deposit = computeDeposit(totalAmountPence, preferredDate || undefined);
+
   const canPayOnline = totalAmountPence > 0;
-  const canPayDeposit = totalAmountPence >= DEPOSIT_THRESHOLD_PENCE;
+  const canPayDeposit = totalAmountPence > 0 && !deposit.isFullPayment;
 
   function selectUpcomingCourse(uc: UpcomingCourse) {
     const catalogCourse = COURSES.find((c) => c.id === uc.courseId);
@@ -525,9 +528,9 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                           <span className="font-bold text-sm text-orange-900">Pay Deposit</span>
                           {paymentType === "deposit" && <CheckCircle2 size={14} className="text-green-600 ml-auto" />}
                         </div>
-                        <div className="text-xl font-black text-orange-brand">{formatGBP(DEPOSIT_AMOUNT_PENCE)}</div>
+                        <div className="text-xl font-black text-orange-brand">{formatGBP(deposit.depositPence)}</div>
                         <div className="text-xs text-gray-500 mt-0.5">
-                          Balance of {formatGBP(totalAmountPence - DEPOSIT_AMOUNT_PENCE)} due before course
+                          Balance of {formatGBP(totalAmountPence - deposit.depositPence)} due before course
                         </div>
                       </button>
                     )}

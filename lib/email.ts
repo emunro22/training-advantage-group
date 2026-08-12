@@ -197,6 +197,105 @@ export async function sendOrderConfirmation(data: OrderConfirmationData) {
   ]);
 }
 
+// TAG-WEB-SPEC-001 §3 Order Data Contract. Field order is fixed and must not change — a standard
+// Microsoft 365 flow parses this on the receiving mailbox. Only the approved field list appears
+// here: no candidate ID, licence image, signature or other restricted evidence is ever included
+// (TAG-WEB-REQ-001 §5 / security boundary).
+export interface OrderHandoffData {
+  orderId: string;
+  orderDateTime: string;
+  websiteProductId?: string;
+  tagPriceId?: string;
+  purchaserFirstName: string;
+  purchaserLastName: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  courseServiceName: string;
+  variant?: string;
+  deliveryMode?: string;
+  venueOrSession?: string;
+  candidateCount: number;
+  currency: string;
+  grossIncVatPence: number;
+  netExVatPence?: number;
+  vatAmountPence?: number;
+  vatTreatment?: string;
+  paymentStatus: "Paid" | "Deposit Paid" | "Pending" | "Refunded" | "Cancelled";
+  paymentReference?: string;
+  discountCode?: string;
+  termsVersion?: string;
+  privacyNoticeVersion?: string;
+  candidateRegistrationRequired: boolean;
+  joiningPackCode?: string;
+  issuePackCode?: string;
+  reviewIndicator?: string;
+}
+
+function handoffLine(label: string, value: string | number | boolean | undefined): string {
+  const shown = value === undefined || value === "" ? "—" : String(value);
+  return `${label}: ${shown}`;
+}
+
+export async function sendOrderHandoffEmail(data: OrderHandoffData) {
+  const mailbox = process.env.ORDER_HANDOFF_MAILBOX;
+  if (!mailbox) {
+    console.warn("[email] ORDER_HANDOFF_MAILBOX not set — order handoff email skipped for", data.orderId);
+    return;
+  }
+
+  const fields = [
+    "=== Identity ===",
+    handoffLine("OrderID", data.orderId),
+    handoffLine("OrderDateTime", data.orderDateTime),
+    handoffLine("WebsiteProductID", data.websiteProductId),
+    handoffLine("TAG PriceID", data.tagPriceId),
+    "",
+    "=== Purchaser ===",
+    handoffLine("First name", data.purchaserFirstName),
+    handoffLine("Last name", data.purchaserLastName),
+    handoffLine("Email", data.email),
+    handoffLine("Telephone", data.phone),
+    handoffLine("Company", data.company),
+    "",
+    "=== Course/product ===",
+    handoffLine("Product/service name", data.courseServiceName),
+    handoffLine("Variant", data.variant),
+    handoffLine("Delivery mode", data.deliveryMode),
+    handoffLine("Venue/requested date or session", data.venueOrSession),
+    handoffLine("Candidate count", data.candidateCount),
+    "",
+    "=== Price/payment ===",
+    handoffLine("Currency", data.currency),
+    handoffLine("Gross including VAT", (data.grossIncVatPence / 100).toFixed(2)),
+    handoffLine("Net ex VAT", data.netExVatPence !== undefined ? (data.netExVatPence / 100).toFixed(2) : undefined),
+    handoffLine("VAT amount", data.vatAmountPence !== undefined ? (data.vatAmountPence / 100).toFixed(2) : undefined),
+    handoffLine("VAT treatment", data.vatTreatment),
+    handoffLine("Payment status", data.paymentStatus),
+    handoffLine("Payment reference", data.paymentReference),
+    handoffLine("Discount code", data.discountCode),
+    "",
+    "=== Control versions ===",
+    handoffLine("TermsVersion", data.termsVersion),
+    handoffLine("PrivacyNoticeVersion", data.privacyNoticeVersion),
+    "",
+    "=== Required action ===",
+    handoffLine("CandidateRegistrationRequired", data.candidateRegistrationRequired ? "Yes" : "No"),
+    handoffLine("JoiningPackCode", data.joiningPackCode),
+    handoffLine("IssuePackCode", data.issuePackCode),
+    handoffLine("Quotation/administrator review indicator", data.reviewIndicator),
+  ].join("\n");
+
+  const html = `<pre style="font-family: Consolas, 'Courier New', monospace; font-size: 13px; white-space: pre-wrap;">${fields}</pre>`;
+
+  await resend.emails.send({
+    from: FROM,
+    to: [mailbox],
+    subject: `Website Order ${data.orderId} — ${data.paymentStatus}`,
+    html,
+  });
+}
+
 export async function sendContactEmail(data: ContactFormData) {
   const adminHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

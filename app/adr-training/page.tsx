@@ -1,10 +1,13 @@
+export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import PriceCard from "@/components/ui/PriceCard";
+import CourseProductTable from "@/components/ui/CourseProductTable";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { getPageContent } from "@/lib/storage";
+import { getPublishedProductsByCategory } from "@/lib/products-public";
 
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("adr-training");
@@ -16,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ADRTrainingPage() {
   const c = await getPageContent("adr-training");
+  const approvedProducts = await getPublishedProductsByCategory("ADR / DGDT");
   return (
     <>
       <PageHero
@@ -123,6 +127,20 @@ export default async function ADRTrainingPage() {
           </AnimatedSection>
         </div>
       </section>
+
+      {approvedProducts.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-4xl mx-auto px-4">
+            <AnimatedSection className="text-center mb-8">
+              <h2 className="section-heading">TAG-Approved Website Pricing</h2>
+              <p className="section-subheading mx-auto text-center mt-3">
+                Director-approved products from the current TAG Master Pricing catalogue.
+              </p>
+            </AnimatedSection>
+            <CourseProductTable products={approvedProducts} />
+          </div>
+        </section>
+      )}
 
       <CTASection />
     </>
