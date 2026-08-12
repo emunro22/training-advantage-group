@@ -118,6 +118,14 @@ export default async function UpcomingCoursesPage() {
                               </div>
                             </div>
 
+                            {/* Course image, when set */}
+                            {course.imageUrl && (
+                              <div className="hidden sm:block relative w-28 flex-shrink-0">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={course.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                              </div>
+                            )}
+
                             {/* Main content */}
                             <div className="flex-1 px-5 py-4 min-w-0">
                               <div className="flex flex-wrap items-start justify-between gap-2 mb-2">

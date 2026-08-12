@@ -17,6 +17,7 @@ const schema = z.object({
   company: z.string().optional(),
   subject: z.string().min(1, "Please select a subject"),
   message: z.string().min(10, "Message must be at least 10 characters"),
+  consent: z.boolean().refine((v) => v === true, "Please accept the Terms and Privacy Notice"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -52,7 +53,10 @@ export default function ContactClient() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          sourcePage: typeof window !== "undefined" ? window.location.pathname : undefined,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -161,6 +165,18 @@ export default function ContactClient() {
                       <label className="label">Message *</label>
                       <textarea {...register("message")} rows={5} className="input-field resize-none" placeholder="Tell us what you need…" />
                       {errors.message && <p className="text-xs text-red-600 mt-1">{errors.message.message}</p>}
+                    </div>
+
+                    <div>
+                      <label className="flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
+                        <input type="checkbox" {...register("consent")} className="mt-0.5 w-4 h-4 rounded flex-shrink-0" />
+                        <span>
+                          I agree to the{" "}
+                          <Link href="/policies#terms" className="text-blue-brand hover:underline">Terms</Link> and{" "}
+                          <Link href="/policies#privacy" className="text-blue-brand hover:underline">Privacy Notice</Link>. *
+                        </span>
+                      </label>
+                      {errors.consent && <p className="text-xs text-red-600 mt-1">{errors.consent.message}</p>}
                     </div>
 
                     {error && (

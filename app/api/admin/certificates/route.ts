@@ -9,6 +9,7 @@ import {
 } from "@/lib/storage";
 import { cookies } from "next/headers";
 import { validateSessionToken, ADMIN_COOKIE } from "@/lib/admin-auth";
+import { sendCertificateUpdateNotification } from "@/lib/email";
 
 async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -52,6 +53,12 @@ export async function POST(request: Request) {
     }
 
     await addCertificate(cert);
+    sendCertificateUpdateNotification({
+      certificateNumber: cert.certificateNumber,
+      holderName: `${cert.holderFirstName} ${cert.holderLastName}`.trim(),
+      course: cert.course,
+      status: cert.status,
+    }).catch((e) => console.error("[certificates] notification failed:", e));
     return NextResponse.json({ certificate: cert }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -66,6 +73,17 @@ export async function PUT(request: Request) {
     const { id, ...updates } = (await request.json()) as { id: string } & Partial<Certificate>;
     const ok = await updateCertificate(id, updates);
     if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    const certs = await getCertificates();
+    const updated = certs.find((c) => c.id === id);
+    if (updated) {
+      sendCertificateUpdateNotification({
+        certificateNumber: updated.certificateNumber,
+        holderName: `${updated.holderFirstName} ${updated.holderLastName}`.trim(),
+        course: updated.course,
+        status: updated.status,
+      }).catch((e) => console.error("[certificates] notification failed:", e));
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

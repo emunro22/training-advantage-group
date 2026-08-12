@@ -10,7 +10,6 @@ function getResend(): Resend {
 const resend = { emails: { send: (...args: Parameters<Resend["emails"]["send"]>) => getResend().emails.send(...args) } };
 
 const FROM = "Training Advantage Group <office@trainingadvantagegroup.co.uk>";
-const TO = process.env.EMAIL_TO || "office@trainingadvantagegroup.co.uk";
 
 export async function sendBookingConfirmation(data: BookingFormData) {
   const customerHtml = `
@@ -47,27 +46,6 @@ export async function sendBookingConfirmation(data: BookingFormData) {
     </div>
   `;
 
-  const adminHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #0d1b4b; padding: 20px;">
-        <h2 style="color: white; margin: 0;">New Booking Request</h2>
-      </div>
-      <div style="padding: 24px;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666; width: 35%;">Name:</td><td style="padding: 10px; font-weight: bold;">${data.firstName} ${data.lastName}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Email:</td><td style="padding: 10px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Phone:</td><td style="padding: 10px;"><a href="tel:${data.phone}">${data.phone}</a></td></tr>
-          ${data.company ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Company:</td><td style="padding: 10px;">${data.company}</td></tr>` : ""}
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Course:</td><td style="padding: 10px; font-weight: bold; color: #0066cc;">${data.courseName}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Preferred Date:</td><td style="padding: 10px;">${data.preferredDate}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Location:</td><td style="padding: 10px;">${data.location}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Delegates:</td><td style="padding: 10px;">${data.delegates}</td></tr>
-          ${data.message ? `<tr><td style="padding: 10px; color: #666; vertical-align: top;">Message:</td><td style="padding: 10px;">${data.message}</td></tr>` : ""}
-        </table>
-      </div>
-    </div>
-  `;
-
   await Promise.all([
     resend.emails.send({
       from: FROM,
@@ -75,12 +53,20 @@ export async function sendBookingConfirmation(data: BookingFormData) {
       subject: `Booking Request Confirmed – ${data.courseName} | Training Advantage Group`,
       html: customerHtml,
     }),
-    resend.emails.send({
-      from: FROM,
-      to: [TO],
-      subject: `New Booking: ${data.courseName} – ${data.firstName} ${data.lastName}`,
-      html: adminHtml,
-      replyTo: data.email,
+    sendFixedFormatNotification({
+      kind: "BOOKING",
+      submissionId: `book-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      name: `${data.firstName} ${data.lastName}`.trim(),
+      company: data.company,
+      email: data.email,
+      telephone: data.phone,
+      courseOrService: data.courseName,
+      status: "Booking requested — preferred date " + data.preferredDate,
+      consent: data.consent ? "Terms & Privacy Notice accepted" : undefined,
+      sourcePage: data.sourcePage,
+      subjectRef: data.courseName,
+      extra: data.message ? { label: "Message", value: data.message } : undefined,
     }),
   ]);
 }
@@ -155,46 +141,15 @@ export async function sendOrderConfirmation(data: OrderConfirmationData) {
     </div>
   `;
 
-  const adminHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #0d1b4b; padding: 20px;">
-        <h2 style="color: white; margin: 0;">💳 New Paid Order — ${isDeposit ? "DEPOSIT" : "FULL PAYMENT"}</h2>
-      </div>
-      <div style="padding: 24px;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666; width: 35%;">Name:</td><td style="padding: 10px; font-weight: bold;">${data.firstName} ${data.lastName}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Email:</td><td style="padding: 10px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Phone:</td><td style="padding: 10px;"><a href="tel:${data.phone}">${data.phone}</a></td></tr>
-          ${data.company ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Company:</td><td style="padding: 10px;">${data.company}</td></tr>` : ""}
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Course:</td><td style="padding: 10px; font-weight: bold; color: #0066cc;">${data.courseName}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Preferred Date:</td><td style="padding: 10px;">${data.preferredDate}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Location:</td><td style="padding: 10px;">${data.location}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Delegates:</td><td style="padding: 10px;">${data.delegates}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Amount Paid:</td><td style="padding: 10px; font-weight: bold; color: #16a34a;">${formatGBP(data.amountPaidPence)}</td></tr>
-          ${isDeposit ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Balance Due:</td><td style="padding: 10px; font-weight: bold; color: #dc2626;">${formatGBP(data.remainingBalancePence)}</td></tr>` : ""}
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Payment Type:</td><td style="padding: 10px;">${isDeposit ? "Deposit" : "Full Payment"}</td></tr>
-          ${data.notes ? `<tr><td style="padding: 10px; color: #666; vertical-align: top;">Notes:</td><td style="padding: 10px;">${data.notes}</td></tr>` : ""}
-        </table>
-        <p style="color: #999; font-size: 12px; margin-top: 16px;">Order ID: ${data.orderId}</p>
-      </div>
-    </div>
-  `;
-
-  await Promise.all([
-    resend.emails.send({
-      from: FROM,
-      to: [data.email],
-      subject: `${subjectVerb} – ${data.courseName} | Training Advantage Group`,
-      html: customerHtml,
-    }),
-    resend.emails.send({
-      from: FROM,
-      to: [TO],
-      subject: `New Order (${isDeposit ? "Deposit" : "Full"}): ${data.courseName} – ${data.firstName} ${data.lastName}`,
-      html: adminHtml,
-      replyTo: data.email,
-    }),
-  ]);
+  // Office notification for this order is the single fixed-format WEB ORDER email
+  // (sendOrderHandoffEmail, sent from the Square webhook) — this function only emails the customer,
+  // so office@ never receives two differently-formatted emails for the same paid order.
+  await resend.emails.send({
+    from: FROM,
+    to: [data.email],
+    subject: `${subjectVerb} – ${data.courseName} | Training Advantage Group`,
+    html: customerHtml,
+  });
 }
 
 // TAG-WEB-SPEC-001 §3 Order Data Contract. Field order is fixed and must not change — a standard
@@ -230,6 +185,10 @@ export interface OrderHandoffData {
   joiningPackCode?: string;
   issuePackCode?: string;
   reviewIndicator?: string;
+  /** Page the order originated from, e.g. "/booking" — reported to Power Automate. */
+  sourcePage?: string;
+  /** ISO timestamp the customer accepted Terms/Privacy at checkout, if recorded. */
+  consentGivenAt?: string;
 }
 
 function handoffLine(label: string, value: string | number | boolean | undefined): string {
@@ -278,6 +237,8 @@ export async function sendOrderHandoffEmail(data: OrderHandoffData) {
     "=== Control versions ===",
     handoffLine("TermsVersion", data.termsVersion),
     handoffLine("PrivacyNoticeVersion", data.privacyNoticeVersion),
+    handoffLine("Consent", data.consentGivenAt ? `Accepted at ${data.consentGivenAt}` : undefined),
+    handoffLine("Source Page", data.sourcePage),
     "",
     "=== Required action ===",
     handoffLine("CandidateRegistrationRequired", data.candidateRegistrationRequired ? "Yes" : "No"),
@@ -288,33 +249,99 @@ export async function sendOrderHandoffEmail(data: OrderHandoffData) {
 
   const html = `<pre style="font-family: Consolas, 'Courier New', monospace; font-size: 13px; white-space: pre-wrap;">${fields}</pre>`;
 
+  const customerName = `${data.purchaserFirstName} ${data.purchaserLastName}`.trim();
   await resend.emails.send({
     from: FROM,
     to: [mailbox],
-    subject: `Website Order ${data.orderId} — ${data.paymentStatus}`,
+    subject: `WEB ORDER | ${data.orderId} | ${customerName}`,
     html,
   });
 }
 
-export async function sendContactEmail(data: ContactFormData) {
-  const adminHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #0d1b4b; padding: 20px;">
-        <h2 style="color: white; margin: 0;">New Contact Enquiry</h2>
-      </div>
-      <div style="padding: 24px;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666; width: 35%;">Name:</td><td style="padding: 10px; font-weight: bold;">${data.firstName} ${data.lastName}</td></tr>
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Email:</td><td style="padding: 10px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
-          ${data.phone ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Phone:</td><td style="padding: 10px;"><a href="tel:${data.phone}">${data.phone}</a></td></tr>` : ""}
-          ${data.company ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Company:</td><td style="padding: 10px;">${data.company}</td></tr>` : ""}
-          <tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px; color: #666;">Subject:</td><td style="padding: 10px; font-weight: bold;">${data.subject}</td></tr>
-          <tr><td style="padding: 10px; color: #666; vertical-align: top;">Message:</td><td style="padding: 10px;">${data.message.replace(/\n/g, "<br>")}</td></tr>
-        </table>
-      </div>
-    </div>
-  `;
+// Shared Power Automate notification format for BOOKING / ENQUIRY / CERTIFICATE_UPDATE events.
+// Orders use the richer sendOrderHandoffEmail above (same mailbox, same "one notification per
+// event" rule, its own field set per TAG-WEB-SPEC-001 §3). Never includes ID/licence/signature/
+// medical/bank evidence — customers are directed to the secure portal for that instead.
+export interface FixedFormatNotification {
+  kind: "BOOKING" | "ENQUIRY" | "CERTIFICATE_UPDATE";
+  submissionId: string;
+  timestamp: string;
+  name?: string;
+  company?: string;
+  email?: string;
+  telephone?: string;
+  courseOrService?: string;
+  status?: string;
+  consent?: string;
+  sourcePage?: string;
+  /** Subject-line identifier: course/service name for BOOKING/ENQUIRY, certificate number for CERTIFICATE_UPDATE. */
+  subjectRef: string;
+  /** Free-text content (e.g. an enquiry message) appended after the fixed fields — outside the parsed block. */
+  extra?: { label: string; value: string };
+}
 
+function buildNotificationSubject(n: FixedFormatNotification): string {
+  const name = n.name || "Unknown";
+  switch (n.kind) {
+    case "BOOKING":
+      return `WEB BOOKING | ${n.subjectRef} | ${name}`;
+    case "ENQUIRY":
+      return `WEB ENQUIRY | ${n.subjectRef} | ${name}`;
+    case "CERTIFICATE_UPDATE":
+      return `CERTIFICATE UPDATE | ${n.subjectRef}`;
+  }
+}
+
+export async function sendFixedFormatNotification(n: FixedFormatNotification) {
+  const mailbox = process.env.ORDER_HANDOFF_MAILBOX;
+  if (!mailbox) {
+    console.warn(`[email] ORDER_HANDOFF_MAILBOX not set — ${n.kind} notification skipped for`, n.submissionId);
+    return;
+  }
+
+  const fields = [
+    handoffLine("SubmissionID", n.submissionId),
+    handoffLine("Timestamp", n.timestamp),
+    handoffLine("Name", n.name),
+    handoffLine("Company", n.company),
+    handoffLine("Email", n.email),
+    handoffLine("Telephone", n.telephone),
+    handoffLine("Course/Service", n.courseOrService),
+    handoffLine("Status", n.status),
+    handoffLine("Consent", n.consent),
+    handoffLine("Source Page", n.sourcePage),
+    ...(n.extra ? ["", `${n.extra.label}:`, n.extra.value] : []),
+  ].join("\n");
+
+  const html = `<pre style="font-family: Consolas, 'Courier New', monospace; font-size: 13px; white-space: pre-wrap;">${fields}</pre>`;
+
+  await resend.emails.send({
+    from: FROM,
+    to: [mailbox],
+    subject: buildNotificationSubject(n),
+    html,
+  });
+}
+
+export async function sendCertificateUpdateNotification(data: {
+  certificateNumber: string;
+  holderName: string;
+  course: string;
+  status: string;
+}) {
+  await sendFixedFormatNotification({
+    kind: "CERTIFICATE_UPDATE",
+    submissionId: data.certificateNumber,
+    timestamp: new Date().toISOString(),
+    name: data.holderName,
+    courseOrService: data.course,
+    status: data.status,
+    sourcePage: "/admin/certificates",
+    subjectRef: data.certificateNumber,
+  });
+}
+
+export async function sendContactEmail(data: ContactFormData) {
   const autoReplyHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #0d1b4b 0%, #0066cc 100%); padding: 30px; text-align: center;">
@@ -339,12 +366,20 @@ export async function sendContactEmail(data: ContactFormData) {
       subject: "We've received your enquiry | Training Advantage Group",
       html: autoReplyHtml,
     }),
-    resend.emails.send({
-      from: FROM,
-      to: [TO],
-      subject: `Enquiry: ${data.subject} – ${data.firstName} ${data.lastName}`,
-      html: adminHtml,
-      replyTo: data.email,
+    sendFixedFormatNotification({
+      kind: "ENQUIRY",
+      submissionId: `enq-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      name: `${data.firstName} ${data.lastName}`.trim(),
+      company: data.company,
+      email: data.email,
+      telephone: data.phone,
+      courseOrService: data.subject,
+      status: "New enquiry",
+      consent: data.consent ? "Terms & Privacy Notice accepted" : undefined,
+      sourcePage: data.sourcePage,
+      subjectRef: data.subject,
+      extra: { label: "Message", value: data.message },
     }),
   ]);
 }

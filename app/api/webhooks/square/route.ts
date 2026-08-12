@@ -82,6 +82,9 @@ export async function POST(request: NextRequest) {
     issue_pack_code: string | null;
     handoff_sent_at: string | null;
     created_at: string;
+    source_page: string | null;
+    consent_given_at: string | null;
+    discount_code: string | null;
   };
 
   const rows = (await sql`
@@ -157,6 +160,9 @@ export async function POST(request: NextRequest) {
       candidateRegistrationRequired: order.candidate_registration_required ?? true,
       joiningPackCode: order.joining_pack_code ?? undefined,
       issuePackCode: order.issue_pack_code ?? undefined,
+      sourcePage: order.source_page ?? undefined,
+      consentGivenAt: order.consent_given_at ?? undefined,
+      discountCode: order.discount_code ?? undefined,
     });
     await sql`UPDATE orders SET handoff_sent_at = NOW() WHERE id = ${order.id}`;
   } catch (e) {

@@ -142,7 +142,7 @@ const STATIC_NAV = [
     color: "text-teal-600",
     items: [
       { label: "Secure Links", href: "/secure-links", desc: "Registration, updates, certificate checker & more" },
-      { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },      { label: "Downloads & Resources", href: "/learner-hub#downloads", desc: "Forms and documents" },
+      { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },      { label: "Downloads & Resources", href: "/downloads", desc: "Forms and documents" },
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
       { label: "Accommodation", href: "/learner-hub#accommodation", desc: "Nearby hotels" },
@@ -184,8 +184,17 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [customPages, setCustomPages] = useState<CustomNavPage[]>([]);
+  const [reviewsSummary, setReviewsSummary] = useState<{ rating: number; totalReviews: number } | null>(null);
   const pathname = usePathname();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Live Google rating badge for the promoted Testimonials nav item
+  useEffect(() => {
+    fetch("/api/reviews-summary")
+      .then((r) => r.json())
+      .then((d) => { if (d.available) setReviewsSummary({ rating: d.rating, totalReviews: d.totalReviews }); })
+      .catch(() => {});
+  }, []);
 
   // Load custom pages for nav (published only, no auth needed)
   useEffect(() => {
@@ -344,7 +353,7 @@ export default function Header() {
             <nav className="hidden xl:flex items-center gap-px">
               {NAV.map((item) => {
                 const active = isActive(item.href);
-                const highlighted = item.label === "Upcoming Courses";
+                const highlighted = item.label === "Upcoming Courses" || item.label === "Testimonials";
                 return (
                   <div
                     key={item.label}
@@ -367,6 +376,11 @@ export default function Header() {
                       }`}
                     >
                       {item.label}
+                      {item.label === "Testimonials" && reviewsSummary && (
+                        <span className="flex items-center gap-0.5 text-[11px] font-bold">
+                          ★ {reviewsSummary.rating.toFixed(1)}
+                        </span>
+                      )}
                       {item.items && item.items.length > 0 && (
                         <ChevronDown
                           size={13}
@@ -502,7 +516,7 @@ export default function Header() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 + i * 0.04 }}
                   >
-                    <MobileNavItem item={item} onClose={() => setMobileOpen(false)} isActive={isActive(item.href)} />
+                    <MobileNavItem item={item} onClose={() => setMobileOpen(false)} isActive={isActive(item.href)} reviewsSummary={reviewsSummary} />
                   </motion.div>
                 ))}
 
@@ -530,16 +544,18 @@ function MobileNavItem({
   item,
   onClose,
   isActive,
+  reviewsSummary,
 }: {
   item: (typeof STATIC_NAV)[0];
   onClose: () => void;
   isActive: boolean;
+  reviewsSummary?: { rating: number; totalReviews: number } | null;
 }) {
   const [open, setOpen] = useState(false);
 
   // If no sub-items, render as a plain Link instead of an accordion button
   if (!item.items || item.items.length === 0) {
-    const highlighted = item.label === "Upcoming Courses";
+    const highlighted = item.label === "Upcoming Courses" || item.label === "Testimonials";
     return (
       <Link
         href={item.href}
@@ -556,6 +572,9 @@ function MobileNavItem({
       >
         <item.icon size={15} className={highlighted ? "" : item.color} />
         {item.label}
+        {item.label === "Testimonials" && reviewsSummary && (
+          <span className="text-xs font-bold">★ {reviewsSummary.rating.toFixed(1)}</span>
+        )}
       </Link>
     );
   }

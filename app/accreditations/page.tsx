@@ -4,23 +4,13 @@ import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, ShieldCheck } from "lucide-react";
+import { getPublicAccreditationLogos } from "@/lib/accreditation-logos-public";
 
 export const metadata: Metadata = {
   title: "Accreditations & Approvals | Training Advantage Group Ltd",
   description:
     "Training Advantage Group Ltd is fully accredited by Qualifications Scotland, DVSA, JAUPT, NPORS and NLTC. All qualifications are nationally recognised.",
 };
-
-const LOGO_STRIP = [
-  { name: "Qualifications Scotland", src: "/images/accreditations/qualifications-scotland.png", width: 140, height: 60 },
-  { name: "NPORS Accredited Training Provider", src: "/images/accreditations/npors-provider.png", width: 80, height: 80 },
-  { name: "NPORS Accredited", src: "/images/accreditations/npors-accredited.png", width: 80, height: 80 },
-  { name: "DVSA Approved ADR Training Body", src: "/images/accreditations/dvsa-adr.png", width: 160, height: 50 },
-  { name: "Driver CPC Consortium Member", src: "/images/accreditations/driver-cpc.png", width: 140, height: 60 },
-  { name: "NLTC Qualifications", src: "/images/accreditations/nltc.png", width: 130, height: 60 },
-  { name: "Ofqual Department for Education", src: "/images/accreditations/ofqual.png", width: 130, height: 60 },
-  { name: "RADAT", src: "/images/accreditations/radat.png", width: 80, height: 80 },
-];
 
 const ACCREDITATIONS = [
   {
@@ -105,7 +95,8 @@ const ACCREDITATIONS = [
   },
 ];
 
-export default function AccreditationsPage() {
+export default async function AccreditationsPage() {
+  const logoStrip = await getPublicAccreditationLogos("accreditations_page");
   return (
     <>
       <PageHero
@@ -133,15 +124,9 @@ export default function AccreditationsPage() {
         <div className="max-w-7xl mx-auto px-4">
           <AnimatedSection>
             <div className="flex flex-wrap items-center justify-center gap-8">
-              {LOGO_STRIP.map((logo) => (
-                <div key={logo.name} className="flex items-center justify-center bg-white rounded-xl p-3 shadow-sm">
-                  <Image
-                    src={logo.src}
-                    alt={logo.name}
-                    width={logo.width}
-                    height={logo.height}
-                    className="object-contain"
-                  />
+              {logoStrip.map((logo) => (
+                <div key={logo.name} className="relative h-16 w-[150px] flex-shrink-0 bg-white rounded-xl p-3 shadow-sm">
+                  <Image src={logo.src} alt={logo.alt} fill sizes="150px" className="object-contain p-2" />
                 </div>
               ))}
             </div>

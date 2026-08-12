@@ -92,6 +92,38 @@ export const CATEGORY_ISSUE_PACK_CODE: Record<string, string> = {
   "First Aid": "IP-FA",
 };
 
+export interface SpecialOfferLike {
+  active: boolean;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  courseId?: string;
+  courseName?: string;
+  validUntil?: string;
+}
+
+/** True if the offer currently applies to this course (or is course-unscoped) and hasn't expired. */
+export function isPromoApplicable(
+  offer: SpecialOfferLike,
+  courseId: string,
+  courseName: string,
+  today: string = new Date().toISOString().split("T")[0]
+): boolean {
+  if (!offer.active) return false;
+  if (offer.validUntil && offer.validUntil < today) return false;
+  if (offer.courseId && offer.courseId !== courseId) return false;
+  if (offer.courseName && offer.courseName !== courseName) return false;
+  return true;
+}
+
+/** discountValue is a percentage (0-100) for "percentage" offers, or whole pounds for "fixed" offers. */
+export function computePromoDiscountPence(offer: SpecialOfferLike, grossPence: number): number {
+  const raw =
+    offer.discountType === "percentage"
+      ? Math.round(grossPence * (offer.discountValue / 100))
+      : Math.round(offer.discountValue * 100);
+  return Math.max(0, Math.min(raw, grossPence));
+}
+
 /** Maps the workbook's Category column to the existing site section (used to route product tables to pages). */
 export const CATEGORY_TO_PAGE_SLUG: Record<string, string> = {
   "HGV & PCV": "/hgv-training",

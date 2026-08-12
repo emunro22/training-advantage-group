@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,6 +29,7 @@ const schema = z.object({
   delegates: z.coerce.number().min(1, "At least 1 delegate required").max(50, "Max 50 delegates"),
   location: z.string().min(1, "Please select a location"),
   message: z.string().optional(),
+  consent: z.boolean().refine((v) => v === true, "Please accept the Terms and Privacy Notice"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -86,6 +88,10 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   const [selectedUpcomingId, setSelectedUpcomingId] = useState<string | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType>("full");
   const [redirecting, setRedirecting] = useState(false);
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [promoChecking, setPromoChecking] = useState(false);
+  const [promoError, setPromoError] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountAmountPence: number; offerTitle: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/upcoming-courses")
@@ -120,10 +126,46 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
   const effectiveCourseName = selectedUpcoming?.courseName ?? selectedCourse?.name ?? selectedCourseId;
 
   const preferredDate = watch("preferredDate");
-  const deposit = computeDeposit(totalAmountPence, preferredDate || undefined);
+  const discountedTotalPence = appliedPromo ? totalAmountPence - appliedPromo.discountAmountPence : totalAmountPence;
+  const deposit = computeDeposit(discountedTotalPence, preferredDate || undefined);
 
   const canPayOnline = totalAmountPence > 0;
   const canPayDeposit = totalAmountPence > 0 && !deposit.isFullPayment;
+
+  async function applyPromoCode() {
+    if (!promoCodeInput.trim()) return;
+    setPromoChecking(true);
+    setPromoError("");
+    try {
+      const res = await fetch("/api/checkout/validate-promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: promoCodeInput.trim(),
+          courseId: selectedCourseId,
+          courseName: effectiveCourseName,
+          totalAmountPence,
+        }),
+      });
+      const data = await res.json();
+      if (!data.valid) {
+        setPromoError(data.error ?? "This code is not valid.");
+        setAppliedPromo(null);
+        return;
+      }
+      setAppliedPromo({ code: promoCodeInput.trim(), discountAmountPence: data.discountAmountPence, offerTitle: data.offerTitle });
+    } catch {
+      setPromoError("Could not check that code — please try again.");
+    } finally {
+      setPromoChecking(false);
+    }
+  }
+
+  function clearPromoCode() {
+    setAppliedPromo(null);
+    setPromoCodeInput("");
+    setPromoError("");
+  }
 
   function selectUpcomingCourse(uc: UpcomingCourse) {
     const catalogCourse = COURSES.find((c) => c.id === uc.courseId);
@@ -174,6 +216,8 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
         delegates: values.delegates,
         location: LOCATIONS.find((l) => l.value === values.location)?.label ?? values.location,
         message: values.message,
+        sourcePage: typeof window !== "undefined" ? window.location.pathname : undefined,
+        consent: values.consent,
       };
       const res = await fetch("/api/booking", {
         method: "POST",
@@ -214,6 +258,9 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
           notes: values.message ?? "",
           paymentType,
           totalAmountPence,
+          sourcePage: typeof window !== "undefined" ? window.location.pathname : undefined,
+          consent: values.consent,
+          discountCode: appliedPromo?.code,
         }),
       });
       const data = await res.json();
@@ -489,8 +536,50 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 <ReviewRow label="Delegates" value={`${watch("delegates")} person(s)`} />
                 <ReviewRow label="Location" value={LOCATIONS.find((l) => l.value === watch("location"))?.label ?? ""} />
                 {watch("message") && <ReviewRow label="Notes" value={watch("message") ?? ""} />}
-                {canPayOnline && <ReviewRow label="Total" value={formatGBP(totalAmountPence)} highlight />}
+                {canPayOnline && !appliedPromo && <ReviewRow label="Total" value={formatGBP(totalAmountPence)} highlight />}
+                {canPayOnline && appliedPromo && (
+                  <>
+                    <ReviewRow label="Subtotal" value={formatGBP(totalAmountPence)} />
+                    <ReviewRow label={`Discount (${appliedPromo.code})`} value={`−${formatGBP(appliedPromo.discountAmountPence)}`} />
+                    <ReviewRow label="Total" value={formatGBP(discountedTotalPence)} highlight />
+                  </>
+                )}
               </div>
+
+              {/* Promo code */}
+              {canPayOnline && (
+                <div className="mb-5">
+                  {appliedPromo ? (
+                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                      <span className="text-sm text-green-800">
+                        <strong>{appliedPromo.offerTitle}</strong> applied — code <span className="font-mono">{appliedPromo.code}</span>
+                      </span>
+                      <button type="button" onClick={clearPromoCode} className="text-xs text-green-700 hover:underline">Remove</button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={promoCodeInput}
+                          onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                          placeholder="Have a promo code?"
+                          className={inputCls(false) + " font-mono"}
+                        />
+                        <button
+                          type="button"
+                          onClick={applyPromoCode}
+                          disabled={promoChecking || !promoCodeInput.trim()}
+                          className="btn-outline whitespace-nowrap disabled:opacity-40"
+                        >
+                          {promoChecking ? "Checking…" : "Apply"}
+                        </button>
+                      </div>
+                      {promoError && <p className="text-xs text-red-600 mt-1">{promoError}</p>}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Payment options */}
               {canPayOnline ? (
@@ -510,7 +599,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                         <span className="font-bold text-sm text-navy">Pay in Full</span>
                         {paymentType === "full" && <CheckCircle2 size={14} className="text-green-600 ml-auto" />}
                       </div>
-                      <div className="text-xl font-black text-navy">{formatGBP(totalAmountPence)}</div>
+                      <div className="text-xl font-black text-navy">{formatGBP(discountedTotalPence)}</div>
                       <div className="text-xs text-gray-500 mt-0.5">Nothing more to pay</div>
                     </button>
 
@@ -530,7 +619,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                         </div>
                         <div className="text-xl font-black text-orange-brand">{formatGBP(deposit.depositPence)}</div>
                         <div className="text-xs text-gray-500 mt-0.5">
-                          Balance of {formatGBP(totalAmountPence - deposit.depositPence)} due before course
+                          Balance of {formatGBP(discountedTotalPence - deposit.depositPence)} due before course
                         </div>
                       </button>
                     )}
@@ -549,11 +638,18 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 </div>
               )}
 
-              <p className="text-xs text-gray-500 mb-5">
-                By submitting this form you agree to be contacted by Training Advantage Group regarding your booking.
-                We will not share your details with third parties.
-                {canPayOnline && " You will be securely redirected to Square to complete payment."}
-              </p>
+              <div className="mb-4">
+                <label className="flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
+                  <input type="checkbox" {...register("consent")} className="mt-0.5 w-4 h-4 rounded flex-shrink-0" />
+                  <span>
+                    I agree to the <Link href="/policies#terms" className="text-blue-brand hover:underline">Terms</Link> and{" "}
+                    <Link href="/policies#privacy" className="text-blue-brand hover:underline">Privacy Notice</Link>, and to be
+                    contacted by Training Advantage Group regarding this booking. *
+                    {canPayOnline && " You will be securely redirected to Square to complete payment."}
+                  </span>
+                </label>
+                {errors.consent && <p className="text-xs text-red-600 mt-1">{errors.consent.message}</p>}
+              </div>
 
               <div className="flex justify-between gap-3">
                 <button type="button" onClick={() => setStep(2)} className="btn-outline" disabled={redirecting}>← Back</button>

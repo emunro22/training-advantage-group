@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Globe, Facebook, Linkedin, Instagram } from "lucide-react";
+import { getPublicAccreditationLogos } from "@/lib/accreditation-logos-public";
 
 const FOOTER_LINKS = {
   training: [
@@ -23,6 +24,7 @@ const FOOTER_LINKS = {
     { label: "Learner Hub", href: "/learner-hub" },
     { label: "Book Training", href: "/booking" },
     { label: "Secure Links", href: "/secure-links" },
+    { label: "Downloads & Documents", href: "/downloads" },
     { label: "Course FAQs", href: "/learner-hub#faqs" },
     { label: "Joining Instructions", href: "/learner-hub#joining" },
     { label: "Funding Information", href: "/learner-hub#funding" },
@@ -41,19 +43,8 @@ const FOOTER_LINKS = {
   ],
 };
 
-const ACCREDITATION_LOGOS = [
-  { name: "Qualifications Scotland Approved Centre", src: "/images/accreditations/qualifications-scotland.png", width: 140, height: 60 },
-  { name: "NPORS Accredited Training Provider", src: "/images/accreditations/npors-provider.png", width: 80, height: 80 },
-  { name: "NPORS Accredited", src: "/images/accreditations/npors-accredited.png", width: 80, height: 80 },
-  { name: "DVSA Approved ADR Training Body", src: "/images/accreditations/dvsa-adr.png", width: 160, height: 50 },
-  { name: "Driver CPC Approved Consortium Member", src: "/images/accreditations/driver-cpc.png", width: 140, height: 60 },
-  { name: "NLTC Qualifications", src: "/images/accreditations/nltc.png", width: 130, height: 60 },
-  { name: "Ofqual Department for Education", src: "/images/accreditations/ofqual.png", width: 130, height: 60 },
-  { name: "RADAT Register of Approved Driver Assessors & Trainers", src: "/images/accreditations/radat.png", width: 80, height: 80 },
-  { name: "Public Health Scotland Accredited Training Provider", src: "/images/accreditations/public-health-scotland.jpg", width: 140, height: 60 },
-];
-
-export default function Footer() {
+export default async function Footer() {
+  const accreditationLogos = await getPublicAccreditationLogos("footer");
   return (
     <footer>
       {/* Accreditations strip */}
@@ -63,17 +54,18 @@ export default function Footer() {
             Approved &amp; Accredited By
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6">
-            {ACCREDITATION_LOGOS.map((logo) => (
-              <div key={logo.name} className="flex items-center justify-center">
-                <Image
-                  src={logo.src}
-                  alt={logo.name}
-                  width={logo.width}
-                  height={logo.height}
-                  className="object-contain"
-                />
-              </div>
-            ))}
+            {accreditationLogos.map((logo) => {
+              const img = (
+                <div key={logo.name} className="relative h-14 w-[130px] flex-shrink-0">
+                  <Image src={logo.src} alt={logo.alt} fill sizes="130px" className="object-contain" />
+                </div>
+              );
+              return logo.href ? (
+                <a key={logo.name} href={logo.href} target="_blank" rel="noopener noreferrer" className="relative h-14 w-[130px] flex-shrink-0">
+                  <Image src={logo.src} alt={logo.alt} fill sizes="130px" className="object-contain" />
+                </a>
+              ) : img;
+            })}
           </div>
         </div>
       </div>

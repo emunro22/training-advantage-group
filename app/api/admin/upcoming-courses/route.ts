@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       bookingUrl: body.bookingUrl,
       notes: body.notes,
       active: body.active ?? true,
+      imageUrl: body.imageUrl,
       createdAt: new Date().toISOString(),
     };
 

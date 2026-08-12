@@ -10,6 +10,8 @@ const contactSchema = z.object({
   company: z.string().optional(),
   subject: z.string().min(1),
   message: z.string().min(10),
+  sourcePage: z.string().optional(),
+  consent: z.boolean().refine((v) => v === true, "You must accept the Terms and Privacy Notice"),
 });
 
 export async function POST(request: NextRequest) {

@@ -94,6 +94,7 @@ export interface UpcomingCourse {
   bookingUrl?: string;
   notes?: string;
   active: boolean;
+  imageUrl?: string;
   createdAt: string;
 }
 
@@ -160,6 +161,31 @@ export interface PublicationLogEntry {
   verifiedAt?: string;
   evidenceTicket?: string;
   outcome?: string;
+  createdAt: string;
+}
+
+export interface AccreditationLogo {
+  id: string;
+  name: string;
+  typeLabel: string;
+  logoUrl: string;
+  linkUrl?: string;
+  altText: string;
+  placement: "footer" | "accreditations_page" | "both";
+  sortOrder: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface TagDocument {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  fileUrl: string;
+  fileName: string;
+  sortOrder: number;
+  active: boolean;
   createdAt: string;
 }
 
@@ -295,6 +321,7 @@ function rowToCourse(r: any): UpcomingCourse {
     bookingUrl: r.booking_url ?? undefined,
     notes: r.notes ?? undefined,
     active: r.active,
+    imageUrl: r.image_url ?? undefined,
     createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
   };
 }
@@ -827,12 +854,12 @@ export async function addUpcomingCourse(c: UpcomingCourse): Promise<void> {
     await sql`
       INSERT INTO upcoming_courses
         (id, course_id, course_name, date, end_date, start_time, end_time,
-         location, spots_available, total_spots, price, booking_url, notes, active)
+         location, spots_available, total_spots, price, booking_url, notes, active, image_url)
       VALUES
         (${c.id}, ${c.courseId}, ${c.courseName}, ${c.date}, ${c.endDate ?? null},
          ${c.startTime ?? null}, ${c.endTime ?? null},
          ${c.location}, ${c.spotsAvailable}, ${c.totalSpots}, ${c.price},
-         ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active})
+         ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active}, ${c.imageUrl ?? null})
     `;
     return;
   }
@@ -861,7 +888,8 @@ export async function updateUpcomingCourse(
         price            = COALESCE(${u.price ?? null}, price),
         booking_url      = COALESCE(${u.bookingUrl ?? null}, booking_url),
         notes            = COALESCE(${u.notes ?? null}, notes),
-        active           = COALESCE(${u.active ?? null}, active)
+        active           = COALESCE(${u.active ?? null}, active),
+        image_url        = COALESCE(${u.imageUrl ?? null}, image_url)
       WHERE id = ${id}
       RETURNING id
     `;
@@ -1380,12 +1408,12 @@ export async function bulkAddUpcomingCourses(
             await sql`
               INSERT INTO upcoming_courses
                 (id, course_id, course_name, date, end_date, start_time, end_time,
-                 location, spots_available, total_spots, price, booking_url, notes, active)
+                 location, spots_available, total_spots, price, booking_url, notes, active, image_url)
               VALUES
                 (${c.id}, ${c.courseId}, ${c.courseName}, ${c.date}, ${c.endDate ?? null},
                  ${c.startTime ?? null}, ${c.endTime ?? null},
                  ${c.location}, ${c.spotsAvailable}, ${c.totalSpots}, ${c.price},
-                 ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active})
+                 ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active}, ${c.imageUrl ?? null})
             `;
             return true;
           } catch {
@@ -1403,4 +1431,180 @@ export async function bulkAddUpcomingCourses(
   for (const course of courses) store.courses.push(course);
   fsWrite("upcoming-courses.json", store);
   return { added: courses.length, errors: 0 };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Accreditation Logos
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToAccreditationLogo(r: any): AccreditationLogo {
+  return {
+    id: r.id,
+    name: r.name,
+    typeLabel: r.type_label ?? "",
+    logoUrl: r.logo_url,
+    linkUrl: r.link_url ?? undefined,
+    altText: r.alt_text ?? "",
+    placement: r.placement ?? "both",
+    sortOrder: Number(r.sort_order ?? 0),
+    active: r.active,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getAccreditationLogos(activeOnly = false): Promise<AccreditationLogo[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM accreditation_logos WHERE active = TRUE ORDER BY sort_order ASC, created_at ASC`
+      : await sql`SELECT * FROM accreditation_logos ORDER BY sort_order ASC, created_at ASC`;
+    return rows.map(rowToAccreditationLogo);
+  }
+  const store = fsRead<{ logos: AccreditationLogo[] }>("accreditation-logos.json", { logos: [] });
+  return activeOnly ? store.logos.filter((l) => l.active) : store.logos;
+}
+
+export async function addAccreditationLogo(l: AccreditationLogo): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO accreditation_logos
+        (id, name, type_label, logo_url, link_url, alt_text, placement, sort_order, active)
+      VALUES
+        (${l.id}, ${l.name}, ${l.typeLabel}, ${l.logoUrl}, ${l.linkUrl ?? null}, ${l.altText},
+         ${l.placement}, ${l.sortOrder}, ${l.active})
+    `;
+    return;
+  }
+  const store = fsRead<{ logos: AccreditationLogo[] }>("accreditation-logos.json", { logos: [] });
+  store.logos.push(l);
+  fsWrite("accreditation-logos.json", store);
+}
+
+export async function updateAccreditationLogo(id: string, u: Partial<AccreditationLogo>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE accreditation_logos SET
+        name       = COALESCE(${u.name ?? null}, name),
+        type_label = COALESCE(${u.typeLabel ?? null}, type_label),
+        logo_url   = COALESCE(${u.logoUrl ?? null}, logo_url),
+        link_url   = COALESCE(${u.linkUrl ?? null}, link_url),
+        alt_text   = COALESCE(${u.altText ?? null}, alt_text),
+        placement  = COALESCE(${u.placement ?? null}, placement),
+        sort_order = COALESCE(${u.sortOrder ?? null}, sort_order),
+        active     = COALESCE(${u.active ?? null}, active)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ logos: AccreditationLogo[] }>("accreditation-logos.json", { logos: [] });
+  const idx = store.logos.findIndex((l) => l.id === id);
+  if (idx === -1) return false;
+  store.logos[idx] = { ...store.logos[idx], ...u };
+  fsWrite("accreditation-logos.json", store);
+  return true;
+}
+
+export async function deleteAccreditationLogo(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM accreditation_logos WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ logos: AccreditationLogo[] }>("accreditation-logos.json", { logos: [] });
+  const before = store.logos.length;
+  store.logos = store.logos.filter((l) => l.id !== id);
+  fsWrite("accreditation-logos.json", store);
+  return store.logos.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Documents (public downloads)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToDocument(r: any): TagDocument {
+  return {
+    id: r.id,
+    title: r.title,
+    description: r.description ?? "",
+    category: r.category ?? "General",
+    fileUrl: r.file_url,
+    fileName: r.file_name ?? "",
+    sortOrder: Number(r.sort_order ?? 0),
+    active: r.active,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getDocuments(activeOnly = false): Promise<TagDocument[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM documents WHERE active = TRUE ORDER BY category ASC, sort_order ASC, created_at ASC`
+      : await sql`SELECT * FROM documents ORDER BY category ASC, sort_order ASC, created_at ASC`;
+    return rows.map(rowToDocument);
+  }
+  const store = fsRead<{ documents: TagDocument[] }>("documents.json", { documents: [] });
+  return activeOnly ? store.documents.filter((d) => d.active) : store.documents;
+}
+
+export async function addDocument(d: TagDocument): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO documents (id, title, description, category, file_url, file_name, sort_order, active)
+      VALUES (${d.id}, ${d.title}, ${d.description}, ${d.category}, ${d.fileUrl}, ${d.fileName},
+              ${d.sortOrder}, ${d.active})
+    `;
+    return;
+  }
+  const store = fsRead<{ documents: TagDocument[] }>("documents.json", { documents: [] });
+  store.documents.push(d);
+  fsWrite("documents.json", store);
+}
+
+export async function updateDocument(id: string, u: Partial<TagDocument>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE documents SET
+        title       = COALESCE(${u.title ?? null}, title),
+        description = COALESCE(${u.description ?? null}, description),
+        category    = COALESCE(${u.category ?? null}, category),
+        file_url    = COALESCE(${u.fileUrl ?? null}, file_url),
+        file_name   = COALESCE(${u.fileName ?? null}, file_name),
+        sort_order  = COALESCE(${u.sortOrder ?? null}, sort_order),
+        active      = COALESCE(${u.active ?? null}, active)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ documents: TagDocument[] }>("documents.json", { documents: [] });
+  const idx = store.documents.findIndex((d) => d.id === id);
+  if (idx === -1) return false;
+  store.documents[idx] = { ...store.documents[idx], ...u };
+  fsWrite("documents.json", store);
+  return true;
+}
+
+export async function deleteDocument(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM documents WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ documents: TagDocument[] }>("documents.json", { documents: [] });
+  const before = store.documents.length;
+  store.documents = store.documents.filter((d) => d.id !== id);
+  fsWrite("documents.json", store);
+  return store.documents.length < before;
 }

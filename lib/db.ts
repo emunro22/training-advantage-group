@@ -226,11 +226,41 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS accreditation_logos (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      type_label TEXT NOT NULL DEFAULT '',
+      logo_url TEXT NOT NULL,
+      link_url TEXT,
+      alt_text TEXT NOT NULL DEFAULT '',
+      placement TEXT NOT NULL DEFAULT 'both',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS documents (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      category TEXT NOT NULL DEFAULT 'General',
+      file_url TEXT NOT NULL,
+      file_name TEXT NOT NULL DEFAULT '',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // ALTER TABLE migrations — each wrapped individually so one failure never blocks the rest
   const migrations = [
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS website_product_id TEXT`,
+    sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS image_url TEXT`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`,
     sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB DEFAULT '[]'`,
@@ -252,6 +282,12 @@ export async function ensureSchema() {
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS reconciliation_status TEXT DEFAULT 'unmatched'`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS handoff_sent_at TIMESTAMPTZ`,
     sql`CREATE UNIQUE INDEX IF NOT EXISTS orders_order_ref_idx ON orders(order_ref) WHERE order_ref IS NOT NULL`,
+    // Power Automate notification format additions
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS source_page TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS consent_given BOOLEAN DEFAULT FALSE`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS consent_given_at TIMESTAMPTZ`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_code TEXT`,
+    sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount_pence INTEGER DEFAULT 0`,
   ];
   for (const m of migrations) {
     try { await m; } catch (e) { console.warn("[db] migration skipped:", e); }

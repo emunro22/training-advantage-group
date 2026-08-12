@@ -32,6 +32,10 @@ export interface BookingFormData {
   delegates: number;
   message?: string;
   location: string;
+  /** Page the visitor submitted from, e.g. "/booking" or "/driver-cpc" — reported to Power Automate. */
+  sourcePage?: string;
+  /** Terms & Privacy Notice acceptance, captured at submission. */
+  consent?: boolean;
 }
 
 export interface ContactFormData {
@@ -42,6 +46,10 @@ export interface ContactFormData {
   company?: string;
   subject: string;
   message: string;
+  /** Page the visitor submitted from — reported to Power Automate. */
+  sourcePage?: string;
+  /** Terms & Privacy Notice acceptance, captured at submission. */
+  consent?: boolean;
 }
 
 export interface Location {

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { CalendarDays, Plus, Trash2, Edit2, X, ToggleRight, ToggleLeft, Upload, Download, CalendarX } from "lucide-react";
 import type { UpcomingCourse } from "@/lib/storage";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 
 // ─── CSV helpers ─────────────────────────────────────────────────────────────
 
@@ -127,6 +128,7 @@ const EMPTY_FORM = {
   bookingUrl: "",
   notes: "",
   active: true,
+  imageUrl: "",
 };
 
 type ImportResult = { added: number; errors: number; invalid: number } | null;
@@ -174,6 +176,7 @@ export default function UpcomingCoursesAdmin() {
       bookingUrl: c.bookingUrl ?? "",
       notes: c.notes ?? "",
       active: c.active,
+      imageUrl: c.imageUrl ?? "",
     });
     setEditId(c.id);
     setError("");
@@ -446,6 +449,12 @@ export default function UpcomingCoursesAdmin() {
                 <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Booking URL (optional)</label>
                 <input type="url" value={form.bookingUrl} onChange={(e) => setForm((f) => ({ ...f, bookingUrl: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="/booking or external URL" />
               </div>
+              <ImageUploadField
+                label="Course image (optional)"
+                value={form.imageUrl}
+                onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+                folder="courses"
+              />
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Notes</label>
                 <textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} rows={2} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand resize-none" />

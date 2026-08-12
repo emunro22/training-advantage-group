@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import SpecialOfferBanner from "@/components/layout/SpecialOfferBanner";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
@@ -45,6 +46,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="font-sans antialiased">
+        <SpecialOfferBanner />
         <Header />
         <main className="min-h-screen">{children}</main>
         <Footer />

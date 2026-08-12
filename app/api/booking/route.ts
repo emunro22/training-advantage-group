@@ -14,6 +14,8 @@ const bookingSchema = z.object({
   delegates: z.number().min(1).max(100),
   location: z.string().min(1),
   message: z.string().optional(),
+  sourcePage: z.string().optional(),
+  consent: z.boolean().refine((v) => v === true, "You must accept the Terms and Privacy Notice"),
 });
 
 export async function POST(request: NextRequest) {
