@@ -261,6 +261,8 @@ export async function ensureSchema() {
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS website_product_id TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS image_url TEXT`,
+    sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS vat_status TEXT`,
+    sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS entry_requirements TEXT`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT`,
     sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_id TEXT`,
     sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS accredited_by JSONB DEFAULT '[]'`,

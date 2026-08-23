@@ -43,6 +43,8 @@ export async function POST(request: Request) {
       spotsAvailable: body.spotsAvailable ?? 0,
       totalSpots: body.totalSpots ?? 0,
       price: body.price ?? "",
+      vatStatus: body.vatStatus,
+      entryRequirements: body.entryRequirements,
       bookingUrl: body.bookingUrl,
       notes: body.notes,
       active: body.active ?? true,

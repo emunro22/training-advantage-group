@@ -4,10 +4,13 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SpecialOfferBanner from "@/components/layout/SpecialOfferBanner";
 import { Analytics } from "@vercel/analytics/next";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildOrganizationSchema } from "@/lib/schema";
+import { getGoogleReviews } from "@/lib/google-reviews";
 
 export const metadata: Metadata = {
   title: {
-    default: "Training Advantage Group Ltd | Professional Transport & Industrial Training Scotland",
+    default: "Training Advantage Group | Transport & Industrial Training",
     template: "%s | Training Advantage Group Ltd",
   },
   description:
@@ -34,16 +37,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const reviews = await getGoogleReviews().catch(() => null);
+
   return (
     <html lang="en-GB">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <StructuredData data={buildOrganizationSchema(reviews)} />
       </head>
       <body className="font-sans antialiased">
         <SpecialOfferBanner />

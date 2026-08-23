@@ -3,74 +3,15 @@ import Image from "next/image";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
-import { MapPin, Phone, Car, Clock, CheckCircle2, Bus } from "lucide-react";
+import { MapPin, Phone, Car, Clock, CheckCircle2, Bus, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { TRAINING_CENTRES as CENTRES } from "@/lib/locations";
 
 export const metadata: Metadata = {
   title: "Training Centres | Bothwell, Motherwell & Glasgow | TAG",
   description:
     "Training Advantage Group Ltd operates three fully equipped training centres across central Scotland — Bothwell, Motherwell and Glasgow — plus remote delivery nationwide.",
 };
-
-const CENTRES = [
-  {
-    id: "bothwell",
-    name: "Bothwell HQ & Exam Suite",
-    emoji: "🏢",
-    address: "1st Floor Training Suite, APC Depot, Coalburn Road, Bothwell, G71 8DA",
-    postcode: "G71 8DA",
-    description:
-      "Our main headquarters and primary exam suite. The Bothwell site is co-located at the APC Depot on Coalburn Road and serves as our flagship training facility. Home to our management team and primary classroom and examination facilities.",
-    features: [
-      "Main TAG Headquarters",
-      "Exam Suite & Assessment Rooms",
-      "Fully Equipped Classrooms",
-      "Free Visitor Parking on Site",
-      "Candidate Shuttle Service from St Bride's Church",
-      "DVSA-Approved Testing Facility",
-    ],
-    gradient: "from-navy to-navy-light",
-    transport: "Free shuttle every 10 minutes from St Bride's Church, Fallside Road, Bothwell. Shuttle runs from 40 minutes before course start until 40 minutes after course end.",
-  },
-  {
-    id: "motherwell",
-    name: "Motherwell Training Centre",
-    emoji: "🏫",
-    address: "28 Hope Street, Motherwell, ML1 1TA",
-    postcode: "ML1 1TA",
-    description:
-      "Our Motherwell training centre is located at 28 Hope Street in Motherwell town centre. Modern training facilities with easy access by public transport and good local parking options.",
-    features: [
-      "Full Training Facilities",
-      "Modern Classrooms",
-      "Central Motherwell Location",
-      "Public Transport Links",
-      "Local Parking Available",
-      "Classroom & Practical Training",
-    ],
-    gradient: "from-blue-brand to-blue-dark",
-    transport: "Motherwell train station is a short walk away. Local bus routes serve Hope Street. Street and car park parking available nearby.",
-  },
-  {
-    id: "glasgow",
-    name: "Glasgow Training Centre",
-    emoji: "🏙️",
-    address: "South Street, Glasgow, G14 0BX",
-    postcode: "G14 0BX",
-    description:
-      "Our Glasgow training centre is located in the west of Glasgow on South Street, close to the Clydeside and easily accessible from across the city and surrounding areas.",
-    features: [
-      "West Glasgow Location",
-      "Excellent Transport Links",
-      "Modern Training Facilities",
-      "Easy City Access",
-      "Local Parking Available",
-      "Classroom & Practical Training",
-    ],
-    gradient: "from-orange-dark to-red-brand",
-    transport: "The centre is accessible by bus and local transport links. Parking is available on and around South Street.",
-  },
-];
 
 export default function TrainingCentresPage() {
   return (
@@ -130,6 +71,12 @@ export default function TrainingCentresPage() {
                       </div>
                     ))}
                   </div>
+                  <Link
+                    href={`/training-centres/${centre.id}`}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-brand hover:text-navy transition-colors mt-4"
+                  >
+                    Full {centre.addressLocality} centre details <ArrowRight size={14} />
+                  </Link>
                 </div>
               </div>
 

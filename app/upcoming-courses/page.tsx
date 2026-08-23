@@ -3,6 +3,8 @@ import { getUpcomingCourses } from "@/lib/storage";
 import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildCourseSchema } from "@/lib/schema";
 import {
   CalendarDays,
   MapPin,
@@ -65,6 +67,7 @@ export default async function UpcomingCoursesPage() {
 
   return (
     <>
+      <StructuredData data={buildCourseSchema(courses)} />
       <PageHero
         title="Upcoming Courses"
         subtitle="Browse our scheduled course dates across all locations. Spaces are limited — book early to secure your place."
@@ -134,7 +137,14 @@ export default async function UpcomingCoursesPage() {
                                 </h3>
                                 <div className="flex items-center gap-2 flex-shrink-0">
                                   {course.price && (
-                                    <span className="text-sm font-black text-blue-brand">{course.price}</span>
+                                    <span className="text-sm font-black text-blue-brand">
+                                      {course.price}
+                                      {course.vatStatus && (
+                                        <span className="text-[10px] font-semibold text-gray-400 ml-1">
+                                          {course.vatStatus}
+                                        </span>
+                                      )}
+                                    </span>
                                   )}
                                   <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${spotsColor(course.spotsAvailable, course.totalSpots)}`}>
                                     {course.spotsAvailable === 0
@@ -175,6 +185,12 @@ export default async function UpcomingCoursesPage() {
                                   </span>
                                 )}
                               </div>
+
+                              {course.entryRequirements && (
+                                <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                                  <span className="font-semibold">Entry requirements:</span> {course.entryRequirements}
+                                </p>
+                              )}
 
                               {course.notes && (
                                 <p className="text-xs text-gray-400 mt-2 leading-relaxed">

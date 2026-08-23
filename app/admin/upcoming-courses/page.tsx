@@ -125,6 +125,8 @@ const EMPTY_FORM = {
   spotsAvailable: 10,
   totalSpots: 10,
   price: "",
+  vatStatus: "",
+  entryRequirements: "",
   bookingUrl: "",
   notes: "",
   active: true,
@@ -173,6 +175,8 @@ export default function UpcomingCoursesAdmin() {
       spotsAvailable: c.spotsAvailable,
       totalSpots: c.totalSpots,
       price: c.price,
+      vatStatus: c.vatStatus ?? "",
+      entryRequirements: c.entryRequirements ?? "",
       bookingUrl: c.bookingUrl ?? "",
       notes: c.notes ?? "",
       active: c.active,
@@ -434,6 +438,14 @@ export default function UpcomingCoursesAdmin() {
                   <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Price</label>
                   <input type="text" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="£395" />
                 </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">VAT status (optional)</label>
+                <input type="text" value={form.vatStatus} onChange={(e) => setForm((f) => ({ ...f, vatStatus: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="e.g. Inc. VAT / VAT exempt" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Entry requirements (optional)</label>
+                <input type="text" value={form.entryRequirements} onChange={(e) => setForm((f) => ({ ...f, entryRequirements: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="e.g. Full UK driving licence required" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

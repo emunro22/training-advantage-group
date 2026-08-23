@@ -91,6 +91,8 @@ export interface UpcomingCourse {
   spotsAvailable: number;
   totalSpots: number;
   price: string;
+  vatStatus?: string;
+  entryRequirements?: string;
   bookingUrl?: string;
   notes?: string;
   active: boolean;
@@ -318,6 +320,8 @@ function rowToCourse(r: any): UpcomingCourse {
     spotsAvailable: r.spots_available,
     totalSpots: r.total_spots,
     price: r.price,
+    vatStatus: r.vat_status ?? undefined,
+    entryRequirements: r.entry_requirements ?? undefined,
     bookingUrl: r.booking_url ?? undefined,
     notes: r.notes ?? undefined,
     active: r.active,
@@ -854,11 +858,13 @@ export async function addUpcomingCourse(c: UpcomingCourse): Promise<void> {
     await sql`
       INSERT INTO upcoming_courses
         (id, course_id, course_name, date, end_date, start_time, end_time,
-         location, spots_available, total_spots, price, booking_url, notes, active, image_url)
+         location, spots_available, total_spots, price, vat_status, entry_requirements,
+         booking_url, notes, active, image_url)
       VALUES
         (${c.id}, ${c.courseId}, ${c.courseName}, ${c.date}, ${c.endDate ?? null},
          ${c.startTime ?? null}, ${c.endTime ?? null},
          ${c.location}, ${c.spotsAvailable}, ${c.totalSpots}, ${c.price},
+         ${c.vatStatus ?? null}, ${c.entryRequirements ?? null},
          ${c.bookingUrl ?? null}, ${c.notes ?? null}, ${c.active}, ${c.imageUrl ?? null})
     `;
     return;
@@ -886,6 +892,8 @@ export async function updateUpcomingCourse(
         spots_available  = COALESCE(${u.spotsAvailable ?? null}, spots_available),
         total_spots      = COALESCE(${u.totalSpots ?? null}, total_spots),
         price            = COALESCE(${u.price ?? null}, price),
+        vat_status        = COALESCE(${u.vatStatus ?? null}, vat_status),
+        entry_requirements = COALESCE(${u.entryRequirements ?? null}, entry_requirements),
         booking_url      = COALESCE(${u.bookingUrl ?? null}, booking_url),
         notes            = COALESCE(${u.notes ?? null}, notes),
         active           = COALESCE(${u.active ?? null}, active),

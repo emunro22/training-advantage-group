@@ -141,7 +141,7 @@ const STATIC_NAV = [
     icon: BookOpen,
     color: "text-teal-600",
     items: [
-      { label: "Secure Links", href: "/secure-links", desc: "Registration, updates, certificate checker & more" },
+      { label: "Forms, Portals & Secure Resources", href: "/forms-portals-resources", desc: "Registration, updates, certificate checker & more" },
       { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },      { label: "Downloads & Resources", href: "/downloads", desc: "Forms and documents" },
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
