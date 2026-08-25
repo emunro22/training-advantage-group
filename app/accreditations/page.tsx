@@ -123,12 +123,21 @@ export default async function AccreditationsPage() {
       <section className="py-10 bg-gray-light border-b border-gray-mid">
         <div className="max-w-7xl mx-auto px-4">
           <AnimatedSection>
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              {logoStrip.map((logo) => (
-                <div key={logo.name} className="relative h-16 w-[150px] flex-shrink-0 bg-white rounded-xl p-3 shadow-sm">
-                  <Image src={logo.src} alt={logo.alt} fill sizes="150px" className="object-contain p-2" />
-                </div>
-              ))}
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              {logoStrip.map((logo) => {
+                const card = (
+                  <div className="relative h-16 w-[150px] flex-shrink-0 bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <Image src={logo.src} alt={logo.alt} fill sizes="150px" className="object-contain p-2" />
+                  </div>
+                );
+                return logo.href ? (
+                  <a key={logo.name} href={logo.href} target="_blank" rel="noopener noreferrer" className="hover:-translate-y-0.5 transition-transform duration-300">
+                    {card}
+                  </a>
+                ) : (
+                  <div key={logo.name}>{card}</div>
+                );
+              })}
             </div>
           </AnimatedSection>
         </div>

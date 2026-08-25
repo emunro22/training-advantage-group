@@ -53,18 +53,24 @@ export default async function Footer() {
           <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-7">
             Approved &amp; Accredited By
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             {accreditationLogos.map((logo) => {
-              const img = (
-                <div key={logo.name} className="relative h-14 w-[130px] flex-shrink-0">
-                  <Image src={logo.src} alt={logo.alt} fill sizes="130px" className="object-contain" />
+              const inner = (
+                <div className="relative h-12 w-[120px]">
+                  <Image src={logo.src} alt={logo.alt} fill sizes="120px" className="object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" />
                 </div>
               );
+              const cardClass =
+                "group flex-shrink-0 bg-gray-light/60 hover:bg-white rounded-xl px-4 py-3 border border-transparent hover:border-gray-100 hover:shadow-sm transition-all duration-300";
               return logo.href ? (
-                <a key={logo.name} href={logo.href} target="_blank" rel="noopener noreferrer" className="relative h-14 w-[130px] flex-shrink-0">
-                  <Image src={logo.src} alt={logo.alt} fill sizes="130px" className="object-contain" />
+                <a key={logo.name} href={logo.href} target="_blank" rel="noopener noreferrer" className={cardClass}>
+                  {inner}
                 </a>
-              ) : img;
+              ) : (
+                <div key={logo.name} className={cardClass}>
+                  {inner}
+                </div>
+              );
             })}
           </div>
         </div>

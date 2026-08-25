@@ -300,7 +300,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <Link href="/" className="flex-shrink-0 group">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
