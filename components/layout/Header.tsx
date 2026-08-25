@@ -22,7 +22,6 @@ import {
   AlertTriangle,
   BookOpen,
   ShieldCheck,
-  BadgeCheck,
   CalendarDays,
 } from "lucide-react";
 
@@ -129,20 +128,15 @@ const STATIC_NAV = [
     ],
   },
   {
-    label: "Verify",
-    href: "/verify-certificate",
-    icon: BadgeCheck,
-    color: "text-blue-brand",
-    items: [],
-  },
-  {
     label: "Learner Hub",
     href: "/learner-hub",
     icon: BookOpen,
     color: "text-teal-600",
     items: [
-      { label: "Forms, Portals & Secure Resources", href: "/forms-portals-resources", desc: "Registration, updates, certificate checker & more" },
-      { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },      { label: "Downloads & Resources", href: "/downloads", desc: "Forms and documents" },
+      { label: "Forms, Portals & Secure Resources", href: "/forms-portals-resources", desc: "Registration, updates & more" },
+      { label: "Certificate Checker", href: "/verify-certificate", desc: "Verify a certificate number" },
+      { label: "Joining Instructions", href: "/learner-hub", desc: "Before you arrive" },
+      { label: "Downloads & Resources", href: "/downloads", desc: "Forms and documents" },
       { label: "Course FAQs", href: "/learner-hub#faqs", desc: "Common questions answered" },
       { label: "Funding Information", href: "/learner-hub#funding", desc: "Grants and support" },
       { label: "Accommodation", href: "/learner-hub#accommodation", desc: "Nearby hotels" },
@@ -274,7 +268,7 @@ export default function Header() {
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="bg-navy text-white text-sm py-2 hidden md:block"
+        className="bg-navy text-white text-sm py-1.5 hidden md:block"
       >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -287,16 +281,10 @@ export default function Header() {
               office@trainingadvantagegroup.co.uk
             </a>
           </div>
-          <div className="flex items-center gap-5">
-            <span className="flex items-center gap-1 text-gray-400 text-xs">
-              <MapPin size={12} />
-              Bothwell · Motherwell · Glasgow
-            </span>
-            <Link href="/booking" className="flex items-center gap-1.5 bg-orange-brand/20 border border-orange-brand/30 text-orange-brand px-3 py-1 rounded-full text-xs font-semibold hover:bg-orange-brand hover:text-white transition-all">
-              Quick Booking
-              <ArrowRight size={11} />
-            </Link>
-          </div>
+          <span className="flex items-center gap-1 text-gray-400 text-xs">
+            <MapPin size={12} />
+            Bothwell · Motherwell · Glasgow
+          </span>
         </div>
       </motion.div>
 
@@ -310,20 +298,20 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-[88px]">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2.5 flex-shrink-0">
               <Link href="/" className="flex-shrink-0 group">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
-                  className="relative h-16 w-16"
+                  className="relative h-12 w-12"
                 >
                   <Image
                     src="/images/logo.png"
                     alt="Training Advantage Group Ltd"
                     fill
-                    sizes="64px"
+                    sizes="48px"
                     className="object-contain mix-blend-multiply"
                     priority
                   />
@@ -331,21 +319,11 @@ export default function Header() {
               </Link>
               <div className="hidden sm:block">
                 <Link href="/" className="block group">
-                  <div className="font-black text-navy leading-none text-lg">
+                  <div className="font-black text-navy leading-none text-base">
                     TRAINING <span className="text-blue-brand">ADVANTAGE</span>
                   </div>
-                  <div className="font-black text-navy text-lg leading-none mt-0.5">GROUP LTD</div>
-                  <div className="text-orange-brand text-[9px] font-bold tracking-[0.18em] mt-1 uppercase">
-                    Training for the Future
-                  </div>
+                  <div className="font-black text-navy text-base leading-none mt-0.5">GROUP LTD</div>
                 </Link>
-                <a
-                  href="tel:01412582024"
-                  className="flex items-center gap-1 text-navy text-sm font-semibold mt-1 hover:text-orange-brand transition-colors"
-                >
-                  <Phone size={13} />
-                  0141 258 2024
-                </a>
               </div>
             </div>
 
