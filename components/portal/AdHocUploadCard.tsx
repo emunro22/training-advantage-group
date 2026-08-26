@@ -119,16 +119,18 @@ export default function AdHocUploadCard() {
             </div>
           ))}
         </div>
-        <input
-          type="file"
-          multiple
-          accept=".pdf,.doc,.docx,.heic,.heif,image/*"
-          onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
-          className="block w-full text-sm text-gray-600 cursor-pointer
-                     file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
-                     file:bg-blue-50 file:text-blue-brand file:font-semibold file:text-sm
-                     hover:file:bg-blue-100 file:cursor-pointer"
-        />
+        <div className="relative inline-block">
+          <span className="pointer-events-none inline-flex items-center gap-1.5 text-sm text-blue-brand font-semibold bg-blue-50 px-4 py-2 rounded-lg">
+            + Add file
+          </span>
+          <input
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.heic,.heif,image/*"
+            onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
