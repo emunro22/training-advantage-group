@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Inbox, Paperclip, CheckCircle2, Circle, FileText, UploadCloud } from "lucide-react";
+import { Inbox, Paperclip, CheckCircle2, Circle, FileText, UploadCloud, Trash2 } from "lucide-react";
 
 interface PortalSubmission {
   id: string;
@@ -32,6 +32,16 @@ export default function PortalSubmissionsAdmin() {
   }
 
   useEffect(() => { load(); }, []);
+
+  async function remove(id: string) {
+    if (!confirm("Delete this submission permanently? This can't be undone.")) return;
+    await fetch("/api/admin/portal-submissions", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    await load();
+  }
 
   async function setStatus(id: string, status: "new" | "reviewed") {
     await fetch("/api/admin/portal-submissions", {
@@ -125,13 +135,22 @@ export default function PortalSubmissionsAdmin() {
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => setStatus(s.id, s.status === "new" ? "reviewed" : "new")}
-                  className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors flex-shrink-0"
-                  title={s.status === "new" ? "Mark reviewed" : "Mark as new"}
-                >
-                  {s.status === "reviewed" ? <CheckCircle2 size={18} className="text-green-600" /> : <Circle size={18} />}
-                </button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => setStatus(s.id, s.status === "new" ? "reviewed" : "new")}
+                    className="p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                    title={s.status === "new" ? "Mark reviewed" : "Mark as new"}
+                  >
+                    {s.status === "reviewed" ? <CheckCircle2 size={18} className="text-green-600" /> : <Circle size={18} />}
+                  </button>
+                  <button
+                    onClick={() => remove(s.id)}
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Delete permanently"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

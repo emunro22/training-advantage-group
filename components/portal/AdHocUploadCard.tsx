@@ -11,22 +11,14 @@ export default function AdHocUploadCard() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
-  const [debugLog, setDebugLog] = useState<string[]>([]);
-
-  function log(msg: string) {
-    setDebugLog((d) => [...d, `${new Date().toLocaleTimeString()} — ${msg}`].slice(-8));
-  }
 
   function addFiles(list: FileList | null) {
-    log(`onChange fired. list=${list ? `FileList(${list.length})` : "null"}`);
     if (!list || list.length === 0) {
       setError("No file was received. If you opened this link inside WhatsApp or another app, try opening it in Safari or Chrome directly instead.");
       return;
     }
     setError("");
-    const picked = Array.from(list);
-    log(`adding files: ${picked.map((f) => f.name).join(", ")}`);
-    setFiles((f) => [...f, ...picked].slice(0, 5));
+    setFiles((f) => [...f, ...Array.from(list)].slice(0, 5));
   }
 
   async function handleSubmit() {
@@ -92,15 +84,6 @@ export default function AdHocUploadCard() {
       <div className="font-bold text-navy text-sm mb-3">Upload a document</div>
       {error && <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg mb-3">{error}</div>}
 
-      <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-3 mb-3 text-xs font-mono">
-        <div className="font-bold text-yellow-900 mb-1">DEBUG — files selected right now: {files.length}</div>
-        {debugLog.length === 0 ? (
-          <div className="text-yellow-700">No file input events recorded yet. Click &quot;Choose File&quot; below and pick something.</div>
-        ) : (
-          debugLog.map((l, i) => <div key={i} className="text-yellow-800">{l}</div>)
-        )}
-      </div>
-
       <div className="mb-3">
         <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">What is this? *</label>
         <input
@@ -137,8 +120,6 @@ export default function AdHocUploadCard() {
           type="file"
           multiple
           accept=".pdf,.doc,.docx,.heic,.heif,image/*"
-          onClick={() => log("input clicked")}
-          onInput={(e) => log(`onInput fired. files=${(e.target as HTMLInputElement).files?.length ?? "?"}`)}
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
         />
       </div>

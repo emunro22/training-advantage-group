@@ -1986,6 +1986,19 @@ export async function updatePortalSubmission(id: string, u: Partial<PortalSubmis
   return true;
 }
 
+export async function deletePortalSubmission(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM portal_submissions WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ submissions: PortalSubmission[] }>("portal-submissions.json", { submissions: [] });
+  const before = store.submissions.length;
+  store.submissions = store.submissions.filter((x) => x.id !== id);
+  fsWrite("portal-submissions.json", store);
+  return store.submissions.length < before;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Apprenticeships & SVQ — Pathways
 // ─────────────────────────────────────────────────────────────────────────────
