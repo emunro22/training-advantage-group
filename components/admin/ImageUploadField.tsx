@@ -7,7 +7,7 @@ interface UploadFieldProps {
   label: string;
   value: string;
   onChange: (url: string, fileName?: string) => void;
-  folder: "accreditations" | "courses" | "documents" | "general";
+  folder: "accreditations" | "courses" | "documents" | "portal-resources" | "general";
   accept?: string;
   /** When true, shows a document icon + filename instead of an image preview (for PDFs etc). */
   isDocument?: boolean;

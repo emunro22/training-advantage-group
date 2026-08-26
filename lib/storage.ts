@@ -191,6 +191,32 @@ export interface TagDocument {
   createdAt: string;
 }
 
+export interface PortalUser {
+  id: string;
+  tagId: string;
+  name: string;
+  type: "staff" | "instructor" | "supplier" | "candidate";
+  accessCodeHash: string;
+  accessCodeSalt: string;
+  extraAreas: string[];
+  active: boolean;
+  lastLoginAt?: string;
+  createdAt: string;
+}
+
+export interface PortalResource {
+  id: string;
+  title: string;
+  description: string;
+  resourceType: "document" | "form_link";
+  url: string;
+  fileName?: string;
+  area: string;
+  sortOrder: number;
+  active: boolean;
+  createdAt: string;
+}
+
 export interface JobVacancy {
   id: string;
   title: string;
@@ -1615,4 +1641,231 @@ export async function deleteDocument(id: string): Promise<boolean> {
   store.documents = store.documents.filter((d) => d.id !== id);
   fsWrite("documents.json", store);
   return store.documents.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Secure Portal — Users
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToPortalUser(r: any): PortalUser {
+  return {
+    id: r.id,
+    tagId: r.tag_id,
+    name: r.name ?? "",
+    type: r.type,
+    accessCodeHash: r.access_code_hash,
+    accessCodeSalt: r.access_code_salt,
+    extraAreas: Array.isArray(r.extra_areas) ? r.extra_areas : [],
+    active: r.active,
+    lastLoginAt: r.last_login_at
+      ? r.last_login_at instanceof Date
+        ? r.last_login_at.toISOString()
+        : String(r.last_login_at)
+      : undefined,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getPortalUsers(): Promise<PortalUser[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM portal_users ORDER BY created_at DESC`;
+    return rows.map(rowToPortalUser);
+  }
+  const store = fsRead<{ users: PortalUser[] }>("portal-users.json", { users: [] });
+  return store.users;
+}
+
+export async function getPortalUserByTagId(tagId: string): Promise<PortalUser | null> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM portal_users WHERE tag_id = ${tagId} LIMIT 1`;
+    return rows.length > 0 ? rowToPortalUser(rows[0]) : null;
+  }
+  const users = await getPortalUsers();
+  return users.find((u) => u.tagId.toLowerCase() === tagId.toLowerCase()) ?? null;
+}
+
+export async function getPortalUserById(id: string): Promise<PortalUser | null> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM portal_users WHERE id = ${id} LIMIT 1`;
+    return rows.length > 0 ? rowToPortalUser(rows[0]) : null;
+  }
+  const users = await getPortalUsers();
+  return users.find((u) => u.id === id) ?? null;
+}
+
+export async function addPortalUser(u: PortalUser): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO portal_users
+        (id, tag_id, name, type, access_code_hash, access_code_salt, extra_areas, active)
+      VALUES
+        (${u.id}, ${u.tagId}, ${u.name}, ${u.type}, ${u.accessCodeHash}, ${u.accessCodeSalt},
+         ${JSON.stringify(u.extraAreas)}, ${u.active})
+    `;
+    return;
+  }
+  const store = fsRead<{ users: PortalUser[] }>("portal-users.json", { users: [] });
+  store.users.push(u);
+  fsWrite("portal-users.json", store);
+}
+
+export async function updatePortalUser(id: string, u: Partial<PortalUser>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE portal_users SET
+        tag_id            = COALESCE(${u.tagId ?? null}, tag_id),
+        name              = COALESCE(${u.name ?? null}, name),
+        type              = COALESCE(${u.type ?? null}, type),
+        access_code_hash  = COALESCE(${u.accessCodeHash ?? null}, access_code_hash),
+        access_code_salt  = COALESCE(${u.accessCodeSalt ?? null}, access_code_salt),
+        extra_areas       = COALESCE(${u.extraAreas != null ? JSON.stringify(u.extraAreas) : null}, extra_areas),
+        active            = COALESCE(${u.active ?? null}, active),
+        last_login_at     = COALESCE(${u.lastLoginAt ?? null}, last_login_at)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ users: PortalUser[] }>("portal-users.json", { users: [] });
+  const idx = store.users.findIndex((x) => x.id === id);
+  if (idx === -1) return false;
+  store.users[idx] = { ...store.users[idx], ...u };
+  fsWrite("portal-users.json", store);
+  return true;
+}
+
+export async function deletePortalUser(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM portal_users WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ users: PortalUser[] }>("portal-users.json", { users: [] });
+  const before = store.users.length;
+  store.users = store.users.filter((x) => x.id !== id);
+  fsWrite("portal-users.json", store);
+  return store.users.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Secure Portal — Resources
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToPortalResource(r: any): PortalResource {
+  return {
+    id: r.id,
+    title: r.title,
+    description: r.description ?? "",
+    resourceType: r.resource_type,
+    url: r.url,
+    fileName: r.file_name ?? undefined,
+    area: r.area,
+    sortOrder: Number(r.sort_order ?? 0),
+    active: r.active,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getPortalResources(activeOnly = false): Promise<PortalResource[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM portal_resources WHERE active = TRUE ORDER BY area ASC, sort_order ASC, created_at ASC`
+      : await sql`SELECT * FROM portal_resources ORDER BY area ASC, sort_order ASC, created_at ASC`;
+    return rows.map(rowToPortalResource);
+  }
+  const store = fsRead<{ resources: PortalResource[] }>("portal-resources.json", { resources: [] });
+  return activeOnly ? store.resources.filter((r) => r.active) : store.resources;
+}
+
+export async function getPortalResourceById(id: string): Promise<PortalResource | null> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM portal_resources WHERE id = ${id} LIMIT 1`;
+    return rows.length > 0 ? rowToPortalResource(rows[0]) : null;
+  }
+  const resources = await getPortalResources();
+  return resources.find((r) => r.id === id) ?? null;
+}
+
+export async function getPortalResourcesForAreas(areas: string[]): Promise<PortalResource[]> {
+  const all = await getPortalResources(true);
+  return all.filter((r) => areas.includes(r.area));
+}
+
+export async function getDistinctPortalAreas(): Promise<string[]> {
+  const all = await getPortalResources();
+  const areas = new Set<string>(["staff", "instructor", "supplier", "candidate"]);
+  for (const r of all) areas.add(r.area);
+  return Array.from(areas);
+}
+
+export async function addPortalResource(r: PortalResource): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO portal_resources
+        (id, title, description, resource_type, url, file_name, area, sort_order, active)
+      VALUES
+        (${r.id}, ${r.title}, ${r.description}, ${r.resourceType}, ${r.url}, ${r.fileName ?? null},
+         ${r.area}, ${r.sortOrder}, ${r.active})
+    `;
+    return;
+  }
+  const store = fsRead<{ resources: PortalResource[] }>("portal-resources.json", { resources: [] });
+  store.resources.push(r);
+  fsWrite("portal-resources.json", store);
+}
+
+export async function updatePortalResource(id: string, u: Partial<PortalResource>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE portal_resources SET
+        title         = COALESCE(${u.title ?? null}, title),
+        description   = COALESCE(${u.description ?? null}, description),
+        resource_type = COALESCE(${u.resourceType ?? null}, resource_type),
+        url           = COALESCE(${u.url ?? null}, url),
+        file_name     = COALESCE(${u.fileName ?? null}, file_name),
+        area          = COALESCE(${u.area ?? null}, area),
+        sort_order    = COALESCE(${u.sortOrder ?? null}, sort_order),
+        active        = COALESCE(${u.active ?? null}, active)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ resources: PortalResource[] }>("portal-resources.json", { resources: [] });
+  const idx = store.resources.findIndex((x) => x.id === id);
+  if (idx === -1) return false;
+  store.resources[idx] = { ...store.resources[idx], ...u };
+  fsWrite("portal-resources.json", store);
+  return true;
+}
+
+export async function deletePortalResource(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM portal_resources WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ resources: PortalResource[] }>("portal-resources.json", { resources: [] });
+  const before = store.resources.length;
+  store.resources = store.resources.filter((x) => x.id !== id);
+  fsWrite("portal-resources.json", store);
+  return store.resources.length < before;
 }

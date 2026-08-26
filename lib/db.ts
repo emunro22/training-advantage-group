@@ -255,6 +255,39 @@ export async function ensureSchema() {
     )
   `;
 
+  // Secure portal (in-house replacement for SharePoint links) — instructors, suppliers,
+  // staff and candidates log in with a TAG ID + access code and see only the resources
+  // allocated to their type/area. See lib/portal-auth.ts for the auth mechanism.
+  await sql`
+    CREATE TABLE IF NOT EXISTS portal_users (
+      id TEXT PRIMARY KEY,
+      tag_id TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL DEFAULT '',
+      type TEXT NOT NULL DEFAULT 'candidate',
+      access_code_hash TEXT NOT NULL,
+      access_code_salt TEXT NOT NULL,
+      extra_areas JSONB NOT NULL DEFAULT '[]',
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      last_login_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS portal_resources (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      resource_type TEXT NOT NULL DEFAULT 'form_link',
+      url TEXT NOT NULL,
+      file_name TEXT,
+      area TEXT NOT NULL DEFAULT 'staff',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // ALTER TABLE migrations — each wrapped individually so one failure never blocks the rest
   const migrations = [
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`,

@@ -20,6 +20,7 @@ const ALLOWED_FOLDERS: Record<string, { types: string[]; label: string }> = {
   accreditations: { types: IMAGE_TYPES, label: "image" },
   courses: { types: IMAGE_TYPES, label: "image" },
   documents: { types: DOCUMENT_TYPES, label: "document" },
+  "portal-resources": { types: DOCUMENT_TYPES, label: "document" },
   general: { types: IMAGE_TYPES, label: "image" },
 };
 

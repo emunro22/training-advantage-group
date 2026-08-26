@@ -14,6 +14,8 @@ import {
   CalendarDays,
   ClipboardList,
   AlertCircle,
+  KeyRound,
+  Users,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -189,27 +191,16 @@ export default function FormsPortalsResourcesPage() {
                 assessments, evidence return, qualification/CPD updates, trainee/shadowing arrangements and
                 lead-instructor responsibilities.
               </p>
-              {process.env.INSTRUCTOR_PORTAL_URL ? (
-                <a
-                  href={process.env.INSTRUCTOR_PORTAL_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  Instructor / Assessor Secure Access <ExternalLink size={15} />
-                </a>
-              ) : (
-                <span className="text-xs text-gray-400 italic block mb-2">
-                  Route not yet configured — please call us on 0141 258 2024
-                </span>
-              )}
+              <Link href="/portal/login" className="btn-primary inline-flex items-center gap-2">
+                Instructor / Assessor Secure Access <KeyRound size={15} />
+              </Link>
               <p className="text-xs text-gray-500 mt-3">
-                Requires a TAG-approved Microsoft account and assigned permissions. If you see &ldquo;Access
-                Denied&rdquo;, contact{" "}
+                Sign in with the TAG ID and access code TAG has issued you. If you&apos;ve lost your code or see an
+                error, contact{" "}
                 <a href="mailto:office@trainingadvantagegroup.co.uk" className="text-blue-brand hover:underline">
                   office@trainingadvantagegroup.co.uk
                 </a>{" "}
-                — do not request the folder be made public.
+                for a reset.
               </p>
             </div>
           </AnimatedSection>
@@ -232,30 +223,46 @@ export default function FormsPortalsResourcesPage() {
                 Onboarding, compliance documents, invoice and delivery submission, NDA/data protection declarations,
                 and protected bank-detail changes.
               </p>
-              {process.env.SUPPLIER_PORTAL_URL ? (
-                <a
-                  href={process.env.SUPPLIER_PORTAL_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  Supplier / Subcontractor Secure Access <ExternalLink size={15} />
-                </a>
-              ) : (
-                <span className="text-xs text-gray-400 italic block mb-2">
-                  Route not yet configured — please call us on 0141 258 2024
-                </span>
-              )}
+              <Link href="/portal/login" className="btn-primary inline-flex items-center gap-2">
+                Supplier / Subcontractor Secure Access <KeyRound size={15} />
+              </Link>
               <p className="text-xs text-gray-500 mt-3">
-                Submitting onboarding information does not create automatic supplier approval. Bank-detail changes
-                are independently verified using an existing trusted contact route before payment records are
-                amended — never by email or WhatsApp. If you see &ldquo;Access Denied&rdquo;, contact{" "}
-                <a href="mailto:office@trainingadvantagegroup.co.uk" className="text-blue-brand hover:underline">
-                  office@trainingadvantagegroup.co.uk
-                </a>
-                .
+                Sign in with the TAG ID and access code TAG has issued you. Submitting onboarding information does
+                not create automatic supplier approval. Bank-detail changes are independently verified using an
+                existing trusted contact route before payment records are amended — never by email or WhatsApp.
               </p>
             </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Staff portal + candidate secure resources */}
+      <section className="py-16 bg-gray-light">
+        <div className="max-w-5xl mx-auto px-4 grid md:grid-cols-2 gap-5">
+          <AnimatedSection className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 flex flex-col">
+            <div className="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
+              <Users size={20} className="text-orange-brand" />
+            </div>
+            <h3 className="font-bold text-navy text-lg mb-1.5">Staff Portal</h3>
+            <p className="text-sm text-gray-600 flex-1 mb-4">
+              For authorised TAG staff to access role-based resources and forms without full admin access.
+            </p>
+            <Link href="/portal/login" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-brand hover:text-navy transition-colors">
+              Staff Secure Access <KeyRound size={13} />
+            </Link>
+          </AnimatedSection>
+          <AnimatedSection className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 flex flex-col">
+            <div className="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
+              <UserPlus size={20} className="text-orange-brand" />
+            </div>
+            <h3 className="font-bold text-navy text-lg mb-1.5">Candidate Secure Resources</h3>
+            <p className="text-sm text-gray-600 flex-1 mb-4">
+              Where TAG has allocated you course-specific resources, sign in with the TAG ID and access code you
+              were given to access them.
+            </p>
+            <Link href="/portal/login" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-brand hover:text-navy transition-colors">
+              Candidate Secure Access <KeyRound size={13} />
+            </Link>
           </AnimatedSection>
         </div>
       </section>
