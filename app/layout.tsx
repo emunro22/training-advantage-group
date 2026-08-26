@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SpecialOfferBanner from "@/components/layout/SpecialOfferBanner";
+import RouteGate from "@/components/layout/RouteGate";
 import { Analytics } from "@vercel/analytics/next";
 import StructuredData from "@/components/seo/StructuredData";
 import { buildOrganizationSchema } from "@/lib/schema";
@@ -52,10 +53,14 @@ export default async function RootLayout({
         <StructuredData data={buildOrganizationSchema(reviews)} />
       </head>
       <body className="font-sans antialiased">
-        <SpecialOfferBanner />
-        <Header />
+        <RouteGate exclude={["/admin", "/portal"]}>
+          <SpecialOfferBanner />
+          <Header />
+        </RouteGate>
         <main className="min-h-screen">{children}</main>
-        <Footer />
+        <RouteGate exclude={["/admin", "/portal"]}>
+          <Footer />
+        </RouteGate>
         <Analytics />
       </body>
     </html>
