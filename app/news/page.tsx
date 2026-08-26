@@ -13,6 +13,16 @@ export const metadata: Metadata = {
 
 const ARTICLES = [
   {
+    slug: "new-website-launch-2026",
+    title: "Introducing Our New Website — Built with Munro Studio",
+    excerpt:
+      "We're proud to launch our brand new website, built in partnership with Munro Studio. It brings together our full training services, upcoming Apprenticeship & SVQ pathways, and a new secure portal for candidates, instructors, assessors and suppliers — all in one place.",
+    date: "26 August 2026",
+    category: "Company News",
+    readTime: "2 min read",
+    color: "bg-green-50 text-green-700",
+  },
+  {
     slug: "driver-cpc-2026-requirements",
     title: "Driver CPC 2026: What Drivers Need to Know",
     excerpt:

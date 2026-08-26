@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, CheckCircle2, Paperclip, X, Loader2 } from "lucide-react";
@@ -25,14 +25,20 @@ export default function PortalFormClient({ resourceId, title, description, field
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function setAnswer(id: string, value: string) {
     setAnswers((a) => ({ ...a, [id]: value }));
   }
 
   function addFiles(list: FileList | null) {
-    if (!list) return;
+    if (!list || list.length === 0) {
+      // Some in-app browsers (WhatsApp/Instagram/Messenger's built-in browser) fire the
+      // change event but hand back zero files because they block photo library access —
+      // this looks identical to "nothing happened" unless we say so explicitly.
+      setError("No file was received. If you opened this link inside WhatsApp or another app, try opening it in Safari or Chrome directly instead.");
+      return;
+    }
+    setError("");
     setFiles((f) => [...f, ...Array.from(list)].slice(0, 5));
   }
 
@@ -174,21 +180,16 @@ export default function PortalFormClient({ resourceId, title, description, field
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="text-sm text-blue-brand font-semibold hover:underline"
-          >
+          <label className="inline-block text-sm text-blue-brand font-semibold hover:underline cursor-pointer">
             + Add file
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".pdf,.doc,.docx,.heic,.heif,image/*"
-            className="hidden"
-            onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
-          />
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.heic,.heif,image/*"
+              className="sr-only"
+              onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
+            />
+          </label>
         </div>
 
         <button
