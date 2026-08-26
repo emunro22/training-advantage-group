@@ -15,9 +15,20 @@ const ALLOWED_TYPES = [
   "image/png",
   "image/jpeg",
   "image/webp",
+  "image/heic",
+  "image/heif",
 ];
+// Fallback for browsers that report an unhelpful/empty MIME type for some files
+// (seen for HEIC photos and a few document managers) — checked by extension instead.
+const ALLOWED_EXTENSIONS = ["pdf", "doc", "docx", "png", "jpg", "jpeg", "webp", "heic", "heif"];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_FILES = 5;
+
+function isAllowedFile(file: File): boolean {
+  if (ALLOWED_TYPES.includes(file.type)) return true;
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  return !!ext && ALLOWED_EXTENSIONS.includes(ext);
+}
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -62,7 +73,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `A maximum of ${MAX_FILES} files can be attached` }, { status: 400 });
   }
   for (const file of files) {
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    if (!isAllowedFile(file)) {
       return NextResponse.json({ error: `Unsupported file type: ${file.name}` }, { status: 400 });
     }
     if (file.size > MAX_SIZE_BYTES) {

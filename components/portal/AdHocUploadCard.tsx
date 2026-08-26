@@ -120,7 +120,7 @@ export default function AdHocUploadCard() {
           ref={fileInputRef}
           type="file"
           multiple
-          accept=".pdf,.doc,.docx,image/png,image/jpeg,image/webp"
+          accept=".pdf,.doc,.docx,.heic,.heif,image/*"
           className="hidden"
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
         />
