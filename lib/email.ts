@@ -327,7 +327,7 @@ export async function sendOrderHandoffEmail(data: OrderHandoffData) {
 // event" rule, its own field set per TAG-WEB-SPEC-001 §3). Never includes ID/licence/signature/
 // medical/bank evidence — customers are directed to the secure portal for that instead.
 export interface FixedFormatNotification {
-  kind: "BOOKING" | "ENQUIRY" | "CERTIFICATE_UPDATE";
+  kind: "BOOKING" | "ENQUIRY" | "CERTIFICATE_UPDATE" | "PORTAL_SUBMISSION";
   submissionId: string;
   timestamp: string;
   name?: string;
@@ -353,6 +353,8 @@ function buildNotificationSubject(n: FixedFormatNotification): string {
       return `WEB ENQUIRY | ${n.subjectRef} | ${name}`;
     case "CERTIFICATE_UPDATE":
       return `CERTIFICATE UPDATE | ${n.subjectRef}`;
+    case "PORTAL_SUBMISSION":
+      return `PORTAL SUBMISSION | ${n.subjectRef} | ${name}`;
   }
 }
 
@@ -381,6 +383,7 @@ export async function sendFixedFormatNotification(n: FixedFormatNotification) {
     BOOKING: "New Booking Request",
     ENQUIRY: "New Enquiry",
     CERTIFICATE_UPDATE: "Certificate Update",
+    PORTAL_SUBMISSION: "New Portal Submission",
   };
 
   // Wrapping markup is cosmetic only — the field text and line breaks inside <pre> are untouched
@@ -420,6 +423,38 @@ export async function sendCertificateUpdateNotification(data: {
     status: data.status,
     sourcePage: "/admin/certificates",
     subjectRef: data.certificateNumber,
+  });
+}
+
+// Portal users submit forms/uploads that may contain licences, IDs or other restricted
+// evidence (see the "never includes ID/licence/signature/medical/bank evidence" rule above) —
+// so this notification is deliberately just a pointer telling staff to review it in
+// /admin/portal-submissions, never the answers or attachment links themselves.
+export async function sendPortalSubmissionNotification(data: {
+  kind: "form" | "upload";
+  resourceTitle: string;
+  tagId: string;
+  userName: string;
+  userType: string;
+  submissionId: string;
+  attachmentCount: number;
+}) {
+  await sendFixedFormatNotification({
+    kind: "PORTAL_SUBMISSION",
+    submissionId: data.submissionId,
+    timestamp: new Date().toISOString(),
+    name: `${data.userName} (${data.tagId})`,
+    courseOrService: data.resourceTitle,
+    status:
+      data.kind === "form"
+        ? `Online form completed by ${data.userType}`
+        : `Document uploaded by ${data.userType}`,
+    sourcePage: "/portal",
+    subjectRef: data.resourceTitle,
+    extra: {
+      label: "Action required",
+      value: `${data.attachmentCount} attachment(s) waiting. Review and download in the admin portal: /admin/portal-submissions. Never sent by email — sign in to view.`,
+    },
   });
 }
 

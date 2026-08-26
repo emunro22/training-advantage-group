@@ -1,22 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FolderLock, Plus, Trash2, Edit2, X, ToggleLeft, ToggleRight, FileText, Link2, ExternalLink } from "lucide-react";
+import { FolderLock, Plus, Trash2, Edit2, X, ToggleLeft, ToggleRight, FileText, Link2, ExternalLink, MonitorCheck } from "lucide-react";
 import ImageUploadField from "@/components/admin/ImageUploadField";
+
+interface PortalFormField {
+  id: string;
+  label: string;
+  type: "text" | "textarea" | "date" | "email" | "tel" | "select";
+  required: boolean;
+  options?: string[];
+}
 
 interface PortalResource {
   id: string;
   title: string;
   description: string;
-  resourceType: "document" | "form_link";
+  resourceType: "document" | "form_link" | "online_form";
   url: string;
   fileName?: string;
   area: string;
   sortOrder: number;
   active: boolean;
+  formFields?: PortalFormField[];
 }
 
 const BASE_AREAS = ["staff", "instructor", "supplier", "candidate"];
+const FIELD_TYPES: PortalFormField["type"][] = ["text", "textarea", "date", "email", "tel", "select"];
 
 const EMPTY_FORM = {
   title: "",
@@ -28,6 +38,7 @@ const EMPTY_FORM = {
   customArea: "",
   sortOrder: 0,
   active: true,
+  formFields: [] as PortalFormField[],
 };
 
 export default function PortalResourcesAdmin() {
@@ -70,6 +81,7 @@ export default function PortalResourcesAdmin() {
       customArea: "",
       sortOrder: r.sortOrder,
       active: r.active,
+      formFields: r.formFields ?? [],
     });
     setEditId(r.id);
     setAddingArea(false);
@@ -77,9 +89,28 @@ export default function PortalResourcesAdmin() {
     setShowForm(true);
   }
 
+  function addField() {
+    setForm((f) => ({
+      ...f,
+      formFields: [...f.formFields, { id: `f-${Date.now()}`, label: "", type: "text", required: false }],
+    }));
+  }
+
+  function updateField(id: string, u: Partial<PortalFormField>) {
+    setForm((f) => ({ ...f, formFields: f.formFields.map((fl) => (fl.id === id ? { ...fl, ...u } : fl)) }));
+  }
+
+  function removeField(id: string) {
+    setForm((f) => ({ ...f, formFields: f.formFields.filter((fl) => fl.id !== id) }));
+  }
+
   async function save() {
     const area = addingArea ? form.customArea.trim() : form.area;
-    if (!form.title || !form.url || !area) { setError("Title, URL/upload and area are required."); return; }
+    const urlRequired = form.resourceType !== "online_form";
+    if (!form.title || !area || (urlRequired && !form.url)) { setError("Title, area and URL/upload are required."); return; }
+    if (form.resourceType === "online_form" && form.formFields.some((fl) => !fl.label.trim())) {
+      setError("Every form field needs a label."); return;
+    }
     setSaving(true);
     setError("");
     const payload = { ...form, area };
@@ -154,7 +185,13 @@ export default function PortalResourcesAdmin() {
                 {grouped[area].map((r) => (
                   <div key={r.id} className={`bg-white rounded-2xl border p-4 flex items-center gap-4 ${r.active ? "border-gray-100" : "border-gray-100 opacity-60"}`}>
                     <div className="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                      {r.resourceType === "document" ? <FileText size={18} className="text-orange-brand" /> : <Link2 size={18} className="text-orange-brand" />}
+                      {r.resourceType === "document" ? (
+                        <FileText size={18} className="text-orange-brand" />
+                      ) : r.resourceType === "online_form" ? (
+                        <MonitorCheck size={18} className="text-orange-brand" />
+                      ) : (
+                        <Link2 size={18} className="text-orange-brand" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
@@ -204,11 +241,14 @@ export default function PortalResourcesAdmin() {
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Type</label>
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, resourceType: "form_link", url: "" }))} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${form.resourceType === "form_link" ? "border-blue-brand bg-blue-50 text-blue-brand" : "border-gray-200 text-gray-500"}`}>
-                    <ExternalLink size={14} /> Form link
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, resourceType: "form_link", url: "" }))} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border-2 transition-colors ${form.resourceType === "form_link" ? "border-blue-brand bg-blue-50 text-blue-brand" : "border-gray-200 text-gray-500"}`}>
+                    <ExternalLink size={13} /> Form link
                   </button>
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, resourceType: "document", url: "" }))} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${form.resourceType === "document" ? "border-blue-brand bg-blue-50 text-blue-brand" : "border-gray-200 text-gray-500"}`}>
-                    <FileText size={14} /> Document
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, resourceType: "document", url: "" }))} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border-2 transition-colors ${form.resourceType === "document" ? "border-blue-brand bg-blue-50 text-blue-brand" : "border-gray-200 text-gray-500"}`}>
+                    <FileText size={13} /> Document
+                  </button>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, resourceType: "online_form", url: "" }))} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border-2 transition-colors ${form.resourceType === "online_form" ? "border-blue-brand bg-blue-50 text-blue-brand" : "border-gray-200 text-gray-500"}`}>
+                    <MonitorCheck size={13} /> Online form
                   </button>
                 </div>
               </div>
@@ -217,7 +257,7 @@ export default function PortalResourcesAdmin() {
                   <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Form URL *</label>
                   <input type="url" value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand" placeholder="https://form.jotform.com/…" />
                 </div>
-              ) : (
+              ) : form.resourceType === "document" ? (
                 <ImageUploadField
                   label="Document *"
                   value={form.url}
@@ -226,6 +266,60 @@ export default function PortalResourcesAdmin() {
                   accept=".pdf,.doc,.docx"
                   isDocument
                 />
+              ) : (
+                <div className="space-y-3">
+                  <ImageUploadField
+                    label="Downloadable PDF (optional — shown alongside Complete Online)"
+                    value={form.url}
+                    onChange={(url, fileName) => setForm((f) => ({ ...f, url, fileName: fileName ?? "" }))}
+                    folder="portal-resources"
+                    accept=".pdf,.doc,.docx"
+                    isDocument
+                  />
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Form fields</label>
+                      <button type="button" onClick={addField} className="text-xs font-semibold text-blue-brand hover:underline">+ Add field</button>
+                    </div>
+                    {form.formFields.length === 0 && (
+                      <p className="text-xs text-gray-400">No fields yet — users will just see TAG ID, name and an attachment option.</p>
+                    )}
+                    <div className="space-y-2">
+                      {form.formFields.map((fl) => (
+                        <div key={fl.id} className="border border-gray-200 rounded-xl p-2.5 space-y-2">
+                          <div className="flex gap-2">
+                            <input
+                              value={fl.label}
+                              onChange={(e) => updateField(fl.id, { label: e.target.value })}
+                              placeholder="Field label"
+                              className="flex-1 px-2.5 py-2 border-2 border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-brand"
+                            />
+                            <select
+                              value={fl.type}
+                              onChange={(e) => updateField(fl.id, { type: e.target.value as PortalFormField["type"] })}
+                              className="px-2 py-2 border-2 border-gray-200 rounded-lg text-xs bg-white"
+                            >
+                              {FIELD_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <button type="button" onClick={() => removeField(fl.id)} className="p-2 text-gray-400 hover:text-red-500"><X size={14} /></button>
+                          </div>
+                          {fl.type === "select" && (
+                            <input
+                              value={(fl.options ?? []).join(", ")}
+                              onChange={(e) => updateField(fl.id, { options: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+                              placeholder="Options, comma separated"
+                              className="w-full px-2.5 py-2 border-2 border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-brand"
+                            />
+                          )}
+                          <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" checked={fl.required} onChange={(e) => updateField(fl.id, { required: e.target.checked })} className="w-3.5 h-3.5 rounded" />
+                            <span className="text-xs text-gray-600">Required</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Area *</label>

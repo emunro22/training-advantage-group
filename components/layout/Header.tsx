@@ -23,6 +23,7 @@ import {
   BookOpen,
   ShieldCheck,
   CalendarDays,
+  Award,
 } from "lucide-react";
 
 const STATIC_NAV = [
@@ -31,6 +32,13 @@ const STATIC_NAV = [
     href: "/upcoming-courses",
     icon: CalendarDays,
     color: "text-orange-brand",
+    items: [],
+  },
+  {
+    label: "Apprenticeships & SVQ",
+    href: "/apprenticeships-svq",
+    icon: Award,
+    color: "text-blue-brand",
     items: [],
   },
   {

@@ -204,14 +204,53 @@ export interface PortalUser {
   createdAt: string;
 }
 
+export interface PortalFormField {
+  id: string;
+  label: string;
+  type: "text" | "textarea" | "date" | "email" | "tel" | "select";
+  required: boolean;
+  options?: string[];
+}
+
 export interface PortalResource {
   id: string;
   title: string;
   description: string;
-  resourceType: "document" | "form_link";
+  resourceType: "document" | "form_link" | "online_form";
   url: string;
   fileName?: string;
   area: string;
+  sortOrder: number;
+  active: boolean;
+  createdAt: string;
+  /** "online_form" only — the fields rendered by /portal/[type]/forms/[id]. */
+  formFields?: PortalFormField[];
+}
+
+export interface PortalSubmission {
+  id: string;
+  kind: "form" | "upload";
+  resourceId?: string;
+  resourceTitle: string;
+  portalUserId: string;
+  tagId: string;
+  userName: string;
+  userType: string;
+  area: string;
+  courseRef?: string;
+  answers: Record<string, string>;
+  notes?: string;
+  attachments: { fileName: string; url: string }[];
+  status: "new" | "reviewed";
+  submittedAt: string;
+}
+
+export interface ApprenticeshipPathway {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  status: "developing" | "live";
   sortOrder: number;
   active: boolean;
   createdAt: string;
@@ -1774,6 +1813,7 @@ function rowToPortalResource(r: any): PortalResource {
     sortOrder: Number(r.sort_order ?? 0),
     active: r.active,
     createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    formFields: Array.isArray(r.form_fields) ? r.form_fields : undefined,
   };
 }
 
@@ -1819,10 +1859,10 @@ export async function addPortalResource(r: PortalResource): Promise<void> {
     const sql = getDb();
     await sql`
       INSERT INTO portal_resources
-        (id, title, description, resource_type, url, file_name, area, sort_order, active)
+        (id, title, description, resource_type, url, file_name, area, sort_order, active, form_fields)
       VALUES
         (${r.id}, ${r.title}, ${r.description}, ${r.resourceType}, ${r.url}, ${r.fileName ?? null},
-         ${r.area}, ${r.sortOrder}, ${r.active})
+         ${r.area}, ${r.sortOrder}, ${r.active}, ${JSON.stringify(r.formFields ?? [])})
     `;
     return;
   }
@@ -1843,7 +1883,8 @@ export async function updatePortalResource(id: string, u: Partial<PortalResource
         file_name     = COALESCE(${u.fileName ?? null}, file_name),
         area          = COALESCE(${u.area ?? null}, area),
         sort_order    = COALESCE(${u.sortOrder ?? null}, sort_order),
-        active        = COALESCE(${u.active ?? null}, active)
+        active        = COALESCE(${u.active ?? null}, active),
+        form_fields   = COALESCE(${u.formFields != null ? JSON.stringify(u.formFields) : null}, form_fields)
       WHERE id = ${id}
       RETURNING id
     `;
@@ -1868,4 +1909,162 @@ export async function deletePortalResource(id: string): Promise<boolean> {
   store.resources = store.resources.filter((x) => x.id !== id);
   fsWrite("portal-resources.json", store);
   return store.resources.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Secure Portal — Submissions (online forms + ad-hoc uploads from portal users)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToPortalSubmission(r: any): PortalSubmission {
+  return {
+    id: r.id,
+    kind: r.kind,
+    resourceId: r.resource_id ?? undefined,
+    resourceTitle: r.resource_title ?? "",
+    portalUserId: r.portal_user_id,
+    tagId: r.tag_id,
+    userName: r.user_name ?? "",
+    userType: r.user_type,
+    area: r.area,
+    courseRef: r.course_ref ?? undefined,
+    answers: r.answers && typeof r.answers === "object" ? r.answers : {},
+    notes: r.notes ?? undefined,
+    attachments: Array.isArray(r.attachments) ? r.attachments : [],
+    status: r.status,
+    submittedAt: r.submitted_at instanceof Date ? r.submitted_at.toISOString() : String(r.submitted_at),
+  };
+}
+
+export async function getPortalSubmissions(): Promise<PortalSubmission[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM portal_submissions ORDER BY submitted_at DESC`;
+    return rows.map(rowToPortalSubmission);
+  }
+  const store = fsRead<{ submissions: PortalSubmission[] }>("portal-submissions.json", { submissions: [] });
+  return store.submissions;
+}
+
+export async function addPortalSubmission(s: PortalSubmission): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO portal_submissions
+        (id, kind, resource_id, resource_title, portal_user_id, tag_id, user_name, user_type, area,
+         course_ref, answers, notes, attachments, status)
+      VALUES
+        (${s.id}, ${s.kind}, ${s.resourceId ?? null}, ${s.resourceTitle}, ${s.portalUserId}, ${s.tagId},
+         ${s.userName}, ${s.userType}, ${s.area}, ${s.courseRef ?? null}, ${JSON.stringify(s.answers)},
+         ${s.notes ?? null}, ${JSON.stringify(s.attachments)}, ${s.status})
+    `;
+    return;
+  }
+  const store = fsRead<{ submissions: PortalSubmission[] }>("portal-submissions.json", { submissions: [] });
+  store.submissions.push(s);
+  fsWrite("portal-submissions.json", store);
+}
+
+export async function updatePortalSubmission(id: string, u: Partial<PortalSubmission>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE portal_submissions SET
+        status = COALESCE(${u.status ?? null}, status)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ submissions: PortalSubmission[] }>("portal-submissions.json", { submissions: [] });
+  const idx = store.submissions.findIndex((x) => x.id === id);
+  if (idx === -1) return false;
+  store.submissions[idx] = { ...store.submissions[idx], ...u };
+  fsWrite("portal-submissions.json", store);
+  return true;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Apprenticeships & SVQ — Pathways
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToApprenticeshipPathway(r: any): ApprenticeshipPathway {
+  return {
+    id: r.id,
+    icon: r.icon ?? "🎓",
+    title: r.title,
+    description: r.description ?? "",
+    status: r.status,
+    sortOrder: Number(r.sort_order ?? 0),
+    active: r.active,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  };
+}
+
+export async function getApprenticeshipPathways(activeOnly = false): Promise<ApprenticeshipPathway[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = activeOnly
+      ? await sql`SELECT * FROM apprenticeship_pathways WHERE active = TRUE ORDER BY sort_order ASC, created_at ASC`
+      : await sql`SELECT * FROM apprenticeship_pathways ORDER BY sort_order ASC, created_at ASC`;
+    return rows.map(rowToApprenticeshipPathway);
+  }
+  const store = fsRead<{ pathways: ApprenticeshipPathway[] }>("apprenticeship-pathways.json", { pathways: [] });
+  return activeOnly ? store.pathways.filter((p) => p.active) : store.pathways;
+}
+
+export async function addApprenticeshipPathway(p: ApprenticeshipPathway): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO apprenticeship_pathways (id, icon, title, description, status, sort_order, active)
+      VALUES (${p.id}, ${p.icon}, ${p.title}, ${p.description}, ${p.status}, ${p.sortOrder}, ${p.active})
+    `;
+    return;
+  }
+  const store = fsRead<{ pathways: ApprenticeshipPathway[] }>("apprenticeship-pathways.json", { pathways: [] });
+  store.pathways.push(p);
+  fsWrite("apprenticeship-pathways.json", store);
+}
+
+export async function updateApprenticeshipPathway(id: string, u: Partial<ApprenticeshipPathway>): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE apprenticeship_pathways SET
+        icon        = COALESCE(${u.icon ?? null}, icon),
+        title       = COALESCE(${u.title ?? null}, title),
+        description = COALESCE(${u.description ?? null}, description),
+        status      = COALESCE(${u.status ?? null}, status),
+        sort_order  = COALESCE(${u.sortOrder ?? null}, sort_order),
+        active      = COALESCE(${u.active ?? null}, active)
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ pathways: ApprenticeshipPathway[] }>("apprenticeship-pathways.json", { pathways: [] });
+  const idx = store.pathways.findIndex((x) => x.id === id);
+  if (idx === -1) return false;
+  store.pathways[idx] = { ...store.pathways[idx], ...u };
+  fsWrite("apprenticeship-pathways.json", store);
+  return true;
+}
+
+export async function deleteApprenticeshipPathway(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM apprenticeship_pathways WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ pathways: ApprenticeshipPathway[] }>("apprenticeship-pathways.json", { pathways: [] });
+  const before = store.pathways.length;
+  store.pathways = store.pathways.filter((x) => x.id !== id);
+  fsWrite("apprenticeship-pathways.json", store);
+  return store.pathways.length < before;
 }

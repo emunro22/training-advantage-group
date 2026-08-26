@@ -22,6 +22,8 @@ import {
   FolderOpen,
   Users,
   FolderLock,
+  Inbox,
+  GraduationCap,
 } from "lucide-react";
 
 const NAV = [
@@ -30,6 +32,8 @@ const NAV = [
   { href: "/admin/products", label: "Website Products", icon: ClipboardCheck },
   { href: "/admin/portal-users", label: "Portal Users", icon: Users },
   { href: "/admin/portal-resources", label: "Portal Resources", icon: FolderLock },
+  { href: "/admin/portal-submissions", label: "Portal Submissions", icon: Inbox },
+  { href: "/admin/apprenticeship-pathways", label: "Apprenticeship Pathways", icon: GraduationCap },
   { href: "/admin/accreditations", label: "Accreditation Logos", icon: ShieldCheck },
   { href: "/admin/documents", label: "Documents", icon: FolderOpen },
   { href: "/admin/content", label: "Edit Page Content", icon: PenLine },

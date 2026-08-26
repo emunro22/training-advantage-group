@@ -288,8 +288,44 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS portal_submissions (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL DEFAULT 'form',
+      resource_id TEXT,
+      resource_title TEXT NOT NULL DEFAULT '',
+      portal_user_id TEXT NOT NULL,
+      tag_id TEXT NOT NULL,
+      user_name TEXT NOT NULL DEFAULT '',
+      user_type TEXT NOT NULL DEFAULT '',
+      area TEXT NOT NULL DEFAULT '',
+      course_ref TEXT,
+      answers JSONB NOT NULL DEFAULT '{}',
+      notes TEXT,
+      attachments JSONB NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'new',
+      submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  // Apprenticeships & SVQ — pathway cards, admin-editable so approved frameworks can be
+  // switched from "developing" to "live" individually as SDS approval comes through.
+  await sql`
+    CREATE TABLE IF NOT EXISTS apprenticeship_pathways (
+      id TEXT PRIMARY KEY,
+      icon TEXT NOT NULL DEFAULT '🎓',
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'developing',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // ALTER TABLE migrations — each wrapped individually so one failure never blocks the rest
   const migrations = [
+    sql`ALTER TABLE portal_resources ADD COLUMN IF NOT EXISTS form_fields JSONB DEFAULT '[]'`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS start_time TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS end_time TEXT`,
     sql`ALTER TABLE upcoming_courses ADD COLUMN IF NOT EXISTS website_product_id TEXT`,

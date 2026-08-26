@@ -1,10 +1,12 @@
 export const dynamic = "force-dynamic";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
-import { FileText, ExternalLink, Download } from "lucide-react";
+import { FileText, ExternalLink, Download, MonitorCheck } from "lucide-react";
 import { PORTAL_COOKIE, validatePortalSessionToken, PORTAL_USER_TYPES, type PortalUserType } from "@/lib/portal-auth";
 import { getPortalUserById, getPortalResourcesForAreas } from "@/lib/storage";
 import PortalHeader from "@/components/portal/PortalHeader";
+import AdHocUploadCard from "@/components/portal/AdHocUploadCard";
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -53,6 +55,37 @@ export default async function PortalAreaPage({ params }: Props) {
         ) : (
           <div className="space-y-2">
             {resources.map((r) => {
+              if (r.resourceType === "online_form") {
+                return (
+                  <div key={r.id} className="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-card p-4">
+                    <div className="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                      <MonitorCheck size={18} className="text-orange-brand" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-navy text-sm">{r.title}</div>
+                      {r.description && <div className="text-xs text-gray-500 mt-0.5">{r.description}</div>}
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {r.url && (
+                        <a
+                          href={r.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 border border-gray-200 rounded-lg px-3 py-2 hover:border-blue-brand hover:text-blue-brand transition-colors"
+                        >
+                          <Download size={13} /> PDF
+                        </a>
+                      )}
+                      <Link
+                        href={`/portal/${type}/forms/${r.id}`}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-white bg-orange-brand rounded-lg px-3 py-2 hover:bg-orange-dark transition-colors"
+                      >
+                        Complete Online
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
               const Icon = r.resourceType === "document" ? FileText : ExternalLink;
               const href = r.resourceType === "document" ? `/api/portal/resources/${r.id}/download` : r.url;
               return (
@@ -78,6 +111,12 @@ export default async function PortalAreaPage({ params }: Props) {
                 </a>
               );
             })}
+          </div>
+        )}
+
+        {type === "instructor" && (
+          <div className="mt-6">
+            <AdHocUploadCard />
           </div>
         )}
 
