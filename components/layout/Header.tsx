@@ -18,7 +18,6 @@ import {
   HardHat,
   Monitor,
   FileCheck,
-  Users2,
   AlertTriangle,
   BookOpen,
   ShieldCheck,
@@ -151,19 +150,13 @@ const STATIC_NAV = [
     ],
   },
   {
-    label: "Testimonials",
-    href: "/testimonials",
-    icon: Users2,
-    color: "text-orange-brand",
-    items: [],
-  },
-  {
     label: "About",
     href: "/about",
     icon: AlertTriangle,
     color: "text-gray-500",
     items: [
       { label: "About TAG", href: "/about", desc: "Our story & team" },
+      { label: "Testimonials", href: "/testimonials", desc: "Customer reviews & ratings" },
       { label: "Accreditations", href: "/accreditations", desc: "Our approvals & standards" },
       { label: "Training Centres", href: "/training-centres", desc: "Bothwell, Motherwell, Glasgow" },
       { label: "News & Updates", href: "/news", desc: "Latest from TAG" },
@@ -339,7 +332,7 @@ export default function Header() {
             <nav className="hidden xl:flex items-center gap-px">
               {NAV.map((item) => {
                 const active = isActive(item.href);
-                const highlighted = item.label === "Upcoming Courses" || item.label === "Testimonials";
+                const highlighted = item.label === "Upcoming Courses";
                 return (
                   <div
                     key={item.label}
@@ -362,11 +355,6 @@ export default function Header() {
                       }`}
                     >
                       {item.label}
-                      {item.label === "Testimonials" && reviewsSummary && (
-                        <span className="flex items-center gap-0.5 text-[11px] font-bold">
-                          ★ {reviewsSummary.rating.toFixed(1)}
-                        </span>
-                      )}
                       {item.items && item.items.length > 0 && (
                         <ChevronDown
                           size={13}
@@ -440,6 +428,14 @@ export default function Header() {
 
             {/* CTA buttons */}
             <div className="hidden xl:flex items-center gap-2 flex-shrink-0">
+              {reviewsSummary && (
+                <Link
+                  href="/testimonials"
+                  className="flex items-center gap-1 text-[12px] font-bold text-orange-brand bg-orange-50 hover:bg-orange-100 px-2.5 py-2 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  ★ {reviewsSummary.rating.toFixed(1)}
+                </Link>
+              )}
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link href="/booking" className="btn-primary text-[12px] px-4 py-2 whitespace-nowrap">
                   Book Training
@@ -502,7 +498,7 @@ export default function Header() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 + i * 0.04 }}
                   >
-                    <MobileNavItem item={item} onClose={() => setMobileOpen(false)} isActive={isActive(item.href)} reviewsSummary={reviewsSummary} />
+                    <MobileNavItem item={item} onClose={() => setMobileOpen(false)} isActive={isActive(item.href)} />
                   </motion.div>
                 ))}
 
@@ -530,18 +526,16 @@ function MobileNavItem({
   item,
   onClose,
   isActive,
-  reviewsSummary,
 }: {
   item: (typeof STATIC_NAV)[0];
   onClose: () => void;
   isActive: boolean;
-  reviewsSummary?: { rating: number; totalReviews: number } | null;
 }) {
   const [open, setOpen] = useState(false);
 
   // If no sub-items, render as a plain Link instead of an accordion button
   if (!item.items || item.items.length === 0) {
-    const highlighted = item.label === "Upcoming Courses" || item.label === "Testimonials";
+    const highlighted = item.label === "Upcoming Courses";
     return (
       <Link
         href={item.href}
@@ -558,9 +552,6 @@ function MobileNavItem({
       >
         <item.icon size={15} className={highlighted ? "" : item.color} />
         {item.label}
-        {item.label === "Testimonials" && reviewsSummary && (
-          <span className="text-xs font-bold">★ {reviewsSummary.rating.toFixed(1)}</span>
-        )}
       </Link>
     );
   }
