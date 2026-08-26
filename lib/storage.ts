@@ -1721,7 +1721,7 @@ export async function getPortalUserByTagId(tagId: string): Promise<PortalUser | 
   if (USE_NEON) {
     await ensureSchema();
     const sql = getDb();
-    const rows = await sql`SELECT * FROM portal_users WHERE tag_id = ${tagId} LIMIT 1`;
+    const rows = await sql`SELECT * FROM portal_users WHERE UPPER(tag_id) = UPPER(${tagId}) LIMIT 1`;
     return rows.length > 0 ? rowToPortalUser(rows[0]) : null;
   }
   const users = await getPortalUsers();

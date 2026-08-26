@@ -11,10 +11,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "TAG ID and access code are required" }, { status: 400 });
     }
 
-    const user = await getPortalUserByTagId(tagId.trim());
+    // Normalised server-side (not just relied on client formatting) — TAG IDs and access
+    // codes are always generated/stored uppercase, and this is a case-sensitive lookup.
+    const user = await getPortalUserByTagId(tagId.trim().toUpperCase());
 
     // Generic error for unknown ID, wrong code, or inactive account — never reveal which.
-    if (!user || !user.active || !verifyAccessCode(accessCode.trim(), user.accessCodeSalt, user.accessCodeHash)) {
+    if (!user || !user.active || !verifyAccessCode(accessCode.trim().toUpperCase(), user.accessCodeSalt, user.accessCodeHash)) {
       return NextResponse.json({ error: "Invalid TAG ID or access code" }, { status: 401 });
     }
 

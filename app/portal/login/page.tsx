@@ -60,8 +60,8 @@ export default function PortalLoginPage() {
               <input
                 type="text"
                 value={tagId}
-                onChange={(e) => setTagId(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand transition-colors uppercase"
+                onChange={(e) => setTagId(e.target.value.toUpperCase())}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand transition-colors"
                 placeholder="e.g. INS-0047"
                 autoFocus
                 required
@@ -72,7 +72,7 @@ export default function PortalLoginPage() {
               <input
                 type="text"
                 value={accessCode}
-                onChange={(e) => setAccessCode(e.target.value)}
+                onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand transition-colors tracking-widest"
                 placeholder="Your private access code"
                 required
