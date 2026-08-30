@@ -4,12 +4,17 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SpecialOfferBanner from "@/components/layout/SpecialOfferBanner";
 import RouteGate from "@/components/layout/RouteGate";
+import CookieConsent from "@/components/layout/CookieConsent";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { Analytics } from "@vercel/analytics/next";
 import StructuredData from "@/components/seo/StructuredData";
 import { buildOrganizationSchema } from "@/lib/schema";
 import { getGoogleReviews } from "@/lib/google-reviews";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.trainingadvantagegroup.co.uk";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Training Advantage Group | Transport & Industrial Training",
     template: "%s | Training Advantage Group Ltd",
@@ -62,6 +67,10 @@ export default async function RootLayout({
           <Footer />
         </RouteGate>
         <Analytics />
+        <RouteGate exclude={["/admin", "/portal"]}>
+          <GoogleAnalytics />
+          <CookieConsent />
+        </RouteGate>
       </body>
     </html>
   );

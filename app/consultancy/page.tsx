@@ -4,11 +4,12 @@ import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CourseProductTable from "@/components/ui/CourseProductTable";
 import CTASection from "@/components/home/CTASection";
-import { CheckCircle2, FileText, BarChart2, Shield, Truck, HelpCircle } from "lucide-react";
+import { CheckCircle2, FileText, BarChart2, Shield, Truck, HelpCircle, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import { getPublishedProductsByCategory } from "@/lib/products-public";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/consultancy" },
   title: "Transport Compliance & Consultancy | External TM Services | TAG",
   description:
     "Professional transport compliance consultancy. External TM services, operator licence support, fleet audits, OCRS improvement, tachograph analysis. Scotland.",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 
 const SERVICES = [
   {
+    id: "external-tm",
     icon: FileText,
     title: "External Transport Manager Services",
     desc: "We act as your nominated Transport Manager, providing full legal compliance without the overhead of a full-time TM employee.",
@@ -24,6 +26,16 @@ const SERVICES = [
     price: "POA",
   },
   {
+    id: "olat",
+    icon: GraduationCap,
+    title: "Operator Licence Awareness Training (OLAT)",
+    desc: "A one-day course for operators, directors and nominated Transport Managers who need a practical grounding in operator licence obligations — classroom or remote.",
+    features: ["1-day course", "Classroom or remote delivery", "Operator licence obligations", "Nominated person training", "Booked per candidate"],
+    href: "/booking?course=olat",
+    price: "From £495",
+  },
+  {
+    id: "licence",
     icon: Shield,
     title: "Operator Licence Support",
     desc: "Comprehensive guidance for new applications and renewals of Standard National and International Operator Licences.",
@@ -32,6 +44,7 @@ const SERVICES = [
     price: "POA",
   },
   {
+    id: "audit",
     icon: BarChart2,
     title: "Fleet Compliance Audit",
     desc: "Detailed inspection of your transport operation against DVSA standards to identify risks and improvement areas.",
@@ -40,6 +53,7 @@ const SERVICES = [
     price: "From £250",
   },
   {
+    id: "ocrs",
     icon: Truck,
     title: "OCRS Improvement",
     desc: "Targeted support to improve your Operator Compliance Risk Score and maintain a green DVSA status.",
@@ -48,6 +62,7 @@ const SERVICES = [
     price: "POA",
   },
   {
+    id: "tacho",
     icon: BarChart2,
     title: "Tachograph Analysis",
     desc: "Professional analysis of digital and analogue tachograph data to ensure driver hours compliance.",
@@ -56,6 +71,7 @@ const SERVICES = [
     price: "From £295",
   },
   {
+    id: "fors",
     icon: HelpCircle,
     title: "FORS Support",
     desc: "Guidance and support for Fleet Operator Recognition Scheme accreditation and maintenance.",
@@ -88,9 +104,9 @@ export default async function ConsultancyPage() {
           </AnimatedSection>
 
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {SERVICES.map(({ icon: Icon, title, desc, features, href, price }, i) => (
+            {SERVICES.map(({ id, icon: Icon, title, desc, features, href, price }, i) => (
               <AnimatedSection key={title} delay={i * 0.06}>
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 p-6 h-full flex flex-col hover:-translate-y-1">
+                <div id={id} className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover transition-all duration-300 p-6 h-full flex flex-col hover:-translate-y-1 scroll-mt-24">
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="w-11 h-11 rounded-xl bg-navy/10 flex items-center justify-center flex-shrink-0">
                       <Icon size={22} className="text-navy" />

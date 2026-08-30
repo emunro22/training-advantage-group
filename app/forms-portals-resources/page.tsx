@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/forms-portals-resources" },
   title: "Forms, Portals & Secure Resources | Training Advantage Group",
   description:
     "The correct secure route for candidate registration and updates, instructor/assessor course workspaces, supplier/subcontractor onboarding and certificate checking.",

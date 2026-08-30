@@ -19,6 +19,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { getApprenticeshipPathways } from "@/lib/storage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/apprenticeships-svq" },
   title: "Apprenticeships & SVQ Pathways | Training Advantage Group",
   description:
     "Training Advantage Group is developing Modern Apprenticeship and work-based SVQ provision across Scotland — transport, logistics, plant, safety and professional training pathways.",

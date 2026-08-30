@@ -6,6 +6,7 @@ import { CheckCircle2, Award, Clock, BookOpen, Shield, Users, Laptop, Star, Aler
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/iosh-managing-safely" },
   title: "IOSH Managing Safely® Online Course | Training Advantage Group",
   description:
     "IOSH Approved Managing Safely® online training course — rated Outstanding by IOSH. 100% online, 190-day access. Ideal for supervisors, managers and team leaders. Enrol today.",

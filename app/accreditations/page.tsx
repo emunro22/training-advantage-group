@@ -7,6 +7,7 @@ import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { getPublicAccreditationLogos } from "@/lib/accreditation-logos-public";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/accreditations" },
   title: "Accreditations & Approvals | Training Advantage Group Ltd",
   description:
     "Training Advantage Group Ltd is fully accredited by Qualifications Scotland, DVSA, JAUPT, NPORS and NLTC. All qualifications are nationally recognised.",

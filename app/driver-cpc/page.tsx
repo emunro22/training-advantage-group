@@ -9,10 +9,13 @@ import { CheckCircle2, MapPin, Users, Upload, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { getPageContent } from "@/lib/storage";
 import { getPublishedProductsByCategory } from "@/lib/products-public";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("driver-cpc");
   return {
+    alternates: { canonical: "/driver-cpc" },
     title: c.metaTitle || "Driver CPC Training Scotland – Periodic & Initial CPC Courses",
     description: c.metaDescription || "DVSA & JAUPT approved Driver CPC periodic training across Scotland. Classroom sessions in Bothwell, Motherwell, Glasgow, or online remote delivery. From £50.",
   };
@@ -59,6 +62,7 @@ export default async function DriverCPCPage() {
   const approvedProducts = await getPublishedProductsByCategory("Driver CPC");
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title={c.heroTitle || "Driver CPC Training"}
         subtitle={c.heroSubtitle || "DVSA & JAUPT approved periodic and initial Driver CPC training delivered in classroom or online across Scotland."}

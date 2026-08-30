@@ -22,6 +22,7 @@ const FOOTER_LINKS = {
   ],
   learner: [
     { label: "Learner Hub", href: "/learner-hub" },
+    { label: "Course Pricing", href: "/pricing" },
     { label: "Book Training", href: "/booking" },
     { label: "Forms, Portals & Secure Resources", href: "/forms-portals-resources" },
     { label: "Downloads & Documents", href: "/downloads" },

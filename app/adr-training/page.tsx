@@ -12,6 +12,7 @@ import { getPublishedProductsByCategory } from "@/lib/products-public";
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("adr-training");
   return {
+    alternates: { canonical: "/adr-training" },
     title: c.metaTitle || "ADR Dangerous Goods Training Scotland | Initial & Requalification",
     description: c.metaDescription || "DVSA approved ADR training for the carriage of dangerous goods by road. Initial packages, requalification, tanks and specialist classes. Scotland.",
   };

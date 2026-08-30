@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getJobVacancies } from "@/lib/storage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/careers" },
   title: "Careers at Training Advantage Group | Join Our Team",
   description:
     "Join the team at Training Advantage Group Ltd. We're always looking for passionate instructors, assessors and training professionals to help deliver Scotland's best transport training.",

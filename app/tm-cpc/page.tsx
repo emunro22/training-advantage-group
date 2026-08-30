@@ -13,6 +13,7 @@ import { getPublishedProductsByCategory } from "@/lib/products-public";
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("tm-cpc");
   return {
+    alternates: { canonical: "/tm-cpc" },
     title: c.metaTitle || "Transport Manager CPC Training Scotland | Road Haulage & PSV",
     description: c.metaDescription || "Full Transport Manager CPC classroom training for Road Haulage and PSV. NLTC exam fees included. From £1,195 excl. VAT. Scotland's leading TM CPC provider.",
   };
@@ -186,6 +187,45 @@ export default async function TMCPCPage() {
               Optional: TM App e-learning add-on available at £{c.elearningAddOnPrice ?? "129"}.
               Remote e-learning tests can be arranged nationwide.
             </p>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Refresher Training */}
+      <section id="refresher" className="py-16 bg-gray-light scroll-mt-24">
+        <div className="max-w-5xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+          <AnimatedSection direction="left">
+            <span className="tag bg-orange-brand/10 text-orange-brand mb-4">CMP Renewal</span>
+            <h2 className="section-heading mb-4">Transport Manager CPC Refresher Training</h2>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Already hold your Certificate of Professional Competence? Our TM CPC Refresher
+              Training keeps working Transport Managers current on operator licensing, drivers&apos;
+              hours, vehicle maintenance and fleet compliance — ideal for renewing your Continuous
+              Professional Development or refreshing your knowledge ahead of a DVSA audit.
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Delivered by the same experienced TM tutors as our full CPC course, with the same
+              small class sizes and practical, real-world focus.
+            </p>
+            <Link href="/contact?subject=tm-refresher" className="btn-primary">
+              Enquire About Refresher Training
+            </Link>
+          </AnimatedSection>
+          <AnimatedSection direction="right">
+            <ul className="space-y-2 bg-white rounded-2xl border border-gray-100 shadow-card p-6">
+              {[
+                "Operator licensing & compliance updates",
+                "Drivers' hours & tachograph rule changes",
+                "Vehicle maintenance & roadworthiness standards",
+                "Fleet compliance & OCRS best practice",
+                "Delivered by experienced TM tutors",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm text-gray-700">
+                  <CheckCircle2 size={16} className="text-blue-brand flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </AnimatedSection>
         </div>
       </section>

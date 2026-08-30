@@ -3,6 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/policies" },
   title: "Policies | Training Advantage Group Ltd",
   description: "Privacy policy, terms and conditions, complaints procedure and quality policy for Training Advantage Group Ltd.",
 };

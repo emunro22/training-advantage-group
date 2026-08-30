@@ -8,6 +8,7 @@ import Link from "next/link";
 import { TRAINING_CENTRES as CENTRES } from "@/lib/locations";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/training-centres" },
   title: "Training Centres | Bothwell, Motherwell & Glasgow | TAG",
   description:
     "Training Advantage Group Ltd operates three fully equipped training centres across central Scotland — Bothwell, Motherwell and Glasgow — plus remote delivery nationwide.",

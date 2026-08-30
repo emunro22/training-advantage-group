@@ -6,6 +6,7 @@ import { CheckCircle2, Truck, Shield, BarChart3, Users } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/fleet-training" },
   title: "Fleet Driver Training Scotland | Corporate CPC & Driver Development",
   description:
     "Comprehensive fleet driver training programmes across Scotland. Corporate Driver CPC, bespoke fleet programmes, onsite delivery and compliance support.",

@@ -12,6 +12,7 @@ import { getPublishedProductsByCategory } from "@/lib/products-public";
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("first-aid");
   return {
+    alternates: { canonical: "/first-aid" },
     title: c.metaTitle || "First Aid Training Scotland | EFAW, FAW & Paediatric | Training Advantage Group",
     description: c.metaDescription || "Accredited first aid training in Scotland. Emergency First Aid at Work, First Aid at Work, Paediatric First Aid. NLTC Level 3 OFQUAL regulated qualifications. On-site or at our centres.",
     keywords: ["First Aid Training Scotland", "Emergency First Aid at Work", "EFAW Scotland", "FAW Scotland", "Paediatric First Aid", "NLTC First Aid", "OFQUAL First Aid"],

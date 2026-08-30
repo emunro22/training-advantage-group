@@ -5,8 +5,11 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, BookOpen, Monitor, Target } from "lucide-react";
 import Link from "next/link";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/theory-hazard-perception" },
   title: "LGV & PCV Theory Test Preparation Scotland | Hazard Perception",
   description:
     "Theory test preparation for LGV and PCV licence applicants. Mock tests, hazard perception training and fast-track support. Nationwide. From £95.",
@@ -51,6 +54,7 @@ const FAQS = [
 export default function TheoryHazardPerceptionPage() {
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="Theory & Hazard Perception"
         subtitle="LGV and PCV theory test preparation. Mock tests, question banks, hazard perception practice and fast-track support for all HGV licence categories."

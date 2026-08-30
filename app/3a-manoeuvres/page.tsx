@@ -5,8 +5,11 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, MapPin } from "lucide-react";
 import Link from "next/link";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/3a-manoeuvres" },
   title: "3a Off-Road Manoeuvres Scotland | HGV Reversing & Manoeuvre Training",
   description:
     "3a off-road manoeuvre training for HGV licence candidates across Scotland. Reversing, coupling/uncoupling and vehicle control. £250 excl. VAT.",
@@ -45,6 +48,7 @@ const FAQS = [
 export default function ManoeuvresPage() {
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="3a Off-Road Manoeuvres"
         subtitle="Comprehensive off-road manoeuvre training for HGV licence candidates. Reversing, coupling and precise vehicle control in a safe, controlled environment."

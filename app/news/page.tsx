@@ -6,6 +6,7 @@ import { Calendar, ArrowRight, Tag } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/news" },
   title: "News & Updates | Training Advantage Group Ltd",
   description:
     "Latest news, training updates and industry insights from Training Advantage Group Ltd — Scotland's leading transport and industrial training provider.",

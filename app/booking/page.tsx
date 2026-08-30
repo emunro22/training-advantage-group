@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import BookingPageClient from "./BookingPageClient";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/booking" },
   title: "Book Training | Training Advantage Group Ltd",
   description: "Book professional transport, logistics and industrial training with Training Advantage Group. Easy online booking with email confirmation.",
 };

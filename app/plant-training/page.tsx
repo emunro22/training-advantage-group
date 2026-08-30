@@ -11,6 +11,7 @@ import { getPublishedProductsByCategories } from "@/lib/products-public";
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("plant-training");
   return {
+    alternates: { canonical: "/plant-training" },
     title: c.metaTitle || "Plant & MHE Training Scotland | Forklift, NPORS, Telehandler",
     description: c.metaDescription || "NPORS accredited forklift, telehandler, reach truck and MEWP training. On-site or at our centres. From £295. Glasgow, Motherwell & Bothwell.",
   };

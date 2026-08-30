@@ -5,8 +5,11 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, ClipboardList, MapPin } from "lucide-react";
 import Link from "next/link";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/module-4-cpc" },
   title: "Module 4 CPC Practical Test Scotland | Case Study Preparation",
   description:
     "Module 4 CPC practical test preparation and examination at TAG's approved centres. Thorough preparation, DVSA approved. £295 excl. VAT.",
@@ -45,6 +48,7 @@ const FAQS = [
 export default function Module4CPCPage() {
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="Module 4 CPC Practical Test"
         subtitle="DVSA approved Module 4 CPC practical test preparation and examination. Part of the Driver CPC Initial qualification for all new licence holders."

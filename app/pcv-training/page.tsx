@@ -5,8 +5,11 @@ import PriceCard from "@/components/ui/PriceCard";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, MapPin, Users, FileText, Star } from "lucide-react";
 import Link from "next/link";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/pcv-training" },
   title: "PCV / Bus Driver Training Scotland | Category D Licence",
   description:
     "Professional PCV and bus driver training in Scotland. Category D licence packages including DVLA medicals, theory, practical training and Module 4 CPC. From £1,795.",
@@ -43,6 +46,7 @@ const FAQS = [
 export default function PCVTrainingPage() {
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="PCV / Bus Driver Training"
         subtitle="Professional Category D passenger vehicle training packages. From DVLA medicals to your driving test — we handle everything."

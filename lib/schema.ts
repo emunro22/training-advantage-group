@@ -63,6 +63,23 @@ export function buildLocationSchema(centre: TrainingCentre) {
   };
 }
 
+/** FAQPage schema — rendered on any page with an on-screen FAQ section, so AI
+ * answer engines and Google's AI Overviews can quote the answers directly. */
+export function buildFAQSchema(faqs: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.a,
+      },
+    })),
+  };
+}
+
 interface CourseForSchema {
   courseName: string;
   date: string;

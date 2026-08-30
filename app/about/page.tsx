@@ -6,6 +6,7 @@ import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, MapPin, Phone, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About Training Advantage Group | Scotland's Transport Training Specialists",
   description:
     "Learn about Training Advantage Group Ltd — Scotland's premier transport, logistics and industrial training provider. DVSA approved, Qualifications Scotland accredited.",

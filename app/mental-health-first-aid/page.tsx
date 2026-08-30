@@ -9,6 +9,7 @@ import { getPageContent } from "@/lib/storage";
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("mental-health-first-aid");
   return {
+    alternates: { canonical: "/mental-health-first-aid" },
     title: c.metaTitle || "Mental Health First Aid Training Scotland | Public Health Scotland & NLTC | Training Advantage Group",
     description: c.metaDescription || "Mental health first aid training for the workplace. Public Health Scotland accredited manager awareness sessions and NLTC Level 3 Award in Mental Health First Aid at Work RQF. Scotland.",
     keywords: ["Mental Health First Aid Scotland", "MHFA Scotland", "Mental Health Awareness Training", "Public Health Scotland Mental Health", "NLTC Mental Health First Aid", "Workplace Mental Health"],

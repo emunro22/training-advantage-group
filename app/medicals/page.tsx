@@ -6,10 +6,13 @@ import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, Clock, MapPin, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { getPricingData } from "@/lib/storage";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/medicals" },
   title: "DVLA Group 2 Medical Assessment Scotland | HGV & PCV Medicals",
   description:
     "DVLA Group 2 medical assessments for HGV, PCV and LGV licence applicants across Scotland. In-house at our training centres. £80 per assessment.",
@@ -61,6 +64,7 @@ export default async function MedicalsPage() {
 
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="DVLA Group 2 Medical Assessments"
         subtitle="In-house DVLA Group 2 medicals for HGV and PCV licence applicants and renewals. Quick appointments, professional service, D4 forms completed same day."

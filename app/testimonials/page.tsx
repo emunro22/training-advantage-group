@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getTestimonials } from "@/lib/storage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/testimonials" },
   title: "Testimonials & Reviews | Training Advantage Group Ltd",
   description:
     "Read reviews and testimonials from thousands of satisfied learners and fleet operators who have trained with Training Advantage Group across Scotland.",

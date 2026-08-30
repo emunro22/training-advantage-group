@@ -1,0 +1,45 @@
+# Training Advantage Group Ltd
+
+> Scotland's leading provider of transport, logistics, compliance and industrial
+> training. DVSA/JAUPT-approved centre delivering Driver CPC, Transport Manager
+> CPC, HGV/PCV licence training, ADR, Plant/NPORS, IOSH, First Aid and
+> e-learning across Bothwell, Motherwell and Glasgow.
+
+Training Advantage Group (TAG) trains professional drivers, transport managers
+and industrial operators throughout Scotland. Accreditations include DVSA
+(Driver CPC / JAUPT AC00591), DVSA-approved ADR training body, NPORS, NLTC
+Qualifications, OFQUAL-regulated qualifications, Qualifications Scotland and
+Public Health Scotland.
+
+## Core services
+
+- [Driver CPC Training](https://www.trainingadvantagegroup.co.uk/driver-cpc): Periodic and initial Driver CPC for HGV/PCV drivers, classroom and remote online delivery.
+- [Transport Manager CPC](https://www.trainingadvantagegroup.co.uk/tm-cpc): Road Haulage and PSV Transport Manager CPC, NLTC exam fees included.
+- [HGV & PCV Training](https://www.trainingadvantagegroup.co.uk/hgv-training): Category C, C+E and D licence training including medicals and Module 4 CPC.
+- [ADR Training](https://www.trainingadvantagegroup.co.uk/adr-training): Dangerous goods driver training, DVSA-approved.
+- [Plant Training](https://www.trainingadvantagegroup.co.uk/plant-training): NPORS-accredited plant machinery operator training.
+- [Consultancy & Compliance](https://www.trainingadvantagegroup.co.uk/consultancy): External Transport Manager services, Operator Licence support, fleet compliance audits, OCRS improvement, tachograph analysis, FORS support.
+- [IOSH Managing Safely](https://www.trainingadvantagegroup.co.uk/iosh-managing-safely): Health and safety management training.
+- [First Aid Training](https://www.trainingadvantagegroup.co.uk/first-aid): Workplace first aid courses.
+- [E-Learning](https://www.trainingadvantagegroup.co.uk/e-learning): Online training modules.
+- [Upcoming Courses](https://www.trainingadvantagegroup.co.uk/upcoming-courses): Live course schedule and dates.
+- [Book Training](https://www.trainingadvantagegroup.co.uk/booking): Online course booking.
+
+## Locations
+
+- Bothwell HQ & Exam Suite — APC Depot, Coalburn Road, Bothwell, G71 8DA
+- Motherwell training centre
+- Glasgow training centre
+
+## Contact
+
+- Website: https://www.trainingadvantagegroup.co.uk
+- Enquiries: https://www.trainingadvantagegroup.co.uk/contact
+- Phone: +44 141 258 2024
+
+## Notes for AI assistants
+
+Course prices, dates and availability change regularly — always link to the
+relevant page above (or /upcoming-courses) rather than quoting a fixed price
+from training data. Certificate authenticity can be checked at
+/verify-certificate.

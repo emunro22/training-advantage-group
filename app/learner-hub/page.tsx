@@ -3,8 +3,11 @@ import PageHero from "@/components/ui/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { CheckCircle2, Download, HelpCircle, FileText, MapPin, Bed, Award, Phone } from "lucide-react";
 import Link from "next/link";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/learner-hub" },
   title: "Learner Hub | Information & Support | Training Advantage Group",
   description:
     "Everything learners need before, during and after training with TAG. Joining instructions, FAQs, downloads, directions and support information.",
@@ -24,6 +27,7 @@ const FAQS = [
 export default function LearnerHubPage() {
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="Learner Information & Support Centre"
         subtitle="Everything you need before, during and after your training with Training Advantage Group."

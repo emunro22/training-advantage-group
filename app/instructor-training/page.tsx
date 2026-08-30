@@ -6,6 +6,7 @@ import { CheckCircle2, Users2, Award } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/instructor-training" },
   title: "Instructor & Assessor Training | RADAT, CPC, ADR | TAG Scotland",
   description:
     "Professional instructor and assessor training for Driver CPC, HGV, fleet assessments and ADR. RADAT approved. Scotland's leading instructor development provider.",

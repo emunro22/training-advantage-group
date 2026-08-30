@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Building2, MapPin, Phone, Mail, Globe, ShieldAlert, FileText } from "lucide-react";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/company-information" },
   title: "Company Information | Training Advantage Group",
   description:
     "Official company identity, registration and contact details for Training Advantage Group Ltd.",

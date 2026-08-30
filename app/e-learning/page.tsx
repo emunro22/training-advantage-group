@@ -6,6 +6,7 @@ import { Monitor, CheckCircle2, Users2, Award, Clock, ExternalLink } from "lucid
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/e-learning" },
   title: "E-Learning Academy | Online Training Courses Scotland | TAG",
   description:
     "200+ CPD certified online courses covering health & safety, business skills, health & social care, mental health and hospitality. Instant access. From £15.",

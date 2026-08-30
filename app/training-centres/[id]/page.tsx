@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${centre.name} | ${centre.addressLocality} | Training Advantage Group`,
     description: `${centre.intro} DVSA/NPORS accredited transport and industrial training at our ${centre.addressLocality} training centre, ${centre.address}.`,
+    alternates: { canonical: `/training-centres/${id}` },
   };
 }
 

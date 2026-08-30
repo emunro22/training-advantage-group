@@ -6,6 +6,7 @@ import { FileText, Download } from "lucide-react";
 import { getDocuments } from "@/lib/storage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/downloads" },
   title: "Downloads & Documents | Training Advantage Group",
   description: "Policies, handbooks and course information available to download from Training Advantage Group Ltd.",
 };

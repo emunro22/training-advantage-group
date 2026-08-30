@@ -4,8 +4,11 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import CTASection from "@/components/home/CTASection";
 import { CheckCircle2, ClipboardList, BarChart3, FileText, MapPin } from "lucide-react";
 import Link from "next/link";
+import StructuredData from "@/components/seo/StructuredData";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/driver-assessments" },
   title: "Driver Assessments Scotland | Fleet & Individual Driver Evaluation",
   description:
     "Professional driver assessment services across Scotland. Fleet driver evaluations, individual assessments and safety audits. Detailed reports and improvement plans. From £95.",
@@ -72,6 +75,7 @@ const FAQS = [
 export default function DriverAssessmentsPage() {
   return (
     <>
+      <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="Driver Assessments"
         subtitle="Professional on-road driver evaluations for individual drivers and entire fleets. Detailed reports, risk scoring and improvement plans."

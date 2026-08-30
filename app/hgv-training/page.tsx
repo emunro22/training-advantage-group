@@ -12,6 +12,7 @@ import { getPublishedProductsByCategory } from "@/lib/products-public";
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getPageContent("hgv-training");
   return {
+    alternates: { canonical: "/hgv-training" },
     title: c.metaTitle || "HGV & PCV Driver Training Scotland | Class 1, 2 & Bus Licence",
     description: c.metaDescription || "Complete HGV and PCV driver training packages in Scotland. Cat C, Cat C+E and Category D. Includes medicals, theory, practical training and Module 4 CPC.",
   };
