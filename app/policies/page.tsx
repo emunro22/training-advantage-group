@@ -52,10 +52,10 @@ export default function PoliciesPage() {
               <h2 className="text-2xl font-bold text-navy mb-4">Complaints Procedure</h2>
               <div className="prose prose-gray max-w-none text-sm leading-relaxed space-y-3 text-gray-700">
                 <p>Training Advantage Group Ltd is committed to providing excellent service. If you are dissatisfied with any aspect of our service, please follow the procedure below:</p>
-                <p><strong>Step 1 — Informal resolution:</strong> Speak with your instructor or course coordinator in the first instance. Many issues can be resolved quickly and informally.</p>
-                <p><strong>Step 2 — Formal complaint:</strong> If the matter is not resolved, submit a written complaint to office@trainingadvantagegroup.co.uk with full details of the complaint.</p>
-                <p><strong>Step 3 — Investigation:</strong> We will acknowledge your complaint within 3 working days and provide a full written response within 10 working days.</p>
-                <p><strong>Step 4 — Escalation:</strong> If you remain dissatisfied, you may escalate to the relevant awarding body or regulatory authority depending on the nature of your complaint.</p>
+                <p><strong>Step 1: Informal resolution:</strong> Speak with your instructor or course coordinator in the first instance. Many issues can be resolved quickly and informally.</p>
+                <p><strong>Step 2: Formal complaint:</strong> If the matter is not resolved, submit a written complaint to office@trainingadvantagegroup.co.uk with full details of the complaint.</p>
+                <p><strong>Step 3: Investigation:</strong> We will acknowledge your complaint within 3 working days and provide a full written response within 10 working days.</p>
+                <p><strong>Step 4: Escalation:</strong> If you remain dissatisfied, you may escalate to the relevant awarding body or regulatory authority depending on the nature of your complaint.</p>
               </div>
             </section>
           </AnimatedSection>

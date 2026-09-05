@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     const itemName =
       data.paymentType === "deposit"
-        ? `Deposit — ${data.courseName} (${data.delegates} delegate${data.delegates > 1 ? "s" : ""})`
+        ? `Deposit: ${data.courseName} (${data.delegates} delegate${data.delegates > 1 ? "s" : ""})`
         : `${data.courseName} (${data.delegates} delegate${data.delegates > 1 ? "s" : ""})`;
 
     const response = await client.checkout.paymentLinks.create({

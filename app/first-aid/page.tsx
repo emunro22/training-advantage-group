@@ -36,7 +36,7 @@ const COURSES = [
       "Burns, fractures and minor injuries",
       "NLTC Level 3 Award certificate on pass",
     ],
-    suitableFor: "All industries — particularly lower-risk workplaces",
+    suitableFor: "All industries, particularly lower-risk workplaces",
     validity: "3 years",
     accreditation: "NLTC / OFQUAL",
     courseId: "efaw",
@@ -45,7 +45,7 @@ const COURSES = [
     highlighted: true,
   },
   {
-    title: "First Aid at Work (FAW) — Initial",
+    title: "First Aid at Work (FAW): Initial",
     qualification: "NLTC Level 3 Award in First Aid at Work",
     regulation: "OFQUAL regulated",
     duration: "3 days",
@@ -69,7 +69,7 @@ const COURSES = [
     highlighted: false,
   },
   {
-    title: "First Aid at Work (FAW) — Refresher",
+    title: "First Aid at Work (FAW): Refresher",
     qualification: "FAW Renewal",
     regulation: "OFQUAL regulated",
     duration: "2 days",
@@ -82,7 +82,7 @@ const COURSES = [
       "Advanced casualty management revision",
       "Certificate renewal on successful completion",
     ],
-    suitableFor: "Existing FAW certificate holders — must renew before certificate expires",
+    suitableFor: "Existing FAW certificate holders, must renew before certificate expires",
     validity: "3 years (renewed)",
     accreditation: "NLTC / OFQUAL",
     courseId: "faw-refresher",
@@ -124,7 +124,7 @@ export default async function FirstAidPage() {
     <>
       <PageHero
         title={c.heroTitle || "First Aid Training"}
-        subtitle={c.heroSubtitle || "Accredited first aid courses for the workplace — from Emergency First Aid at Work to the full First Aid at Work qualification. NLTC Level 3 OFQUAL regulated."}
+        subtitle={c.heroSubtitle || "Accredited first aid courses for the workplace, from Emergency First Aid at Work to the full First Aid at Work qualification. NLTC Level 3 OFQUAL regulated."}
         tag="First Aid"
         breadcrumbs={[{ label: "Health & Safety", href: "/iosh-managing-safely" }, { label: "First Aid" }]}
         cta={{ label: "Enquire About First Aid", href: "/contact?course=first-aid" }}
@@ -235,13 +235,13 @@ export default async function FirstAidPage() {
             <span className="tag bg-green-50 text-green-700 mb-4 inline-block">On-Site Delivery</span>
             <h2 className="section-heading mb-4">Training at Your Workplace</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              All our first aid courses can be delivered on-site at your premises. This is often the most cost-effective option for groups — we bring all the equipment and materials to you.
+              All our first aid courses can be delivered on-site at your premises. This is often the most cost-effective option for groups: we bring all the equipment and materials to you.
             </p>
             <ul className="space-y-2 mb-6">
               {[
                 "No travel time or cost for your team",
                 "Training tailored to your specific workplace hazards",
-                "Flexible scheduling — mornings, evenings, weekends",
+                "Flexible scheduling: mornings, evenings, weekends",
                 "Group bookings from 4+ delegates",
                 "All equipment and manikins provided",
                 "Certificates issued on the day",
@@ -262,10 +262,10 @@ export default async function FirstAidPage() {
               <h3 className="font-black text-lg mb-5">Which course is right for you?</h3>
               <div className="space-y-4">
                 {[
-                  { q: "Low-risk office / retail environment", a: "Emergency First Aid at Work (EFAW) — 1 day" },
-                  { q: "Higher-risk workplace (construction, warehousing)", a: "First Aid at Work (FAW) — 3 days" },
-                  { q: "Your current FAW certificate is expiring", a: "First Aid at Work Refresher — 2 days" },
-                  { q: "Working with children / childcare setting", a: "Paediatric First Aid — 1–2 days" },
+                  { q: "Low-risk office / retail environment", a: "Emergency First Aid at Work (EFAW): 1 day" },
+                  { q: "Higher-risk workplace (construction, warehousing)", a: "First Aid at Work (FAW): 3 days" },
+                  { q: "Your current FAW certificate is expiring", a: "First Aid at Work Refresher: 2 days" },
+                  { q: "Working with children / childcare setting", a: "Paediatric First Aid: 1–2 days" },
                 ].map(({ q, a }) => (
                   <div key={q} className="bg-white/10 rounded-xl p-4">
                     <div className="text-xs text-blue-200/70 mb-1">If you&apos;re in a...</div>

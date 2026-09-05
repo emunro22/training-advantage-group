@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Truck, GraduationCap, HardHat, Monitor, FileCheck, Users2, AlertTriangle } from "lucide-react";
 
 const SERVICES = [
-  { id: "driver-cpc",    icon: Truck,        title: "Driver CPC",              desc: "DVSA & JAUPT approved periodic and initial Driver CPC — classroom or online.",   href: "/driver-cpc",         price: "From £50",    accent: "#0066cc", tags: ["Classroom", "Online", "JAUPT"] },
+  { id: "driver-cpc",    icon: Truck,        title: "Driver CPC",              desc: "DVSA & JAUPT approved periodic and initial Driver CPC, classroom or online.",   href: "/driver-cpc",         price: "From £50",    accent: "#0066cc", tags: ["Classroom", "Online", "JAUPT"] },
   { id: "tm-cpc",        icon: FileCheck,    title: "Transport Manager CPC",   desc: "Road Haulage & PSV TM CPC intensive training. NLTC exam fees included.",          href: "/tm-cpc",             price: "From £1,195", accent: "#0d1b4b", tags: ["Road Haulage", "PSV", "NLTC Incl."] },
   { id: "hgv-training",  icon: Truck,        title: "HGV & PCV Training",      desc: "Complete LGV and PCV packages including medicals, theory and practical tests.",   href: "/hgv-training",       price: "From £1,495", accent: "#ff6600", tags: ["Cat C", "Cat C+E", "Cat D"] },
   { id: "adr",           icon: AlertTriangle,title: "ADR Dangerous Goods",     desc: "DVSA approved ADR training. Initial, requalification and specialist upgrades.",   href: "/adr-training",       price: "From £325",   accent: "#cc0000", tags: ["Initial", "Requalification", "DVSA"] },
@@ -41,7 +41,7 @@ export default function ServiceCards() {
           </span>
           <h2 className="section-heading">Everything You Need to Stay Compliant &amp; Progress</h2>
           <p className="section-subheading mx-auto mt-3 text-center">
-            From Driver CPC to Transport Manager qualifications — complete solutions for individuals and fleets.
+            From Driver CPC to Transport Manager qualifications: complete solutions for individuals and fleets.
           </p>
         </motion.div>
 

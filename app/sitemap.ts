@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getCustomPages } from "@/lib/storage";
+import { BLOG_POSTS } from "@/lib/blogPosts";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.trainingadvantagegroup.co.uk";
 
@@ -17,6 +18,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/training-centres/glasgow", priority: 0.7, changeFrequency: "monthly" },
   { path: "/testimonials", priority: 0.5, changeFrequency: "monthly" },
   { path: "/news", priority: 0.5, changeFrequency: "weekly" },
+  { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
   { path: "/careers", priority: 0.4, changeFrequency: "weekly" },
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
   { path: "/booking", priority: 0.5, changeFrequency: "monthly" },
@@ -54,6 +56,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: r.priority,
   }));
 
+  const blogEntries: MetadataRoute.Sitemap = BLOG_POSTS.map((p) => ({
+    url: `${SITE_URL}/blog/${p.slug}`,
+    lastModified: new Date(p.publishDate),
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+
   let customEntries: MetadataRoute.Sitemap = [];
   try {
     const pages = await getCustomPages(true);
@@ -67,5 +76,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Neon tables may not exist yet on first deploy — sitemap still returns the static routes
   }
 
-  return [...staticEntries, ...customEntries];
+  return [...staticEntries, ...blogEntries, ...customEntries];
 }

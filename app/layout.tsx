@@ -10,6 +10,7 @@ import { Analytics } from "@vercel/analytics/next";
 import StructuredData from "@/components/seo/StructuredData";
 import { buildOrganizationSchema } from "@/lib/schema";
 import { getGoogleReviews } from "@/lib/google-reviews";
+import { getCustomPages } from "@/lib/storage";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.trainingadvantagegroup.co.uk";
 
@@ -49,6 +50,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const reviews = await getGoogleReviews().catch(() => null);
+  const customPages = await getCustomPages(true).catch(() => []); // published only, no auth needed
+  const navCustomPages = customPages.map((p) => ({ slug: p.slug, title: p.title, navLabel: p.navLabel, navCategory: p.navCategory }));
+  const reviewsSummary = reviews ? { rating: reviews.rating, totalReviews: reviews.totalReviews } : null;
 
   return (
     <html lang="en-GB">
@@ -60,7 +64,7 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <RouteGate exclude={["/admin", "/portal"]}>
           <SpecialOfferBanner />
-          <Header />
+          <Header customPages={navCustomPages} reviewsSummary={reviewsSummary} />
         </RouteGate>
         <main className="min-h-screen">{children}</main>
         <RouteGate exclude={["/admin", "/portal"]}>

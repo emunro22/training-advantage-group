@@ -8,7 +8,7 @@ function centreToLocalBusiness(centre: TrainingCentre) {
   return {
     "@type": "LocalBusiness",
     "@id": `${SITE_URL}/training-centres/${centre.id}#business`,
-    name: `Training Advantage Group Ltd — ${centre.name}`,
+    name: `Training Advantage Group Ltd: ${centre.name}`,
     parentOrganization: { "@id": ORG_ID },
     address: {
       "@type": "PostalAddress",
@@ -77,6 +77,26 @@ export function buildFAQSchema(faqs: { q: string; a: string }[]) {
         text: faq.a,
       },
     })),
+  };
+}
+
+/** Article schema for a blog post, rendered on /blog/[slug]. */
+export function buildArticleSchema(post: {
+  title: string;
+  metaDescription: string;
+  publishDate: string;
+  slug: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.metaDescription,
+    datePublished: post.publishDate,
+    dateModified: post.publishDate,
+    author: { "@id": ORG_ID, name: "Training Advantage Group Ltd" },
+    publisher: { "@id": ORG_ID, name: "Training Advantage Group Ltd" },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
   };
 }
 

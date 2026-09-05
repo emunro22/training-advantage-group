@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/training-centres" },
   title: "Training Centres | Bothwell, Motherwell & Glasgow | TAG",
   description:
-    "Training Advantage Group Ltd operates three fully equipped training centres across central Scotland — Bothwell, Motherwell and Glasgow — plus remote delivery nationwide.",
+    "Training Advantage Group Ltd operates three fully equipped training centres across central Scotland: Bothwell, Motherwell and Glasgow, plus remote delivery nationwide.",
 };
 
 export default function TrainingCentresPage() {
@@ -19,7 +19,7 @@ export default function TrainingCentresPage() {
     <>
       <PageHero
         title="Our Training Centres"
-        subtitle="Three fully equipped professional training centres across central Scotland — plus remote and on-site delivery available nationwide."
+        subtitle="Three fully equipped professional training centres across central Scotland, plus remote and on-site delivery available nationwide."
         tag="Training Centres"
         breadcrumbs={[{ label: "About TAG", href: "/about" }, { label: "Training Centres" }]}
         cta={{ label: "Get Directions", href: "/contact" }}
@@ -92,7 +92,7 @@ export default function TrainingCentresPage() {
         <div className="max-w-4xl mx-auto px-4">
           <AnimatedSection className="text-center">
             <div className="text-4xl mb-4">🚐</div>
-            <h2 className="text-2xl font-black text-white mb-3">Free Shuttle Service — Bothwell HQ</h2>
+            <h2 className="text-2xl font-black text-white mb-3">Free Shuttle Service: Bothwell HQ</h2>
             <p className="text-blue-light/80 mb-6">
               During peak training periods, all candidates at our Bothwell HQ must use the designated candidate shuttle service. Visitors are welcome to park on site.
             </p>

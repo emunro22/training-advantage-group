@@ -155,7 +155,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
       }
       setAppliedPromo({ code: promoCodeInput.trim(), discountAmountPence: data.discountAmountPence, offerTitle: data.offerTitle });
     } catch {
-      setPromoError("Could not check that code — please try again.");
+      setPromoError("Could not check that code. Please try again.");
     } finally {
       setPromoChecking(false);
     }
@@ -376,7 +376,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                   <div className="flex items-center gap-2 mb-3">
                     <CalendarDays size={15} className="text-orange-brand" />
                     <span className="text-sm font-bold text-navy">Available Scheduled Sessions</span>
-                    <span className="text-xs text-gray-400">— click to pre-fill your booking</span>
+                    <span className="text-xs text-gray-400">(click to pre-fill your booking)</span>
                   </div>
                   <div className="grid gap-2">
                     {upcomingCourses.map((uc) => {
@@ -418,7 +418,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                           </div>
                           {isSelected && (
                             <div className="flex items-center gap-1 mt-1.5 text-xs text-orange-brand font-semibold">
-                              <CheckCircle2 size={11} /> Selected — details pre-filled below
+                              <CheckCircle2 size={11} /> Selected, details pre-filled below
                             </div>
                           )}
                         </button>
@@ -552,7 +552,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                   {appliedPromo ? (
                     <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                       <span className="text-sm text-green-800">
-                        <strong>{appliedPromo.offerTitle}</strong> applied — code <span className="font-mono">{appliedPromo.code}</span>
+                        <strong>{appliedPromo.offerTitle}</strong> applied, code <span className="font-mono">{appliedPromo.code}</span>
                       </span>
                       <button type="button" onClick={clearPromoCode} className="text-xs text-green-700 hover:underline">Remove</button>
                     </div>
@@ -627,7 +627,7 @@ export default function BookingForm({ defaultCourse }: { defaultCourse?: string 
                 </div>
               ) : (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm text-blue-800">
-                  <strong>Price on application</strong> — this course is priced individually. Submit your request and we&apos;ll be in touch within 24 hours to confirm details and arrange payment.
+                  <strong>Price on application</strong>: this course is priced individually. Submit your request and we&apos;ll be in touch within 24 hours to confirm details and arrange payment.
                 </div>
               )}
 

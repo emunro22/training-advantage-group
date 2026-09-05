@@ -23,6 +23,8 @@ import {
   ShieldCheck,
   CalendarDays,
   Award,
+  Facebook,
+  Instagram,
 } from "lucide-react";
 
 const STATIC_NAV = [
@@ -129,8 +131,8 @@ const STATIC_NAV = [
     icon: ShieldCheck,
     color: "text-green-600",
     items: [
-      { label: "IOSH Managing Safely®", href: "/iosh-managing-safely", desc: "IOSH Approved — rated Outstanding" },
-      { label: "First Aid Training", href: "/first-aid", desc: "EFAW, FAW & Paediatric — NLTC OFQUAL qualified" },
+      { label: "IOSH Managing Safely®", href: "/iosh-managing-safely", desc: "IOSH Approved, rated Outstanding" },
+      { label: "First Aid Training", href: "/first-aid", desc: "EFAW, FAW & Paediatric, NLTC OFQUAL qualified" },
       { label: "Mental Health First Aid", href: "/mental-health-first-aid", desc: "Public Health Scotland & NLTC Level 3" },
     ],
   },
@@ -160,6 +162,7 @@ const STATIC_NAV = [
       { label: "Accreditations", href: "/accreditations", desc: "Our approvals & standards" },
       { label: "Training Centres", href: "/training-centres", desc: "Bothwell, Motherwell, Glasgow" },
       { label: "News & Updates", href: "/news", desc: "Latest from TAG" },
+      { label: "Blog", href: "/blog", desc: "Guides & explainers" },
       { label: "Instructor Training", href: "/instructor-training", desc: "Become a TAG approved instructor" },
       { label: "Careers", href: "/careers", desc: "Join our team" },
       { label: "Contact Us", href: "/contact", desc: "Get in touch" },
@@ -173,31 +176,23 @@ interface CustomNavPage {
   navCategory: string;
 }
 
-export default function Header() {
+interface HeaderProps {
+  /** Server-fetched published custom pages, injected into the nav. Rendered in the initial
+   * HTML (rather than fetched client-side) so admin-added pages are discoverable/crawlable
+   * and get real internal links even without JS executing. */
+  customPages?: CustomNavPage[];
+  /** Server-fetched Google rating summary for the promoted Testimonials nav item, sourced
+   * from the same call already made for the root layout's Organization schema. */
+  reviewsSummary?: { rating: number; totalReviews: number } | null;
+}
+
+export default function Header({ customPages = [], reviewsSummary = null }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [customPages, setCustomPages] = useState<CustomNavPage[]>([]);
-  const [reviewsSummary, setReviewsSummary] = useState<{ rating: number; totalReviews: number } | null>(null);
   const pathname = usePathname();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Live Google rating badge for the promoted Testimonials nav item
-  useEffect(() => {
-    fetch("/api/reviews-summary")
-      .then((r) => r.json())
-      .then((d) => { if (d.available) setReviewsSummary({ rating: d.rating, totalReviews: d.totalReviews }); })
-      .catch(() => {});
-  }, []);
-
-  // Load custom pages for nav (published only, no auth needed)
-  useEffect(() => {
-    fetch("/api/nav")
-      .then((r) => r.json())
-      .then((d) => setCustomPages(d.pages ?? []))
-      .catch(() => {});
-  }, []);
 
   // Build the final nav: inject custom pages into their categories or as standalone items
   const NAV = (() => {
@@ -441,6 +436,28 @@ export default function Header() {
                   Book Training
                 </Link>
               </motion.div>
+            </div>
+
+            {/* Social icons — shown immediately left of the mobile hamburger, below xl (1280px) */}
+            <div className="xl:hidden flex items-center gap-1">
+              <a
+                href="https://facebook.com/TrainingAdvantageGroup"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Training Advantage Group on Facebook"
+                className="p-2 rounded-xl hover:bg-gray-light transition-colors text-navy"
+              >
+                <Facebook size={18} />
+              </a>
+              <a
+                href="https://instagram.com/trainingadvantagegroup"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Training Advantage Group on Instagram"
+                className="p-2 rounded-xl hover:bg-gray-light transition-colors text-navy"
+              >
+                <Instagram size={18} />
+              </a>
             </div>
 
             {/* Mobile toggle — shown below xl (1280px) */}

@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/news" },
   title: "News & Updates | Training Advantage Group Ltd",
   description:
-    "Latest news, training updates and industry insights from Training Advantage Group Ltd — Scotland's leading transport and industrial training provider.",
+    "Latest news, training updates and industry insights from Training Advantage Group Ltd, Scotland's leading transport and industrial training provider.",
 };
 
 const ARTICLES = [
   {
     slug: "new-website-launch-2026",
-    title: "Introducing Our New Website — Built with Munro Studio",
+    title: "Introducing Our New Website, Built with Munro Studio",
     excerpt:
-      "We're proud to launch our brand new website, built in partnership with Munro Studio. It brings together our full training services, upcoming Apprenticeship & SVQ pathways, and a new secure portal for candidates, instructors, assessors and suppliers — all in one place.",
+      "We're proud to launch our brand new website, built in partnership with Munro Studio. It brings together our full training services, upcoming Apprenticeship & SVQ pathways, and a new secure portal for candidates, instructors, assessors and suppliers, all in one place.",
     date: "26 August 2026",
     category: "Company News",
     readTime: "2 min read",
@@ -37,7 +37,7 @@ const ARTICLES = [
     slug: "tm-cpc-exam-fees-included",
     title: "TAG TM CPC: NLTC Exam Fees Now Included",
     excerpt:
-      "We're pleased to confirm that NLTC Qualifications exam fees are now fully included in all TAG Transport Manager CPC packages — saving candidates up to £250 compared to some other providers.",
+      "We're pleased to confirm that NLTC Qualifications exam fees are now fully included in all TAG Transport Manager CPC packages, saving candidates up to £250 compared to some other providers.",
     date: "8 May 2026",
     category: "TM CPC",
     readTime: "2 min read",
@@ -55,7 +55,7 @@ const ARTICLES = [
   },
   {
     slug: "new-glasgow-centre-2026",
-    title: "Glasgow Training Centre — New Facilities",
+    title: "Glasgow Training Centre: New Facilities",
     excerpt:
       "Our Glasgow South Street training centre has been upgraded with new classroom facilities, updated training equipment and improved learner amenities. Find out what's new.",
     date: "22 April 2026",
@@ -65,7 +65,7 @@ const ARTICLES = [
   },
   {
     slug: "adr-requalification-reminder",
-    title: "ADR Requalification — Don't Let Your Certificate Lapse",
+    title: "ADR Requalification: Don't Let Your Certificate Lapse",
     excerpt:
       "ADR certificates are valid for 5 years. With many certificates issued in 2021 now approaching expiry, we remind operators to check their drivers' ADR status and book requalification early.",
     date: "14 April 2026",
@@ -77,7 +77,7 @@ const ARTICLES = [
     slug: "fleet-training-packages-2026",
     title: "Introducing TAG Corporate Fleet Training Packages",
     excerpt:
-      "We've launched new corporate fleet training packages for operators with 10+ drivers. Dedicated account management, flexible scheduling and volume pricing — designed for busy transport operations.",
+      "We've launched new corporate fleet training packages for operators with 10+ drivers. Dedicated account management, flexible scheduling and volume pricing, designed for busy transport operations.",
     date: "5 April 2026",
     category: "Fleet Training",
     readTime: "4 min read",

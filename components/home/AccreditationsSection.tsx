@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const ACCREDITATIONS = [
   { name: "Qualifications Scotland", sub: "Approved Centre", logo: "/images/accreditations/qualifications-scotland.png", bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-900" },
-  { name: "Driver CPC", sub: "JAUPT Approved — AC00591", logo: "/images/accreditations/driver-cpc.png", bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-900" },
+  { name: "Driver CPC", sub: "JAUPT Approved, AC00591", logo: "/images/accreditations/driver-cpc.png", bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-900" },
   { name: "DVSA", sub: "Approved ADR Training Body", logo: "/images/accreditations/dvsa-adr.png", bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-900" },
   { name: "NPORS", sub: "Accredited", logo: "/images/accreditations/npors-accredited.png", bg: "bg-orange-50", border: "border-orange-200", text: "text-orange-900" },
   { name: "NLTC Qualifications", sub: "Official Regulated Qualification", logo: "/images/accreditations/nltc.png", bg: "bg-red-50", border: "border-red-200", text: "text-red-900" },

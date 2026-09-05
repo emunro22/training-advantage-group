@@ -41,7 +41,7 @@ const FAQS = [
   },
   {
     q: "Do I need Driver CPC training?",
-    a: "If you hold a Category C, C+E, C1, D, D+E or D1 licence and drive professionally, you are likely required to hold a valid DQC. There are some exemptions — contact us if unsure.",
+    a: "If you hold a Category C, C+E, C1, D, D+E or D1 licence and drive professionally, you are likely required to hold a valid DQC. There are some exemptions, so contact us if unsure.",
   },
   {
     q: "How long is a Driver CPC course?",
@@ -49,7 +49,7 @@ const FAQS = [
   },
   {
     q: "Can I do Driver CPC online?",
-    a: "Yes — we offer remote online CPC training. You'll need a computer or tablet with a webcam and stable internet connection. Hours are uploaded directly to DVSA.",
+    a: "Yes, we offer remote online CPC training. You'll need a computer or tablet with a webcam and stable internet connection. Hours are uploaded directly to DVSA.",
   },
   {
     q: "How are hours uploaded to DVSA?",
@@ -201,7 +201,7 @@ export default async function DriverCPCPage() {
             {[
               { step: "01", title: "Book Online", desc: "Choose your course, date and location through our booking system or call us directly.", icon: BookOpen },
               { step: "02", title: "Attend Training", desc: "Join your session in one of our professional training centres or remotely online.", icon: Users },
-              { step: "03", title: "Complete Assessment", desc: "Attendance-based assessment — no difficult exams. Simply participate and engage.", icon: CheckCircle2 },
+              { step: "03", title: "Complete Assessment", desc: "Attendance-based assessment, no difficult exams. Simply participate and engage.", icon: CheckCircle2 },
               { step: "04", title: "Hours Uploaded", desc: "We upload your hours directly to DVSA JAUPT within 3 working days.", icon: Upload },
             ].map(({ step, title, desc, icon: Icon }, i) => (
               <AnimatedSection key={step} delay={i * 0.1}>

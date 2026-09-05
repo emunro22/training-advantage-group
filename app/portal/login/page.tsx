@@ -105,7 +105,7 @@ export default function PortalLoginPage() {
         </div>
 
         <p className="text-center text-white/30 text-xs mt-6">
-          Training Advantage Group Ltd — Secure Portal
+          Training Advantage Group Ltd · Secure Portal
         </p>
       </div>
     </div>

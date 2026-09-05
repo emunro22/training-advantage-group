@@ -26,7 +26,7 @@ const ACCREDITATIONS = [
   },
   {
     name: "DVSA / JAUPT",
-    type: "Driver CPC Approved — AC00591",
+    type: "Driver CPC Approved: AC00591",
     emoji: "🚛",
     color: "bg-slate-50 border-slate-200",
     textColor: "text-slate-900",
@@ -61,7 +61,7 @@ const ACCREDITATIONS = [
     color: "bg-red-50 border-red-200",
     textColor: "text-red-900",
     description:
-      "NLTC Qualifications approval covers the delivery of Transport Manager CPC qualifications. TAG exam fees are included in TM CPC packages — a significant cost saving for candidates.",
+      "NLTC Qualifications approval covers the delivery of Transport Manager CPC qualifications. TAG exam fees are included in TM CPC packages, a significant cost saving for candidates.",
     what: ["TM CPC examination delivery", "Exam fees included in packages", "Official NLTC certification", "Road Haulage and PSV streams"],
   },
   {
@@ -114,7 +114,7 @@ export default async function AccreditationsPage() {
             <ShieldCheck size={40} className="text-orange-brand mx-auto mb-4" />
             <h2 className="section-heading mb-4">Why Accreditation Matters</h2>
             <p className="text-gray-600 leading-relaxed">
-              When you train with an accredited provider, you know that your qualifications are genuine, nationally recognised and accepted by employers, regulators and enforcement authorities. TAG&apos;s accreditations are not just logos — they represent real quality assurance and regulatory compliance.
+              When you train with an accredited provider, you know that your qualifications are genuine, nationally recognised and accepted by employers, regulators and enforcement authorities. TAG&apos;s accreditations are not just logos: they represent real quality assurance and regulatory compliance.
             </p>
           </AnimatedSection>
         </div>

@@ -200,7 +200,7 @@ export default async function TMCPCPage() {
             <p className="text-gray-600 leading-relaxed mb-4">
               Already hold your Certificate of Professional Competence? Our TM CPC Refresher
               Training keeps working Transport Managers current on operator licensing, drivers&apos;
-              hours, vehicle maintenance and fleet compliance — ideal for renewing your Continuous
+              hours, vehicle maintenance and fleet compliance, ideal for renewing your Continuous
               Professional Development or refreshing your knowledge ahead of a DVSA audit.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">

@@ -164,10 +164,10 @@ export async function sendOrderConfirmation(data: OrderConfirmationData) {
 
   const customerHtml = renderCustomerEmail({
     eyebrow: "Training Advantage Group Ltd",
-    title: `${subjectVerb} — Booking Confirmed`,
+    title: `${subjectVerb}: Booking Confirmed`,
     bodyHtml: `
         <p style="color: #1a1a1a; font-size: 16px; margin: 0 0 12px;">Dear ${data.firstName},</p>
-        <p style="color: #444; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">Thank you — your payment has been received and your booking is confirmed. A member of our team will be in touch shortly with joining instructions.</p>
+        <p style="color: #444; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">Thank you. Your payment has been received and your booking is confirmed. A member of our team will be in touch shortly with joining instructions.</p>
         ${depositNote}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f4f7fa; border-radius: 10px; border-left: 4px solid #ff6600; margin: 0 0 24px;">
           <tr><td style="padding: 22px 24px;">
@@ -453,7 +453,7 @@ export async function sendPortalSubmissionNotification(data: {
     subjectRef: data.resourceTitle,
     extra: {
       label: "Action required",
-      value: `${data.attachmentCount} attachment(s) waiting. Review and download in the admin portal: /admin/portal-submissions. Never sent by email — sign in to view.`,
+      value: `${data.attachmentCount} attachment(s) waiting. Review and download in the admin portal: /admin/portal-submissions. Never sent by email, sign in to view.`,
     },
   });
 }

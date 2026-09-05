@@ -33,7 +33,7 @@ const FAQS = [
   },
   {
     q: "Is the 3a test separate from the main driving test?",
-    a: "Yes — the off-road 3a element is conducted separately from the on-road driving test (3b). Both must be passed to gain your licence category.",
+    a: "Yes, the off-road 3a element is conducted separately from the on-road driving test (3b). Both must be passed to gain your licence category.",
   },
   {
     q: "How long does 3a training take?",
@@ -70,7 +70,7 @@ export default function ManoeuvresPage() {
               Our manoeuvre training sessions take place in our dedicated off-road areas, giving you the time and repetition needed to build genuine confidence before your official test.
             </p>
             <Link href="/booking?course=manoeuvres" className="btn-primary">
-              Book Manoeuvre Training — £250
+              Book Manoeuvre Training: £250
             </Link>
           </AnimatedSection>
 
@@ -136,7 +136,7 @@ export default function ManoeuvresPage() {
           </AnimatedSection>
           <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
-              { name: "Bothwell HQ", detail: "APC Depot — dedicated manoeuvre area" },
+              { name: "Bothwell HQ", detail: "APC Depot, dedicated manoeuvre area" },
               { name: "Motherwell", detail: "ML1 1TA Training Centre" },
               { name: "Glasgow", detail: "G14 0BX Training Centre" },
             ].map((loc) => (

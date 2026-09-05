@@ -42,7 +42,7 @@ export default function CourseProductTable({ products, title, bookingHref = "/bo
             <div className="flex-1 min-w-0">
               <div className="font-bold text-navy text-base">
                 {p.courseService}
-                {p.variant && <span className="text-gray-400 font-normal"> — {p.variant}</span>}
+                {p.variant && <span className="text-gray-400 font-normal">: {p.variant}</span>}
               </div>
               {p.accreditation && <div className="text-xs text-blue-brand font-semibold mt-0.5">{p.accreditation}</div>}
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mt-2">

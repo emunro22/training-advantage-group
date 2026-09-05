@@ -36,7 +36,7 @@ const COURSES = [
       "Public Health Scotland accredited certificate",
     ],
     suitableFor: "All levels of management and supervision in any sector",
-    validity: "No fixed expiry — CPD recognised",
+    validity: "No fixed expiry, CPD recognised",
     highlight: "Public Health Scotland accredited",
     highlightColor: "bg-blue-100 text-blue-800",
     cardColor: "bg-blue-50 border-blue-200",
@@ -46,11 +46,11 @@ const COURSES = [
   {
     title: "NLTC Level 3 Award in Mental Health First Aid at Work",
     qualification: "NLTC Level 3 Award in Mental Health First Aid at Work RQF",
-    accreditation: "NLTC accredited — RQF regulated",
+    accreditation: "NLTC accredited, RQF regulated",
     duration: "2 days",
     icon: "💚",
     audience: "Mental Health First Aiders",
-    desc: "The nationally recognised Mental Health First Aid qualification. Qualifies you as a workplace Mental Health First Aider — the mental health equivalent of a physical first aider. NLTC accredited and on the Regulated Qualifications Framework.",
+    desc: "The nationally recognised Mental Health First Aid qualification. Qualifies you as a workplace Mental Health First Aider: the mental health equivalent of a physical first aider. NLTC accredited and on the Regulated Qualifications Framework.",
     includes: [
       "Mental health first aid action plan (ALGEE)",
       "Depression and anxiety in the workplace",
@@ -85,7 +85,7 @@ export default async function MentalHealthFirstAidPage() {
     <>
       <PageHero
         title={c.heroTitle || "Mental Health First Aid Training"}
-        subtitle={c.heroSubtitle || "Public Health Scotland accredited manager awareness training and the nationally recognised NLTC Level 3 Mental Health First Aid at Work qualification — for a mentally healthy workplace."}
+        subtitle={c.heroSubtitle || "Public Health Scotland accredited manager awareness training and the nationally recognised NLTC Level 3 Mental Health First Aid at Work qualification, for a mentally healthy workplace."}
         tag="Mental Health"
         breadcrumbs={[{ label: "Health & Safety", href: "/iosh-managing-safely" }, { label: "Mental Health First Aid" }]}
         cta={{ label: "Enquire About Mental Health Training", href: "/contact?course=mental-health" }}
@@ -131,7 +131,7 @@ export default async function MentalHealthFirstAidPage() {
           <AnimatedSection className="text-center mb-14">
             <h2 className="section-heading">Our Mental Health Courses</h2>
             <p className="section-subheading mx-auto mt-3">
-              From awareness training for managers to the full Mental Health First Aider qualification — we have the right course for your organisation.
+              From awareness training for managers to the full Mental Health First Aider qualification, we have the right course for your organisation.
             </p>
           </AnimatedSection>
 
@@ -186,7 +186,7 @@ export default async function MentalHealthFirstAidPage() {
                         </div>
                         <div>
                           <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Accreditation</div>
-                          <div className="text-sm font-bold text-navy">{accreditation.split(" — ")[0]}</div>
+                          <div className="text-sm font-bold text-navy">{accreditation.split(", ")[0]}</div>
                         </div>
                       </div>
                       <div className="mt-3 bg-gray-50 rounded-lg p-3">
@@ -219,7 +219,7 @@ export default async function MentalHealthFirstAidPage() {
               Mental health problems are the leading cause of workplace absence in the UK. Having trained managers and designated Mental Health First Aiders creates a psychologically safe environment where people feel able to seek support early.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Our training equips your team with the knowledge, skills and confidence to recognise the signs of poor mental health, have supportive conversations, and point colleagues towards appropriate help — before a crisis develops.
+              Our training equips your team with the knowledge, skills and confidence to recognise the signs of poor mental health, have supportive conversations, and point colleagues towards appropriate help before a crisis develops.
             </p>
             <div className="space-y-3">
               {[
@@ -241,14 +241,14 @@ export default async function MentalHealthFirstAidPage() {
             <div className="bg-navy rounded-2xl p-7 text-white">
               <h3 className="font-black text-lg mb-2">Public Health Scotland Accredited</h3>
               <p className="text-blue-200/80 text-sm leading-relaxed mb-5">
-                Our Mental Health Awareness for Managers course is formally accredited by Public Health Scotland — a mark of quality and evidence-based content you can trust.
+                Our Mental Health Awareness for Managers course is formally accredited by Public Health Scotland: a mark of quality and evidence-based content you can trust.
               </p>
               <div className="space-y-3 mb-6">
                 {[
-                  { label: "Who delivers it?", value: "TAG trained facilitators — experienced in workplace wellbeing" },
+                  { label: "Who delivers it?", value: "TAG trained facilitators, experienced in workplace wellbeing" },
                   { label: "Group size?", value: "Up to 16 delegates per session" },
                   { label: "Where?", value: "At your premises (recommended) or our training centres" },
-                  { label: "CPD recognised?", value: "Yes — counts towards CPD hours" },
+                  { label: "CPD recognised?", value: "Yes, counts towards CPD hours" },
                   { label: "Sector?", value: "Suitable for all industries" },
                 ].map(({ label, value }) => (
                   <div key={label} className="bg-white/10 rounded-xl p-3">

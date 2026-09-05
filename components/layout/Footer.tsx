@@ -38,6 +38,7 @@ const FOOTER_LINKS = {
     { label: "Training Centres", href: "/training-centres" },
     { label: "Testimonials", href: "/testimonials" },
     { label: "News & Updates", href: "/news" },
+    { label: "Blog", href: "/blog" },
     { label: "Careers", href: "/careers" },
     { label: "Contact Us", href: "/contact" },
     { label: "Policies", href: "/policies" },

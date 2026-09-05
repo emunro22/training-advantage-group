@@ -70,13 +70,13 @@ export default function TheoryHazardPerceptionPage() {
             <span className="tag bg-blue-50 text-blue-brand mb-4">LGV & PCV Theory Preparation</span>
             <h2 className="section-heading mb-4">Pass Your Theory Test First Time</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              The LGV theory test is a significant hurdle for many candidates — particularly the specialist drivers&apos; hours, tachograph and vehicle safety sections that differ greatly from Category B tests.
+              The LGV theory test is a significant hurdle for many candidates, particularly the specialist drivers&apos; hours, tachograph and vehicle safety sections that differ greatly from Category B tests.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">
               Our theory support packages give you access to over 1,000 practice questions, hazard perception clips and guided study materials to help you pass confidently first time.
             </p>
             <Link href="/booking?course=theory-support" className="btn-primary">
-              Access Theory Support — £95
+              Access Theory Support: £95
             </Link>
           </AnimatedSection>
 

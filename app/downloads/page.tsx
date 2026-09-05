@@ -23,7 +23,7 @@ export default async function DownloadsPage() {
     <>
       <PageHero
         title="Downloads & Documents"
-        subtitle="Policies, handbooks, course information and joining resources — available to download at any time."
+        subtitle="Policies, handbooks, course information and joining resources, available to download at any time."
         tag="Resources"
       />
 
@@ -32,7 +32,7 @@ export default async function DownloadsPage() {
           {categories.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <FileText size={32} className="mx-auto mb-3 text-gray-200" />
-              <p>No documents are published yet — check back soon.</p>
+              <p>No documents are published yet. Check back soon.</p>
             </div>
           ) : (
             <div className="space-y-10">

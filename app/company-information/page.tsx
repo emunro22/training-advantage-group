@@ -77,7 +77,7 @@ export default function CompanyInformationPage() {
                 <p className="text-sm text-gray-700">
                   Online bookings are paid securely at checkout via our hosted payment provider. For invoiced or
                   purchase-order customers, remittance instructions are issued only through a verified Finance
-                  communication or a controlled, restricted document — never published on this page.
+                  communication or a controlled, restricted document, never published on this page.
                 </p>
               </div>
             </div>

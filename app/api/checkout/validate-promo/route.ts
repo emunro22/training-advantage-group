@@ -51,6 +51,6 @@ export async function POST(request: Request) {
       offerTitle: offer.title,
     });
   } catch {
-    return NextResponse.json({ valid: false, error: "Could not check that code — please try again." }, { status: 500 });
+    return NextResponse.json({ valid: false, error: "Could not check that code. Please try again." }, { status: 500 });
   }
 }

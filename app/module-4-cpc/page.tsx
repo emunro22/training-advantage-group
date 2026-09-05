@@ -61,7 +61,7 @@ export default function Module4CPCPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <AnimatedSection direction="left">
-            <span className="tag bg-blue-50 text-blue-brand mb-4">Driver CPC Initial — Practical Test</span>
+            <span className="tag bg-blue-50 text-blue-brand mb-4">Driver CPC Initial: Practical Test</span>
             <h2 className="section-heading mb-4">Complete Your CPC Initial Qualification</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               Module 4 is the final step in the Driver CPC Initial qualification process. It is a practical demonstration test that assesses your ability to carry out safety checks and demonstrate knowledge of key professional driver responsibilities.
@@ -70,7 +70,7 @@ export default function Module4CPCPage() {
               Our preparation programme ensures you arrive at your Module 4 test fully confident and ready to pass first time.
             </p>
             <Link href="/booking?course=module4" className="btn-primary">
-              Book Module 4 — £295
+              Book Module 4: £295
             </Link>
           </AnimatedSection>
 

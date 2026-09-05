@@ -14,7 +14,7 @@ const REASONS = [
   {
     icon: CheckCircle2,
     title: "Industry Experts",
-    desc: "All training delivered by qualified, experienced transport and logistics professionals — not just educators.",
+    desc: "All training delivered by qualified, experienced transport and logistics professionals, not just educators.",
     color: "bg-orange-50 text-orange-brand",
     ring: "ring-orange-200",
   },

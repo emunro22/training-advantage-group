@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/iosh-managing-safely" },
   title: "IOSH Managing Safely® Online Course | Training Advantage Group",
   description:
-    "IOSH Approved Managing Safely® online training course — rated Outstanding by IOSH. 100% online, 190-day access. Ideal for supervisors, managers and team leaders. Enrol today.",
+    "IOSH Approved Managing Safely® online training course, rated Outstanding by IOSH. 100% online, 190-day access. Ideal for supervisors, managers and team leaders. Enrol today.",
   keywords: [
     "IOSH Managing Safely",
     "IOSH Managing Safely online",
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
 const HIGHLIGHTS = [
   { icon: Star, text: "Rated Outstanding by IOSH" },
   { icon: Users, text: "Ideal for Supervisors, Managers & Team Leaders" },
-  { icon: Laptop, text: "100% Online — study at your own pace" },
+  { icon: Laptop, text: "100% Online: study at your own pace" },
   { icon: Shield, text: "Full support from IOSH-approved tutors" },
 ];
 
 const INCLUDES = [
   "Highly engaging video-based e-learning",
-  "No classroom attendance required — 100% online",
+  "No classroom attendance required: 100% online",
   "Unlimited access on an award-winning Learning Management System",
   "All IOSH Managing Safely® training materials included",
   "Most learners complete the course in 16–24 hours",
@@ -66,7 +66,7 @@ export default function IOSHManagingSafelyPage() {
     <>
       <PageHero
         title="IOSH Managing Safely®"
-        subtitle="The internationally recognised health and safety qualification for managers and supervisors — rated Outstanding by IOSH and delivered 100% online."
+        subtitle="The internationally recognised health and safety qualification for managers and supervisors, rated Outstanding by IOSH and delivered 100% online."
         tag="Health & Safety"
         breadcrumbs={[{ label: "Health & Safety" }, { label: "IOSH Managing Safely®" }]}
         cta={{ label: "Enquire Now", href: "/contact?course=iosh-managing-safely" }}
@@ -94,13 +94,13 @@ export default function IOSHManagingSafelyPage() {
             <h2 className="section-heading mb-4">What is IOSH Managing Safely®?</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               Our IOSH Approved Managing Safely® online training course is fully approved by IOSH and has been
-              independently rated as <strong>&lsquo;Outstanding&rsquo;</strong> — the highest possible grade. This is a
+              independently rated as <strong>&lsquo;Outstanding&rsquo;</strong>, the highest possible grade. This is a
               benchmark qualification for managers and supervisors in every industry.
             </p>
             <p className="text-gray-600 leading-relaxed mb-4">
               Designed to equip managers with essential health and safety skills to promote safer workplaces, the course
               covers hazard identification, risk assessments, incident investigation, and adherence to safety regulations.
-              Delivered entirely online with flexible, self-paced learning — perfect for professionals with busy schedules.
+              Delivered entirely online with flexible, self-paced learning, perfect for professionals with busy schedules.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">
               Upon completion, participants receive the internationally recognised <strong>IOSH Managing Safely® Digital
@@ -218,7 +218,7 @@ export default function IOSHManagingSafelyPage() {
                 <p className="font-bold text-green-800 text-sm mb-0.5">Official IOSH Digital Certificate</p>
                 <p className="text-xs text-green-700">
                   Successful candidates receive an official IOSH Managing Safely® Digital Certificate issued directly by
-                  IOSH — the internationally recognised professional body for health and safety.
+                  IOSH, the internationally recognised professional body for health and safety.
                 </p>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function IOSHManagingSafelyPage() {
                   { icon: Laptop, label: "Study Method", value: "100% Online" },
                   { icon: BookOpen, label: "Access Period", value: "190 days from enrolment" },
                   { icon: Users, label: "Suitable For", value: "Managers, supervisors, team leaders" },
-                  { icon: Shield, label: "Accreditation", value: "IOSH Approved — rated Outstanding" },
+                  { icon: Shield, label: "Accreditation", value: "IOSH Approved, rated Outstanding" },
                   { icon: Award, label: "Certificate", value: "IOSH Managing Safely® Digital" },
                   { icon: AlertTriangle, label: "Prerequisites", value: "No prior qualifications required" },
                 ].map(({ icon: Icon, label, value }) => (

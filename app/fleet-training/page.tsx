@@ -16,7 +16,7 @@ const SERVICES = [
   {
     icon: "📋",
     title: "Fleet Driver CPC",
-    desc: "Managed Driver CPC programmes for your entire fleet. We schedule, deliver and upload hours — reducing your admin burden.",
+    desc: "Managed Driver CPC programmes for your entire fleet. We schedule, deliver and upload hours, reducing your admin burden.",
     features: ["Flexible scheduling around operations", "Onsite or centre-based", "Hours uploaded to DVSA", "Fleet management reporting"],
   },
   {
@@ -68,7 +68,7 @@ export default function FleetTrainingPage() {
             <span className="tag bg-blue-50 text-blue-brand mb-4">Corporate Fleet Solutions</span>
             <h2 className="section-heading mb-4">Training That Works Around Your Operations</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Running a fleet means keeping drivers trained, compliant and productive — often with minimal operational disruption. TAG specialises in managed fleet training programmes that do exactly that.
+              Running a fleet means keeping drivers trained, compliant and productive, often with minimal operational disruption. TAG specialises in managed fleet training programmes that do exactly that.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">
               From small independent hauliers to large national operators, we build training programmes around your specific fleet, your drivers and your compliance requirements.
@@ -176,7 +176,7 @@ export default function FleetTrainingPage() {
             {[
               { step: "01", icon: Users, title: "Initial Consultation", desc: "We review your fleet size, driver pool, current compliance status and operational requirements." },
               { step: "02", icon: BarChart3, title: "Training Plan", desc: "We design a training programme around your drivers, schedules and specific compliance needs." },
-              { step: "03", icon: Truck, title: "Delivery", desc: "Training delivered on-site or at our centres — around your operations, not the other way round." },
+              { step: "03", icon: Truck, title: "Delivery", desc: "Training delivered on-site or at our centres, around your operations, not the other way round." },
               { step: "04", icon: Shield, title: "Reporting", desc: "Detailed completion reports, DVSA uploads and compliance documentation provided to you." },
             ].map(({ step, title, desc, icon: Icon }) => (
               <AnimatedSection key={step}>

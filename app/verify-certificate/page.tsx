@@ -33,7 +33,7 @@ const ACCREDITATION_LOGOS: Record<string, string> = {
 };
 
 function fmtDate(d: string) {
-  if (!d) return "—";
+  if (!d) return "N/A";
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 }
 
@@ -177,7 +177,7 @@ export default function VerifyCertificatePage() {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Holder&apos;s Last Name
-                    <span className="ml-1.5 text-xs font-normal text-gray-400">(optional — adds extra verification)</span>
+                    <span className="ml-1.5 text-xs font-normal text-gray-400">(optional, adds extra verification)</span>
                   </label>
                   <input
                     type="text"
@@ -399,7 +399,7 @@ export default function VerifyCertificatePage() {
                   {[
                     "Enter the certificate number exactly as it appears on the certificate",
                     "Optionally add the holder's last name for extra verification",
-                    "Results are instant — the system checks our certificate registry",
+                    "Results are instant: the system checks our certificate registry",
                     "Valid, expired, replaced and revoked status is displayed clearly",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-gray-500">
@@ -432,7 +432,7 @@ export default function VerifyCertificatePage() {
                   ))}
                 </div>
                 <p className="text-xs text-gray-400 mt-3">
-                  Certificate numbers follow the format shown — e.g. <code className="font-mono bg-gray-100 px-1 rounded">TAG-ADR-2024-001</code>
+                  Certificate numbers follow the format shown, e.g. <code className="font-mono bg-gray-100 px-1 rounded">TAG-ADR-2024-001</code>
                 </p>
               </div>
             </div>

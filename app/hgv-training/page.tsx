@@ -111,7 +111,7 @@ export default async function HGVTrainingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               { title: "Medical Assessment", price: `£${c.medicalPrice ?? "65"}`, desc: "DVLA Group 2 medical conducted by approved practitioners.", id: "medical" },
-              { title: "Module 4 CPC Practical", price: `£${c.module4Price ?? "295"}`, desc: "Practical CPC test — demonstration of professional competence.", id: "module4" },
+              { title: "Module 4 CPC Practical", price: `£${c.module4Price ?? "295"}`, desc: "Practical CPC test: demonstration of professional competence.", id: "module4" },
               { title: "3A Off-Road Manoeuvres", price: `£${c.manoeuvres3aPrice ?? "250"}`, desc: "Off-road manoeuvrability test at our dedicated test area.", id: "manoeuvres-3a" },
               { title: "3B Practical Driving Test", price: `£${c.practicalTestPrice ?? "450"}`, desc: "On-road practical test with experienced driving examiner.", id: "test-3b" },
               { title: "Fleet Driver Assessment", priceLabel: c.fleetAssessmentLabel || "From £95", desc: "Professional assessment of your drivers' on-road skills and compliance.", id: "fleet-assessment" },

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
   title: "About Training Advantage Group | Scotland's Transport Training Specialists",
   description:
-    "Learn about Training Advantage Group Ltd — Scotland's premier transport, logistics and industrial training provider. DVSA approved, Qualifications Scotland accredited.",
+    "Learn about Training Advantage Group Ltd, Scotland's premier transport, logistics and industrial training provider. DVSA approved, Qualifications Scotland accredited.",
 };
 
 export default function AboutPage() {
@@ -35,7 +35,7 @@ export default function AboutPage() {
               Every year, thousands of professional drivers, transport managers, plant operators and fleet professionals choose TAG to advance their careers, maintain compliance and develop their skills.
             </p>
             <p className="text-gray-600 leading-relaxed mb-8">
-              Our instructors are industry professionals with real-world experience — not just educators. This means our training is practical, relevant and genuinely useful in the real world of transport and logistics.
+              Our instructors are industry professionals with real-world experience, not just educators. This means our training is practical, relevant and genuinely useful in the real world of transport and logistics.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
@@ -68,7 +68,7 @@ export default function AboutPage() {
                     <CheckCircle2 size={16} className="text-orange-brand flex-shrink-0 mt-0.5" />
                     <div>
                       <span className="font-semibold">{title}</span>
-                      <span className="text-white/70 text-sm"> — {desc}</span>
+                      <span className="text-white/70 text-sm">: {desc}</span>
                     </div>
                   </div>
                 ))}

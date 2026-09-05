@@ -29,7 +29,7 @@ const SERVICES = [
     id: "olat",
     icon: GraduationCap,
     title: "Operator Licence Awareness Training (OLAT)",
-    desc: "A one-day course for operators, directors and nominated Transport Managers who need a practical grounding in operator licence obligations — classroom or remote.",
+    desc: "A one-day course for operators, directors and nominated Transport Managers who need a practical grounding in operator licence obligations, classroom or remote.",
     features: ["1-day course", "Classroom or remote delivery", "Operator licence obligations", "Nominated person training", "Booked per candidate"],
     href: "/booking?course=olat",
     price: "From £495",
@@ -99,7 +99,7 @@ export default async function ConsultancyPage() {
           <AnimatedSection className="text-center mb-14">
             <h2 className="section-heading">Our Compliance Services</h2>
             <p className="section-subheading mx-auto text-center mt-3">
-              From external TM support to full fleet audits — comprehensive compliance solutions for transport operators.
+              From external TM support to full fleet audits: comprehensive compliance solutions for transport operators.
             </p>
           </AnimatedSection>
 

@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 
 const FAQS = [
   { q: "What should I bring to my training?", a: "Photographic ID (passport or driving licence), proof of address (dated within 3 months), National Insurance number, PPE if applicable (safety boots, high vis, gloves), and comfortable clothing suitable for training. A pen and notebook are optional but useful." },
-  { q: "What time should I arrive?", a: "Please arrive at least 15 minutes before your course start time. For Bothwell HQ, candidates must use the shuttle service from St Bride's Church — allow an extra 20 minutes." },
-  { q: "What happens if I'm late or can't attend?", a: "If you're running late, please call us immediately on 0141 258 2024. If you need to cancel or rearrange, please give us as much notice as possible. Cancellation policies vary by course — please see your booking confirmation." },
+  { q: "What time should I arrive?", a: "Please arrive at least 15 minutes before your course start time. For Bothwell HQ, candidates must use the shuttle service from St Bride's Church, so allow an extra 20 minutes." },
+  { q: "What happens if I'm late or can't attend?", a: "If you're running late, please call us immediately on 0141 258 2024. If you need to cancel or rearrange, please give us as much notice as possible. Cancellation policies vary by course, so please see your booking confirmation." },
   { q: "How do I check how many CPC hours I have?", a: "You can check your Driver Qualification Card hours on the DVSA website using your driver number. Our team can also help if you need guidance." },
   { q: "Are there refreshments available?", a: "Refreshments (tea, coffee, water) are provided throughout the day on full-day courses. For half-day sessions, vending machines are available. Bothwell HQ has a break area." },
   { q: "Is parking available?", a: "Visitors are welcome to park on site at Bothwell HQ. Candidates must use the free shuttle service from St Bride's Church, Fallside Road during peak times. Our other centres have parking available nearby." },

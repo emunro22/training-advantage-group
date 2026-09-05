@@ -60,7 +60,7 @@ const FAQS = [
   },
   {
     q: "Can assessments be done at our depot?",
-    a: "Yes — we can conduct assessments from your depot or operating centre using your own vehicles. This is the most common approach for fleet operators.",
+    a: "Yes, we can conduct assessments from your depot or operating centre using your own vehicles. This is the most common approach for fleet operators.",
   },
   {
     q: "What report will we receive?",
@@ -94,7 +94,7 @@ export default function DriverAssessmentsPage() {
               A professional driver assessment gives operators the evidence they need to demonstrate duty of care, identify at-risk drivers and reduce the likelihood of costly road incidents.
             </p>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Our qualified assessors deliver consistent, thorough evaluations using a standardised scoring matrix — giving you objective, defensible reports that stand up to DVSA scrutiny.
+              Our qualified assessors deliver consistent, thorough evaluations using a standardised scoring matrix, giving you objective, defensible reports that stand up to DVSA scrutiny.
             </p>
             <Link href="/contact" className="btn-primary">
               Discuss Fleet Assessment

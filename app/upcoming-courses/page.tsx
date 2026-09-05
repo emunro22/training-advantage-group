@@ -18,7 +18,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Upcoming Courses | Training Advantage Group",
   description:
-    "Browse our upcoming training course dates in Bothwell, Motherwell, Glasgow and online. Book your place today — limited spaces available.",
+    "Browse our upcoming training course dates in Bothwell, Motherwell, Glasgow and online. Book your place today: limited spaces available.",
 };
 
 // Always fetch fresh data — never serve a cached build-time snapshot
@@ -70,7 +70,7 @@ export default async function UpcomingCoursesPage() {
       <StructuredData data={buildCourseSchema(courses)} />
       <PageHero
         title="Upcoming Courses"
-        subtitle="Browse our scheduled course dates across all locations. Spaces are limited — book early to secure your place."
+        subtitle="Browse our scheduled course dates across all locations. Spaces are limited, so book early to secure your place."
         tag="Course Dates"
         breadcrumbs={[{ label: "Learner Hub", href: "/learner-hub" }, { label: "Upcoming Courses" }]}
         cta={{ label: "Book a Place", href: "/booking" }}
@@ -235,9 +235,9 @@ export default async function UpcomingCoursesPage() {
                 <h3 className="font-bold text-sm text-navy mb-3">Good to know</h3>
                 <ul className="grid sm:grid-cols-2 gap-2">
                   {[
-                    "Spaces are limited — booking early is strongly advised",
+                    "Spaces are limited, so booking early is strongly advised",
                     "Can't see your course? Get in touch and we'll arrange a date",
-                    "Group bookings available — contact us for pricing",
+                    "Group bookings available, contact us for pricing",
                     "On-site delivery at your premises can be arranged",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-gray-600">

@@ -113,7 +113,7 @@ export default function BookingPageClient() {
               {/* Assurances */}
               <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5">
                 <h3 className="font-bold text-navy mb-3">Our Promise</h3>
-                {["No spam — we only contact you about your booking", "Response within 24 business hours", "No payment taken until confirmed"].map((item) => (
+                {["No spam, we only contact you about your booking", "Response within 24 business hours", "No payment taken until confirmed"].map((item) => (
                   <div key={item} className="flex items-start gap-2 text-xs text-gray-700 mb-2">
                     <CheckCircle2 size={13} className="text-green-600 flex-shrink-0 mt-0.5" />
                     {item}

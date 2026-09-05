@@ -32,7 +32,7 @@ export default function SuccessPageClient({ registrationUrl }: { registrationUrl
 
             <h1 className="text-3xl font-black text-navy mb-3">Payment Confirmed!</h1>
             <p className="text-gray-600 mb-2">
-              Thank you — your payment has been received and your booking is confirmed.
+              Thank you. Your payment has been received and your booking is confirmed.
             </p>
             <p className="text-gray-600 mb-8">
               We&apos;ve sent a confirmation email to you. A member of our team will be in touch shortly with joining instructions.
@@ -74,7 +74,7 @@ export default function SuccessPageClient({ registrationUrl }: { registrationUrl
                   Candidate registration
                 </h3>
                 <p className="text-sm text-gray-600 mb-3">
-                  Complete your secure candidate registration next — this is where ID, signature and other
+                  Complete your secure candidate registration next: this is where ID, signature and other
                   evidence are collected, never by email.
                 </p>
                 <a

@@ -39,7 +39,7 @@ const FAQS = [
   },
   {
     q: "Is Module 4 included in the package price?",
-    a: "Yes — all our full Category D packages include the Module 4 CPC practical test as standard.",
+    a: "Yes, all our full Category D packages include the Module 4 CPC practical test as standard.",
   },
 ];
 
@@ -49,7 +49,7 @@ export default function PCVTrainingPage() {
       <StructuredData data={buildFAQSchema(FAQS)} />
       <PageHero
         title="PCV / Bus Driver Training"
-        subtitle="Professional Category D passenger vehicle training packages. From DVLA medicals to your driving test — we handle everything."
+        subtitle="Professional Category D passenger vehicle training packages. From DVLA medicals to your driving test, we handle everything."
         tag="PCV Training"
         breadcrumbs={[{ label: "PCV / Bus Training" }]}
         cta={{ label: "Book PCV Training", href: "/booking?course=pcv-catd" }}
@@ -59,7 +59,7 @@ export default function PCVTrainingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <AnimatedSection direction="left">
-            <span className="tag bg-blue-50 text-blue-brand mb-4">Category D — PSV Licence</span>
+            <span className="tag bg-blue-50 text-blue-brand mb-4">Category D: PSV Licence</span>
             <h2 className="section-heading mb-4">Professional Bus & Coach Driver Training</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
               Our Category D PCV training packages are designed for candidates looking to enter the passenger transport industry as a professional bus or coach driver. We deliver full end-to-end training from initial medical to final driving test.
@@ -145,7 +145,7 @@ export default function PCVTrainingPage() {
             {[
               { icon: Star, title: "Experienced PSV Instructors", desc: "All our PCV instructors hold real industry experience in passenger transport operations." },
               { icon: Users, title: "Small Class Sizes", desc: "Focused individual attention means better pass rates and faster progression through training." },
-              { icon: FileText, title: "Full Admin Support", desc: "We handle all the paperwork — DVSA applications, medical forms and test bookings." },
+              { icon: FileText, title: "Full Admin Support", desc: "We handle all the paperwork: DVSA applications, medical forms and test bookings." },
             ].map(({ icon: Icon, title, desc }) => (
               <AnimatedSection key={title}>
                 <div className="bg-gray-light rounded-2xl p-6 text-center">

@@ -92,7 +92,7 @@ export default async function MedicalsPage() {
               </p>
             </div>
             <Link href="/booking?course=medical" className="btn-primary">
-              Book Your Medical — £{price}
+              Book Your Medical: £{price}
             </Link>
           </AnimatedSection>
 

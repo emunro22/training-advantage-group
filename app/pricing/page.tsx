@@ -39,7 +39,7 @@ export default async function PricingPage() {
           {byCategory.size === 0 ? (
             <AnimatedSection className="text-center text-gray-500">
               <p>
-                Course pricing is updated regularly — see individual course pages or{" "}
+                Course pricing is updated regularly. See individual course pages or{" "}
                 <a href="/contact" className="text-blue-brand underline">
                   get in touch
                 </a>{" "}
@@ -60,7 +60,7 @@ export default async function PricingPage() {
           <AnimatedSection className="mt-14 text-center">
             <p className="text-sm text-gray-500">
               Prices exclude VAT unless stated otherwise. For courses marked &ldquo;Enquire&rdquo; or
-              &ldquo;Quote Required&rdquo;, pricing depends on candidate numbers and delivery location —
+              &ldquo;Quote Required&rdquo;, pricing depends on candidate numbers and delivery location, so
               contact us for a tailored quote.
             </p>
           </AnimatedSection>

@@ -47,7 +47,7 @@ export default async function UpcomingCoursesSection() {
             <span className="tag bg-orange-50 text-orange-brand mb-3 inline-block">Available Now</span>
             <h2 className="section-heading">Upcoming Course Dates</h2>
             <p className="text-gray-500 text-sm mt-1 max-w-xl">
-              Upcoming scheduled courses — book your place today. Spaces are limited.
+              Upcoming scheduled courses, book your place today. Spaces are limited.
             </p>
           </div>
           <Link

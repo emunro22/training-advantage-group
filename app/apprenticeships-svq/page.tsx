@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/apprenticeships-svq" },
   title: "Apprenticeships & SVQ Pathways | Training Advantage Group",
   description:
-    "Training Advantage Group is developing Modern Apprenticeship and work-based SVQ provision across Scotland — transport, logistics, plant, safety and professional training pathways.",
+    "Training Advantage Group is developing Modern Apprenticeship and work-based SVQ provision across Scotland: transport, logistics, plant, safety and professional training pathways.",
   keywords: ["Modern Apprenticeship Scotland", "SVQ Scotland", "work-based qualifications", "SDS apprenticeship", "TAG apprenticeships"],
 };
 
@@ -177,7 +177,7 @@ export default async function ApprenticeshipsSVQPage() {
             <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
               <h3 className="text-navy font-bold text-sm uppercase tracking-wide mb-1">SCQF Levels</h3>
               <p className="text-gray-500 text-sm mb-6">
-                SVQs sit at different levels on the Scottish Credit and Qualifications Framework — not every framework is the same level.
+                SVQs sit at different levels on the Scottish Credit and Qualifications Framework, so not every framework is the same level.
               </p>
               <div className="flex flex-wrap gap-3">
                 {SCQF_LEVELS.map((l) => (
@@ -189,7 +189,7 @@ export default async function ApprenticeshipsSVQPage() {
                 ))}
               </div>
               <p className="text-xs text-gray-400 mt-4">
-                Illustrative only — the exact SCQF level and qualification depend on the approved framework selected.
+                Illustrative only: the exact SCQF level and qualification depend on the approved framework selected.
               </p>
             </div>
           </AnimatedSection>
@@ -203,7 +203,7 @@ export default async function ApprenticeshipsSVQPage() {
             <h2 className="section-heading mb-4">Planned &amp; Developing Pathways</h2>
             <p className="text-gray-600 leading-relaxed max-w-2xl mx-auto">
               We&apos;re building Apprenticeship and SVQ provision across the sectors below. A pathway only becomes
-              available once it is approved — until then, register your interest and we&apos;ll keep you updated.
+              available once it is approved. Until then, register your interest and we&apos;ll keep you updated.
             </p>
           </AnimatedSection>
 
@@ -223,7 +223,7 @@ export default async function ApprenticeshipsSVQPage() {
                       </span>
                     ) : (
                       <span className="inline-block text-xs font-semibold text-amber-800 bg-amber-100 px-2.5 py-1.5 rounded-lg w-fit leading-snug">
-                        Provision currently in development — register your interest
+                        Provision currently in development, register your interest
                       </span>
                     )}
                   </div>
@@ -364,11 +364,11 @@ export default async function ApprenticeshipsSVQPage() {
                   <div className="w-11 h-11 bg-orange-brand rounded-xl flex items-center justify-center flex-shrink-0">
                     <GraduationCap size={20} className="text-white" />
                   </div>
-                  <h2 className="text-xl md:text-2xl font-black text-white">My Apprenticeship / SVQ — In Your Secure Portal</h2>
+                  <h2 className="text-xl md:text-2xl font-black text-white">My Apprenticeship / SVQ: In Your Secure Portal</h2>
                 </div>
                 <p className="text-blue-100/80 text-sm leading-relaxed mb-6 max-w-2xl">
                   Existing TAG portal users will be able to track their programme, submit forms and evidence, and see
-                  their progress — all from the same secure portal used for other TAG documents. This appears
+                  their progress, all from the same secure portal used for other TAG documents. This appears
                   automatically once an apprenticeship or SVQ programme has been allocated to your TAG ID.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2 mb-6">

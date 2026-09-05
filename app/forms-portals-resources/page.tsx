@@ -80,7 +80,7 @@ export default function FormsPortalsResourcesPage() {
             <Lock className="text-blue-brand flex-shrink-0 mt-0.5" size={20} />
             <p className="text-sm text-gray-700">
               For your protection, do not email identity documents, licence images, photographs, signatures or
-              medical information. Use the secure form requested by TAG — never ordinary email or WhatsApp.
+              medical information. Use the secure form requested by TAG, never ordinary email or WhatsApp.
             </p>
           </AnimatedSection>
         </div>
@@ -92,7 +92,7 @@ export default function FormsPortalsResourcesPage() {
           <AnimatedSection className="mb-10">
             <h2 className="section-heading mb-3">Candidate Services</h2>
             <p className="text-gray-600 max-w-3xl">
-              <strong>Which form should I use?</strong> New candidates complete the full registration once — this
+              <strong>Which form should I use?</strong> New candidates complete the full registration once. This
               establishes your core candidate record, privacy acknowledgements, declarations, signature and
               available evidence. Existing candidates use the shorter secure update route whenever ID, licence
               evidence, photograph, signature or other details change.
@@ -109,7 +109,7 @@ export default function FormsPortalsResourcesPage() {
                   <div className="h-full bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden flex flex-col">
                     {card.image && (
                       <div className="relative w-full h-40 bg-gray-50 border-b border-gray-100">
-                        <Image src={card.image} alt={`${card.title} — TAG secure form preview`} fill className="object-cover object-top" />
+                        <Image src={card.image} alt={`${card.title}: TAG secure form preview`} fill className="object-cover object-top" />
                       </div>
                     )}
                     <div className="p-6 flex flex-col flex-1">
@@ -129,7 +129,7 @@ export default function FormsPortalsResourcesPage() {
                         </Link>
                       ) : (
                         <span className="text-xs text-gray-400 italic">
-                          Route not yet configured — please call us on 0141 258 2024
+                          Route not yet configured, please call us on 0141 258 2024
                         </span>
                       )}
                     </div>
@@ -150,7 +150,7 @@ export default function FormsPortalsResourcesPage() {
                 issue the required form for signature and upload it to the candidate/course record after checks.
               </p>
               <p className="text-sm text-gray-600 mb-4">
-                Registering does not by itself guarantee a course place — TAG confirms allocation separately.
+                Registering does not by itself guarantee a course place. TAG confirms allocation separately.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/upcoming-courses" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-brand hover:text-navy transition-colors">
@@ -188,7 +188,7 @@ export default function FormsPortalsResourcesPage() {
               </div>
               <h2 className="section-heading mb-3">Instructor / Assessor Services</h2>
               <p className="text-sm text-gray-600 mb-4">
-                The secure course workspace for authorised instructors, assessors and invigilators — registers,
+                The secure course workspace for authorised instructors, assessors and invigilators: registers,
                 assessments, evidence return, qualification/CPD updates, trainee/shadowing arrangements and
                 lead-instructor responsibilities.
               </p>
@@ -230,7 +230,7 @@ export default function FormsPortalsResourcesPage() {
               <p className="text-xs text-gray-500 mt-3">
                 Sign in with the TAG ID and access code TAG has issued you. Submitting onboarding information does
                 not create automatic supplier approval. Bank-detail changes are independently verified using an
-                existing trusted contact route before payment records are amended — never by email or WhatsApp.
+                existing trusted contact route before payment records are amended, never by email or WhatsApp.
               </p>
             </div>
           </AnimatedSection>
@@ -283,7 +283,7 @@ export default function FormsPortalsResourcesPage() {
             </p>
             <p className="text-blue-light/60 text-sm">
               Sensitive evidence (ID, licence images, photographs, signatures, medical information) must not be
-              emailed — use the secure form requested by TAG instead.
+              emailed. Use the secure form requested by TAG instead.
             </p>
           </AnimatedSection>
         </div>

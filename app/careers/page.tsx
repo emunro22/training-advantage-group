@@ -84,7 +84,7 @@ export default async function CareersPage() {
           <AnimatedSection className="text-center mb-12">
             <h2 className="section-heading">Current Opportunities</h2>
             <p className="section-subheading mx-auto text-center mt-3">
-              We regularly recruit across all training disciplines. If you don&apos;t see the exact role you&apos;re looking for, send us your CV — we keep all applications on file.
+              We regularly recruit across all training disciplines. If you don&apos;t see the exact role you&apos;re looking for, send us your CV: we keep all applications on file.
             </p>
           </AnimatedSection>
 

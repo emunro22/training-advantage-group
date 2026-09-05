@@ -32,7 +32,7 @@ export default async function PlantTrainingPage() {
     { name: "Counterbalance Forklift – Novice", price: c.counterbalanceNovicePrice || "From £595", desc: "Full novice course for new operators.", id: "counterbalance-novice" },
     { name: "Reach Truck Training", price: c.reachTruckPrice || "From £595", desc: "Narrow aisle reach truck operation and safety.", id: "reach-truck" },
     { name: "Telehandler Training", price: c.telehandlerPrice || "From £695", desc: "All-terrain telescopic handler operation.", id: "telehandler" },
-    { name: "MEWP Training", price: c.mewpPrice || "From £495", desc: "Mobile elevated work platforms — all categories.", id: "mewp" },
+    { name: "MEWP Training", price: c.mewpPrice || "From £495", desc: "Mobile elevated work platforms, all categories.", id: "mewp" },
     { name: "Excavator / Dumper", price: c.excavatorPrice || "From £695", desc: "Plant machinery including 360 excavator and dumper.", id: "excavator" },
   ];
   return (
@@ -97,7 +97,7 @@ export default async function PlantTrainingPage() {
           <AnimatedSection className="text-center mb-12">
             <h2 className="section-heading">Plant & MHE Courses</h2>
             <p className="section-subheading mx-auto text-center mt-3">
-              From forklift novice to telehandler specialist — all NPORS accredited.
+              From forklift novice to telehandler specialist, all NPORS accredited.
             </p>
           </AnimatedSection>
 
