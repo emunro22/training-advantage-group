@@ -526,7 +526,12 @@ export async function sendCertReplacementRequestNotification(data: {
         : `Free electronic reissue requested for ${data.holderName}`,
     sourcePage: "/verify-certificate",
     subjectRef: data.certificateNumber,
-    extra: data.notes ? { label: "Notes", value: data.notes } : undefined,
+    // subjectRef only ever reaches the email SUBJECT line (see buildNotificationSubject) —
+    // it must also appear in the body, so it's repeated here via `extra`.
+    extra: {
+      label: "Certificate Number",
+      value: data.notes ? `${data.certificateNumber}\n\nNotes: ${data.notes}` : data.certificateNumber,
+    },
   });
 }
 

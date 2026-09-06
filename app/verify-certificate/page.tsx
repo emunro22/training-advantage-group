@@ -5,8 +5,13 @@ import Image from "next/image";
 import { Search, CheckCircle2, XCircle, AlertCircle, Award, Calendar, MapPin, BookOpen, Shield, Mail, CreditCard, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { CERT_TYPES, guessCertType } from "@/lib/cert-types";
+import { splitVat } from "@/lib/order-contract";
 
-const REPLACEMENT_CERT_FEE_PENCE = Number(process.env.NEXT_PUBLIC_REPLACEMENT_CERT_FEE_PENCE ?? 2500);
+// Gross (VAT-inclusive) amount actually charged via Square — see REPLACEMENT_CERT_FEE_PENCE
+// in .env.local.example. Displayed as net + VAT to match how prices are quoted elsewhere on
+// the site (e.g. PriceCard's "excl. VAT" convention).
+const REPLACEMENT_CERT_FEE_PENCE = Number(process.env.NEXT_PUBLIC_REPLACEMENT_CERT_FEE_PENCE ?? 2400);
+const REPLACEMENT_CERT_NET_PENCE = splitVat(REPLACEMENT_CERT_FEE_PENCE, "Standard 20%").netExVatPence;
 
 /** Inline "request a replacement" form shown under a found certificate — shared shape for
  * both the free electronic reissue and the paid awarding-body order, which only differ in
@@ -145,7 +150,7 @@ function ReplacementRequestForm({
             ? "Please wait…"
             : mode === "electronic"
             ? "Send Request"
-            : `Pay £${(REPLACEMENT_CERT_FEE_PENCE / 100).toFixed(2)} & Order`}
+            : `Pay £${(REPLACEMENT_CERT_NET_PENCE / 100).toFixed(2)} + VAT & Order`}
         </button>
       </div>
     </form>
@@ -543,7 +548,7 @@ export default function VerifyCertificatePage() {
                         onClick={() => setReplacementPanel(replacementPanel === "awarding_body" ? null : "awarding_body")}
                         className={`flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-xl border-2 transition-colors ${replacementPanel === "awarding_body" ? "border-orange-brand text-orange-brand bg-orange-50" : "border-gray-200 text-gray-600 hover:border-orange-brand"}`}
                       >
-                        <CreditCard size={15} /> Order Awarding Body Replacement (£{(REPLACEMENT_CERT_FEE_PENCE / 100).toFixed(2)})
+                        <CreditCard size={15} /> Order Awarding Body Replacement (£{(REPLACEMENT_CERT_NET_PENCE / 100).toFixed(2)} + VAT)
                       </button>
                     </div>
                     {replacementPanel && (

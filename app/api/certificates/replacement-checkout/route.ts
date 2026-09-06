@@ -21,9 +21,9 @@ function isRateLimited(ip: string): boolean {
   return timestamps.length > RATE_LIMIT_MAX_REQUESTS;
 }
 
-// Flat re-issue fee, same for every awarding body — see REPLACEMENT_CERT_FEE_PENCE in
-// .env.local.example. TODO(TAG): confirm the real fee before go-live, this is a placeholder.
-const REPLACEMENT_CERT_FEE_PENCE = Number(process.env.REPLACEMENT_CERT_FEE_PENCE ?? 2500);
+// Flat re-issue fee, same for every awarding body — £20 + VAT, confirmed by TAG.
+// See REPLACEMENT_CERT_FEE_PENCE in .env.local.example.
+const REPLACEMENT_CERT_FEE_PENCE = Number(process.env.REPLACEMENT_CERT_FEE_PENCE ?? 2400);
 
 export async function POST(request: Request) {
   try {
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     const response = await client.checkout.paymentLinks.create({
       idempotencyKey: orderId,
       quickPay: {
-        name: `Replacement Awarding Body Certificate — ${cert.course} (${record.certificateNumber})`,
+        name: `Replacement Awarding Body Certificate (incl. VAT) — ${cert.course} (${record.certificateNumber})`,
         priceMoney: {
           amount: BigInt(REPLACEMENT_CERT_FEE_PENCE),
           currency: "GBP",
