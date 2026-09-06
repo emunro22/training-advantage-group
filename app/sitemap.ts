@@ -37,6 +37,8 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/module-4-cpc", priority: 0.5, changeFrequency: "monthly" },
   { path: "/3a-manoeuvres", priority: 0.5, changeFrequency: "monthly" },
   { path: "/tm-cpc", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/tm-refresher-training", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/olat-training", priority: 0.6, changeFrequency: "monthly" },
   { path: "/plant-training", priority: 0.7, changeFrequency: "monthly" },
   { path: "/e-learning", priority: 0.6, changeFrequency: "monthly" },
   { path: "/consultancy", priority: 0.6, changeFrequency: "monthly" },

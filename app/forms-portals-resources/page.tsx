@@ -12,7 +12,6 @@ import {
   Lock,
   ExternalLink,
   CalendarDays,
-  ClipboardList,
   AlertCircle,
   KeyRound,
   Users,
@@ -156,16 +155,6 @@ export default function FormsPortalsResourcesPage() {
                 <Link href="/upcoming-courses" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-brand hover:text-navy transition-colors">
                   <CalendarDays size={15} /> Book a course / Upcoming Courses
                 </Link>
-                {process.env.JOTFORM_COURSE_BOOKING_URL && (
-                  <a
-                    href={process.env.JOTFORM_COURSE_BOOKING_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-brand hover:text-navy transition-colors"
-                  >
-                    <ClipboardList size={15} /> Staff: course booking/allocation
-                  </a>
-                )}
               </div>
             </div>
             <div className="relative w-full aspect-[864/1821] max-h-[420px] mx-auto rounded-xl overflow-hidden border border-gray-100">

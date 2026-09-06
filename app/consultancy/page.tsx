@@ -31,7 +31,7 @@ const SERVICES = [
     title: "Operator Licence Awareness Training (OLAT)",
     desc: "A one-day course for operators, directors and nominated Transport Managers who need a practical grounding in operator licence obligations, classroom or remote.",
     features: ["1-day course", "Classroom or remote delivery", "Operator licence obligations", "Nominated person training", "Booked per candidate"],
-    href: "/booking?course=olat",
+    href: "/olat-training",
     price: "From £495",
   },
   {

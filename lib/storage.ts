@@ -2000,6 +2000,133 @@ export async function deletePortalSubmission(id: string): Promise<boolean> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Certificate Replacement Requests (from the public /verify-certificate checker)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface CertReplacementRequest {
+  id: string;
+  type: "electronic" | "awarding_body";
+  status: "new" | "pending_payment" | "paid" | "handled";
+  certificateNumber: string;
+  holderName: string;
+  course: string;
+  awardingBody?: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  notes?: string;
+  amountPence?: number;
+  squareOrderId?: string;
+  squarePaymentId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToCertReplacementRequest(r: any): CertReplacementRequest {
+  return {
+    id: r.id,
+    type: r.type,
+    status: r.status,
+    certificateNumber: r.certificate_number,
+    holderName: r.holder_name ?? "",
+    course: r.course ?? "",
+    awardingBody: r.awarding_body ?? undefined,
+    contactName: r.contact_name,
+    email: r.email,
+    phone: r.phone ?? "",
+    notes: r.notes ?? undefined,
+    amountPence: r.amount_pence ?? undefined,
+    squareOrderId: r.square_order_id ?? undefined,
+    squarePaymentId: r.square_payment_id ?? undefined,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
+  };
+}
+
+export async function getCertReplacementRequests(): Promise<CertReplacementRequest[]> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM cert_replacement_requests ORDER BY created_at DESC`;
+    return rows.map(rowToCertReplacementRequest);
+  }
+  const store = fsRead<{ requests: CertReplacementRequest[] }>("cert-replacement-requests.json", { requests: [] });
+  return store.requests;
+}
+
+export async function getCertReplacementRequestBySquareOrderId(
+  squareOrderId: string
+): Promise<CertReplacementRequest | null> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM cert_replacement_requests WHERE square_order_id = ${squareOrderId} LIMIT 1`;
+    return rows.length ? rowToCertReplacementRequest(rows[0]) : null;
+  }
+  const store = fsRead<{ requests: CertReplacementRequest[] }>("cert-replacement-requests.json", { requests: [] });
+  return store.requests.find((r) => r.squareOrderId === squareOrderId) ?? null;
+}
+
+export async function addCertReplacementRequest(r: CertReplacementRequest): Promise<void> {
+  if (USE_NEON) {
+    await ensureSchema();
+    const sql = getDb();
+    await sql`
+      INSERT INTO cert_replacement_requests
+        (id, type, status, certificate_number, holder_name, course, awarding_body,
+         contact_name, email, phone, notes, amount_pence, square_order_id, square_payment_id)
+      VALUES
+        (${r.id}, ${r.type}, ${r.status}, ${r.certificateNumber}, ${r.holderName}, ${r.course},
+         ${r.awardingBody ?? null}, ${r.contactName}, ${r.email}, ${r.phone}, ${r.notes ?? null},
+         ${r.amountPence ?? null}, ${r.squareOrderId ?? null}, ${r.squarePaymentId ?? null})
+    `;
+    return;
+  }
+  const store = fsRead<{ requests: CertReplacementRequest[] }>("cert-replacement-requests.json", { requests: [] });
+  store.requests.unshift(r);
+  fsWrite("cert-replacement-requests.json", store);
+}
+
+export async function updateCertReplacementRequest(
+  id: string,
+  u: Partial<CertReplacementRequest>
+): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`
+      UPDATE cert_replacement_requests SET
+        status = COALESCE(${u.status ?? null}, status),
+        square_order_id = COALESCE(${u.squareOrderId ?? null}, square_order_id),
+        square_payment_id = COALESCE(${u.squarePaymentId ?? null}, square_payment_id),
+        updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING id
+    `;
+    return result.length > 0;
+  }
+  const store = fsRead<{ requests: CertReplacementRequest[] }>("cert-replacement-requests.json", { requests: [] });
+  const idx = store.requests.findIndex((x) => x.id === id);
+  if (idx === -1) return false;
+  store.requests[idx] = { ...store.requests[idx], ...u, updatedAt: new Date().toISOString() };
+  fsWrite("cert-replacement-requests.json", store);
+  return true;
+}
+
+export async function deleteCertReplacementRequest(id: string): Promise<boolean> {
+  if (USE_NEON) {
+    const sql = getDb();
+    const result = await sql`DELETE FROM cert_replacement_requests WHERE id = ${id} RETURNING id`;
+    return result.length > 0;
+  }
+  const store = fsRead<{ requests: CertReplacementRequest[] }>("cert-replacement-requests.json", { requests: [] });
+  const before = store.requests.length;
+  store.requests = store.requests.filter((x) => x.id !== id);
+  fsWrite("cert-replacement-requests.json", store);
+  return store.requests.length < before;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Apprenticeships & SVQ — Pathways
 // ─────────────────────────────────────────────────────────────────────────────
 

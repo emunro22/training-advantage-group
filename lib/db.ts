@@ -308,6 +308,33 @@ export async function ensureSchema() {
     )
   `;
 
+  // Certificate replacement requests from the public /verify-certificate checker:
+  // "electronic" is a free reissue handled manually by the office (no payment fields
+  // needed); "awarding_body" charges a flat fee via Square before TAG orders the
+  // physical replacement from the awarding body — mirrors the orders/webhook pattern
+  // but deliberately kept as its own lightweight table since it shares almost none of
+  // the course-booking-specific columns on `orders`.
+  await sql`
+    CREATE TABLE IF NOT EXISTS cert_replacement_requests (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL DEFAULT 'electronic',
+      status TEXT NOT NULL DEFAULT 'new',
+      certificate_number TEXT NOT NULL,
+      holder_name TEXT NOT NULL DEFAULT '',
+      course TEXT NOT NULL DEFAULT '',
+      awarding_body TEXT,
+      contact_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL DEFAULT '',
+      notes TEXT,
+      amount_pence INTEGER,
+      square_order_id TEXT,
+      square_payment_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // Apprenticeships & SVQ — pathway cards, admin-editable so approved frameworks can be
   // switched from "developing" to "live" individually as SDS approval comes through.
   await sql`

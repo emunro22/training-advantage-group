@@ -207,9 +207,14 @@ export default async function TMCPCPage() {
               Delivered by the same experienced TM tutors as our full CPC course, with the same
               small class sizes and practical, real-world focus.
             </p>
-            <Link href="/contact?subject=tm-refresher" className="btn-primary">
-              Enquire About Refresher Training
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/tm-refresher-training" className="btn-primary">
+                Learn More About Refresher Training
+              </Link>
+              <Link href="/contact?subject=tm-refresher" className="btn-outline">
+                Enquire Now
+              </Link>
+            </div>
           </AnimatedSection>
           <AnimatedSection direction="right">
             <ul className="space-y-2 bg-white rounded-2xl border border-gray-100 shadow-card p-6">

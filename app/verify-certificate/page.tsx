@@ -2,9 +2,155 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Search, CheckCircle2, XCircle, AlertCircle, Award, Calendar, MapPin, BookOpen, Shield } from "lucide-react";
+import { Search, CheckCircle2, XCircle, AlertCircle, Award, Calendar, MapPin, BookOpen, Shield, Mail, CreditCard, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { CERT_TYPES, guessCertType } from "@/lib/cert-types";
+
+const REPLACEMENT_CERT_FEE_PENCE = Number(process.env.NEXT_PUBLIC_REPLACEMENT_CERT_FEE_PENCE ?? 2500);
+
+/** Inline "request a replacement" form shown under a found certificate — shared shape for
+ * both the free electronic reissue and the paid awarding-body order, which only differ in
+ * the endpoint hit and whether an awarding body needs picking. */
+function ReplacementRequestForm({
+  mode,
+  certNumber,
+  lastName,
+  accreditedBy,
+  onClose,
+}: {
+  mode: "electronic" | "awarding_body";
+  certNumber: string;
+  lastName: string;
+  accreditedBy: string[];
+  onClose: () => void;
+}) {
+  const [contactName, setContactName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [awardingBody, setAwardingBody] = useState(accreditedBy[0] ?? "");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!contactName.trim() || !email.trim()) {
+      setError("Please enter your name and email address.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const endpoint =
+        mode === "electronic" ? "/api/certificates/request-replacement" : "/api/certificates/replacement-checkout";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          certificateNumber: certNumber,
+          lastName: lastName || undefined,
+          contactName: contactName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          notes: notes.trim() || undefined,
+          awardingBody: mode === "awarding_body" ? awardingBody : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+      if (mode === "awarding_body" && data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+      setDone(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
+        <CheckCircle2 size={24} className="text-green-600 mx-auto mb-2" />
+        <p className="text-sm font-semibold text-green-800">Request sent — we&apos;ll email your certificate shortly.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+      <div className="grid sm:grid-cols-2 gap-3">
+        <input
+          value={contactName}
+          onChange={(e) => setContactName(e.target.value)}
+          placeholder="Your name *"
+          className="px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand bg-white"
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email address *"
+          className="px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand bg-white"
+        />
+      </div>
+      <input
+        type="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="Phone (optional)"
+        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand bg-white"
+      />
+      {mode === "awarding_body" && accreditedBy.length > 1 && (
+        <select
+          value={awardingBody}
+          onChange={(e) => setAwardingBody(e.target.value)}
+          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand bg-white"
+        >
+          {accreditedBy.map((b) => (
+            <option key={b} value={b}>{b}</option>
+          ))}
+        </select>
+      )}
+      <textarea
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        rows={2}
+        placeholder="Notes (optional)"
+        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-brand resize-none bg-white"
+      />
+      {error && (
+        <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <XCircle size={13} className="flex-shrink-0" />
+          {error}
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={onClose} className="px-4 py-2.5 text-sm text-gray-500 font-semibold">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="flex-1 flex items-center justify-center gap-2 bg-orange-brand text-white font-bold py-2.5 rounded-xl hover:bg-orange-dark transition-colors disabled:opacity-50 text-sm"
+        >
+          {submitting ? <Loader2 size={15} className="animate-spin" /> : null}
+          {submitting
+            ? "Please wait…"
+            : mode === "electronic"
+            ? "Send Request"
+            : `Pay £${(REPLACEMENT_CERT_FEE_PENCE / 100).toFixed(2)} & Order`}
+        </button>
+      </div>
+    </form>
+  );
+}
 
 interface CertResult {
   found: boolean;
@@ -43,6 +189,7 @@ export default function VerifyCertificatePage() {
   const [result, setResult] = useState<CertResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [replacementPanel, setReplacementPanel] = useState<"electronic" | "awarding_body" | null>(null);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -77,6 +224,7 @@ export default function VerifyCertificatePage() {
     setCertNumber("");
     setLastName("");
     setError("");
+    setReplacementPanel(null);
   }
 
   const statusConfig = {
@@ -375,6 +523,38 @@ export default function VerifyCertificatePage() {
                     <span>
                       Verified by <strong className="text-gray-600">Training Advantage Group Ltd</strong>. This information was retrieved from our certificate registry.
                     </span>
+                  </div>
+
+                  {/* Replacement certificate options */}
+                  <div className="border-t border-gray-100 pt-5">
+                    <h3 className="text-sm font-bold text-navy mb-1">Need a copy of this certificate?</h3>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Request a free electronic copy, or order a replacement certificate directly from the
+                      awarding body.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                      <button
+                        onClick={() => setReplacementPanel(replacementPanel === "electronic" ? null : "electronic")}
+                        className={`flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-xl border-2 transition-colors ${replacementPanel === "electronic" ? "border-blue-brand text-blue-brand bg-blue-50" : "border-gray-200 text-gray-600 hover:border-blue-brand"}`}
+                      >
+                        <Mail size={15} /> Request Electronic Copy (Free)
+                      </button>
+                      <button
+                        onClick={() => setReplacementPanel(replacementPanel === "awarding_body" ? null : "awarding_body")}
+                        className={`flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-xl border-2 transition-colors ${replacementPanel === "awarding_body" ? "border-orange-brand text-orange-brand bg-orange-50" : "border-gray-200 text-gray-600 hover:border-orange-brand"}`}
+                      >
+                        <CreditCard size={15} /> Order Awarding Body Replacement (£{(REPLACEMENT_CERT_FEE_PENCE / 100).toFixed(2)})
+                      </button>
+                    </div>
+                    {replacementPanel && (
+                      <ReplacementRequestForm
+                        mode={replacementPanel}
+                        certNumber={cert.certificateNumber}
+                        lastName={lastName}
+                        accreditedBy={accreditedBy}
+                        onClose={() => setReplacementPanel(null)}
+                      />
+                    )}
                   </div>
                 </div>
 

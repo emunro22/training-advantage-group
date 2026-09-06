@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WebhooksHelper } from "square";
 import { getDb, ensureSchema } from "@/lib/db";
-import { sendOrderConfirmation, sendOrderHandoffEmail } from "@/lib/email";
+import { sendOrderConfirmation, sendOrderHandoffEmail, sendCertReplacementRequestNotification, sendCertReplacementCustomerEmail } from "@/lib/email";
+import { getCertReplacementRequestBySquareOrderId, updateCertReplacementRequest } from "@/lib/storage";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -92,7 +93,46 @@ export async function POST(request: NextRequest) {
   `) as OrderRow[];
 
   if (!rows.length) {
-    console.error("Webhook: no order found for square_order_id", squareOrderId);
+    const certRequest = await getCertReplacementRequestBySquareOrderId(squareOrderId);
+    if (!certRequest) {
+      console.error("Webhook: no order found for square_order_id", squareOrderId);
+      return NextResponse.json({ ok: true });
+    }
+    if (certRequest.status !== "pending_payment") {
+      return NextResponse.json({ ok: true });
+    }
+
+    await updateCertReplacementRequest(certRequest.id, {
+      status: "paid",
+      squarePaymentId: squarePaymentId ?? undefined,
+    });
+
+    try {
+      await Promise.all([
+        sendCertReplacementRequestNotification({
+          id: certRequest.id,
+          type: "awarding_body",
+          certificateNumber: certRequest.certificateNumber,
+          holderName: certRequest.holderName,
+          course: certRequest.course,
+          awardingBody: certRequest.awardingBody,
+          contactName: certRequest.contactName,
+          email: certRequest.email,
+          phone: certRequest.phone,
+          notes: certRequest.notes,
+          amountPence: certRequest.amountPence,
+        }),
+        sendCertReplacementCustomerEmail({
+          type: "awarding_body",
+          contactName: certRequest.contactName,
+          email: certRequest.email,
+          certificateNumber: certRequest.certificateNumber,
+        }),
+      ]);
+    } catch (e) {
+      console.error("Failed to send cert replacement confirmation emails:", e);
+    }
+
     return NextResponse.json({ ok: true });
   }
 

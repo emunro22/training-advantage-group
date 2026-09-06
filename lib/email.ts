@@ -327,7 +327,7 @@ export async function sendOrderHandoffEmail(data: OrderHandoffData) {
 // event" rule, its own field set per TAG-WEB-SPEC-001 §3). Never includes ID/licence/signature/
 // medical/bank evidence — customers are directed to the secure portal for that instead.
 export interface FixedFormatNotification {
-  kind: "BOOKING" | "ENQUIRY" | "CERTIFICATE_UPDATE" | "PORTAL_SUBMISSION";
+  kind: "BOOKING" | "ENQUIRY" | "CERTIFICATE_UPDATE" | "PORTAL_SUBMISSION" | "CERT_REPLACEMENT_REQUEST";
   submissionId: string;
   timestamp: string;
   name?: string;
@@ -355,6 +355,8 @@ function buildNotificationSubject(n: FixedFormatNotification): string {
       return `CERTIFICATE UPDATE | ${n.subjectRef}`;
     case "PORTAL_SUBMISSION":
       return `PORTAL SUBMISSION | ${n.subjectRef} | ${name}`;
+    case "CERT_REPLACEMENT_REQUEST":
+      return `CERT REPLACEMENT | ${n.subjectRef} | ${name}`;
   }
 }
 
@@ -384,6 +386,7 @@ export async function sendFixedFormatNotification(n: FixedFormatNotification) {
     ENQUIRY: "New Enquiry",
     CERTIFICATE_UPDATE: "Certificate Update",
     PORTAL_SUBMISSION: "New Portal Submission",
+    CERT_REPLACEMENT_REQUEST: "Certificate Replacement Request",
   };
 
   // Wrapping markup is cosmetic only — the field text and line breaks inside <pre> are untouched
@@ -492,4 +495,69 @@ export async function sendContactEmail(data: ContactFormData) {
       extra: { label: "Message", value: data.message },
     }),
   ]);
+}
+
+/** Internal office notification for a certificate replacement request — free electronic
+ * reissue, or a paid awarding-body order once Square confirms payment (see the webhook). */
+export async function sendCertReplacementRequestNotification(data: {
+  id: string;
+  type: "electronic" | "awarding_body";
+  certificateNumber: string;
+  holderName: string;
+  course: string;
+  awardingBody?: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  notes?: string;
+  amountPence?: number;
+}) {
+  await sendFixedFormatNotification({
+    kind: "CERT_REPLACEMENT_REQUEST",
+    submissionId: data.id,
+    timestamp: new Date().toISOString(),
+    name: data.contactName,
+    email: data.email,
+    telephone: data.phone,
+    courseOrService: data.course,
+    status:
+      data.type === "awarding_body"
+        ? `Paid £${((data.amountPence ?? 0) / 100).toFixed(2)} — awarding body replacement (${data.awardingBody ?? "unspecified"}) for ${data.holderName}`
+        : `Free electronic reissue requested for ${data.holderName}`,
+    sourcePage: "/verify-certificate",
+    subjectRef: data.certificateNumber,
+    extra: data.notes ? { label: "Notes", value: data.notes } : undefined,
+  });
+}
+
+/** Customer-facing confirmation for a certificate replacement request/order. */
+export async function sendCertReplacementCustomerEmail(data: {
+  type: "electronic" | "awarding_body";
+  contactName: string;
+  email: string;
+  certificateNumber: string;
+}) {
+  const isPaid = data.type === "awarding_body";
+  const html = renderCustomerEmail({
+    eyebrow: "Training Advantage Group Ltd",
+    title: isPaid ? "Replacement Certificate Order Received" : "Replacement Certificate Request Received",
+    bodyHtml: `
+        <p style="color: #1a1a1a; font-size: 16px; margin: 0 0 12px;">Dear ${data.contactName},</p>
+        <p style="color: #444; font-size: 15px; line-height: 1.6; margin: 0 0 12px;">${
+          isPaid
+            ? `Thank you for your payment. We've received your order for a replacement awarding body certificate (certificate number <strong>${data.certificateNumber}</strong>) and our team will be in touch once it has been processed.`
+            : `We've received your request for an electronic copy of certificate <strong>${data.certificateNumber}</strong>. Our team will email it to you shortly.`
+        }</p>
+        <p style="color: #444; font-size: 15px; line-height: 1.6; margin: 0;">For urgent enquiries please call us on <a href="tel:01412582024" style="color: #0066cc; font-weight: 700; text-decoration: none;">0141 258 2024</a>.</p>
+    `,
+  });
+
+  await resend.emails.send({
+    from: FROM,
+    to: [data.email],
+    subject: isPaid
+      ? "Your replacement certificate order | Training Advantage Group"
+      : "Your replacement certificate request | Training Advantage Group",
+    html,
+  });
 }

@@ -68,7 +68,7 @@ const STATIC_NAV = [
     items: [
       { label: "Road Haulage TM CPC", href: "/tm-cpc", desc: "Full classroom intensive" },
       { label: "PSV / Bus TM CPC", href: "/tm-cpc#psv", desc: "Passenger vehicle operators" },
-      { label: "Refresher Training", href: "/tm-cpc#refresher", desc: "CMP renewal support" },
+      { label: "Refresher Training", href: "/tm-refresher-training", desc: "CMP renewal support" },
       { label: "E-learning Support", href: "/tm-cpc#elearning", desc: "Online revision access" },
       { label: "Exam Preparation", href: "/tm-cpc#exams", desc: "NLTC exam guidance" },
       { label: "Study Materials", href: "/tm-cpc#materials", desc: "Revision resources" },
@@ -112,6 +112,7 @@ const STATIC_NAV = [
     color: "text-purple-600",
     items: [
       { label: "External TM Services", href: "/consultancy", desc: "Outsourced TM support" },
+      { label: "Operator Licence Awareness (OLAT)", href: "/olat-training", desc: "1-day awareness course" },
       { label: "Operator Licence Support", href: "/consultancy#licence", desc: "Application & compliance" },
       { label: "Fleet Compliance Audit", href: "/consultancy#audit", desc: "OCRS improvement" },
       { label: "Tachograph Analysis", href: "/consultancy#tacho", desc: "Driver hours analysis" },

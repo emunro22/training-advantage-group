@@ -24,6 +24,7 @@ import {
   FolderLock,
   Inbox,
   GraduationCap,
+  FileSignature,
 } from "lucide-react";
 
 const NAV = [
@@ -39,6 +40,7 @@ const NAV = [
   { href: "/admin/content", label: "Edit Page Content", icon: PenLine },
   { href: "/admin/pages", label: "Custom Pages & Nav", icon: FileText },
   { href: "/admin/certificates", label: "Certificates", icon: Award },
+  { href: "/admin/cert-replacement-requests", label: "Cert Replacement Requests", icon: FileSignature },
   { href: "/admin/pricing", label: "Pricing & Offers", icon: Tag },
   { href: "/admin/upcoming-courses", label: "Upcoming Courses", icon: CalendarDays },
   { href: "/admin/vacancies", label: "Job Vacancies", icon: Briefcase },
